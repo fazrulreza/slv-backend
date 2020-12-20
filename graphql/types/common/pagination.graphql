@@ -1,0 +1,6 @@
+
+
+type Pagination {
+    maxPage: Int
+    currentPage: Int
+}

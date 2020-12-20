@@ -1,0 +1,47 @@
+
+type File {
+  filename: String!
+  mimetype: String!
+  encoding: String!
+}
+
+type KsrRegistrationDetails {
+    REGISTRATION_ID: String!,
+    FIELD: String!,
+}
+
+input KsrRegistrationInput {
+    KSR_ID: String!,
+    REGISTRATION_ID: String,
+    INPUT_FIELD: [KsrRegistrationFieldInput!]!,
+}
+
+input KsrRegistrationFieldInput {
+    FIELD: String!,
+    VALUE: String!,
+    FORM_ID: String,
+}
+
+type KsrRegistrationID {
+  ID: String!
+}
+
+type KsrRegistrationResponse {
+  addResult: AddResp
+  updateResult: UpdateResp
+  id: String!
+}
+
+type Query {
+  ksrRegistration(id: String!) : KsrRegistrationDetails
+  ksrRegistrationList(where: String, limit: Int, offset: Int) : [KsrRegistrationDetails!]!
+  ksrRegistrationID: [KsrRegistrationID!]!
+}
+
+type Mutation {
+  addKsrRegistration(input: KsrRegistrationInput!, file: Upload): AddResp
+  updateKsrRegistration(input: KsrRegistrationInput!): KsrRegistrationResponse
+  deleteKsrRegistration(id: String!): DeleteResp
+}
+
+

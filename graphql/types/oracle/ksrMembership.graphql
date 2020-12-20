@@ -1,0 +1,34 @@
+
+type KSRMembershipDetails {
+    ID: String!
+    MAIL: String!
+    TYPE: String!
+    VALUE: String!
+    EXPIRY_DATE: String!
+    CREATED_AT: String!
+    UPDATED_AT: String!
+    CREATED_BY: String!
+    UPDATED_BY: String!
+}
+
+input KSRMermbershipInput {
+    MAIL: String!
+    TYPE: String!
+    VALUE: String!
+    EXPIRY_DATE: String!
+    ADDER: String!
+}
+
+
+type Query {
+  ksrMembership(id: String!) : KSRMembershipDetails!
+  ksrMembershipList(where: String, limit: Int, offset: Int, order: String) : [KSRMembershipDetails!]!
+}
+
+# type Mutation {
+#   addKSRMembership(input: KSRMermbershipInput!): AddResp
+#   updateKSRMembership(id: String!, input: KSRMermbershipInput!): UpdateResp
+#   deleteKSRMembership(id: String!): DeleteResp
+# }
+
+

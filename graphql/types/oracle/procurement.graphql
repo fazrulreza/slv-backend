@@ -1,0 +1,39 @@
+
+type ProcurementDetails {
+    ID: String!,
+    PROCUREMENT_TYPE: String!,
+    PROCUREMENT_DETAILS: String!,
+    REQUESTOR_ORIGIN: String!,
+    REQUESTOR_ORIGIN_DETAILS: String!,
+    PERSON_IN_CHARGE: String!,
+    CREATED_AT: String,
+    UPDATED_AT: String,
+    CREATED_BY: String,
+    UPDATED_BY: String,
+}
+
+input ProcurementInput {
+    PROCUREMENT_TYPE: String!,
+    PROCUREMENT_DETAILS: String!,
+    REQUESTOR_ORIGIN: String!,
+    REQUESTOR_ORIGIN_DETAILS: String!,
+    PERSON_IN_CHARGE: String!,
+}
+
+type ProcurementId {
+  ID: String!
+}
+
+type Query {
+  procurement(id: String!) : ProcurementDetails
+  procurementList(where: String) : [ProcurementDetails!]!
+  procurementID: [ProcurementId!]!
+}
+
+type Mutation {
+  addProcurement(input: ProcurementInput!): AddResp
+  updateProcurement(id: String!, input: ProcurementInput!): UpdateResp
+  deleteProcurement(id: String!): DeleteResp
+}
+
+

@@ -1,0 +1,56 @@
+
+type KsrFormDetails {
+    ID: String!,
+    TYPE: String!,
+    VALIDATION: String!,
+    QUESTION: String!,
+    REQUIRED: Int!,
+    KSR_ID: String,
+    VALUE: String,
+    FORM_ID: String,
+    CREATED_AT: String,
+    UPDATED_AT: String,
+    CREATED_BY: String,
+    UPDATED_BY: String,
+}
+
+input KsrFormInput {
+    KSR_ID: String!,
+    NAME: String!,
+    SHIRT: String!,
+    FILE: String!,
+    FORM: [KsrFormQuestionInput!]!,
+}
+
+input KsrFormQuestionInput {
+  ID: String!
+  TYPE: String!,
+  VALIDATION: String!,
+  QUESTION: String!,
+  REQUIRED: Int!,
+}
+
+type KsrFormID {
+  ID: String!
+}
+
+type KsrFormResponse {
+  addResult: AddResp
+  updateResult: UpdateResp
+  deleteResult: DeleteResp
+  id: String!
+}
+
+type Query {
+  # ksrForm(id: String!) : KsrFormDetails
+  ksrFormList(where: String, all: Boolean, limit: Int, offset: Int, id: String) : [KsrFormDetails!]!
+  # ksrFormID: [KsrFormID!]!
+}
+
+type Mutation {
+  addKsrForm(input: KsrFormInput!): KsrFormResponse
+  # updateKsrForm(id: String!, input: KsrFormInput!): UpdateResp
+  # deleteKsrForm(id: String!): DeleteResp
+}
+
+
