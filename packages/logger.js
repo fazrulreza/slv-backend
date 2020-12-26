@@ -5,8 +5,6 @@
 
 /** Import method from he module */
 const { createLogger, transports, format } = require('winston');
-/** Import log config from configuration */
-const config = require('../config/');
 /** destructure timestamp, combine and simple method from format */
 const {
   timestamp, combine, printf, prettyPrint, colorize,
@@ -34,6 +32,7 @@ const logger = createLogger({
     // , new (winston.transports.File)({ filename: 'log/result.log' })
   ],
 });
-logger.level = config.log;
+
+logger.level = process.env.LOG_LEVEL;
 
 module.exports = logger;

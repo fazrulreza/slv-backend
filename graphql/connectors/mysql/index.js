@@ -1,9 +1,13 @@
-import MysqlCdnMainTable from './cdn-main_table';
+const MysqlSlvCompanyProfile = require('./slv-company_profile');
+const MysqlSlvQuestionnaire = require('./slv-questionnaire');
+const MysqlSlvMSIC = require('./slv-msic');
 
 const mysqlConnectors = {
 
   // common
-  MysqlCdnMainTable,
+  MysqlSlvCompanyProfile,
+  MysqlSlvQuestionnaire,
+  MysqlSlvMSIC,
 };
 
-export default mysqlConnectors;
+module.exports = mysqlConnectors;

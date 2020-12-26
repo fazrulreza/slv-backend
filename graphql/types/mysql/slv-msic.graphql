@@ -1,0 +1,22 @@
+
+type MSICResult {
+  MSIC: String,
+  description_malay_detail: String,
+  section: String,
+  division: String,
+  group: String,
+  Class: String,
+  description_english_section: String,
+  description_malay_section: String,
+  description_english_division: String,
+  description_malay_division: String,
+  description_english_group: String,
+  description_malay_group: String,
+  description_english_class: String,
+  description_malay_class: String,
+  sector: String,
+}
+
+type Query {
+    allMSIC (MSIC: String): [MSICResult!]!
+}

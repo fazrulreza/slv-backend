@@ -1,36 +1,17 @@
-const oracleConnection = {
-  user: process.env.DB_USER,
-  password: process.env.DB_PASS,
-  connectString: process.env.DB_CONNECT_STRING,
+const mysqlConnection = {
+  host: process.env.MYSQL_HOST,
+  username: process.env.MYSQL_USER,
+  password: process.env.MYSQL_PASSWORD,
+  database: process.env.MYSQL_DATABASE,
 };
 
-const KSRREGISTRATION = 'KSR_REGISTRATION';
-const KSR = 'KSR';
-const KSRFORM = 'KSR_FORM';
-const KSRUSER = 'KSR_USER';
-const KSRMEMBERSHIP = 'KSR_MEMBERSHIP';
-const PROCUREMENT = 'PROCUREMENT';
-
-// const ssl = {
-//   development: {
-//     key: './certificates/localhost.key',
-//     crt: './certificates/localhost.crt',
-//   },
-//   production: {
-//     key: '../certificates/smebank.com.my2019.key',
-//     crt: '../certificates/smebank.com.my2019.crt',
-//   },
-// };
-
+const COMPANY_PROFILE = 'company_profile';
+const QUESTIONNAIRE = 'questionnaire';
+const MSIC = 'msic';
 
 module.exports = {
-  oracleConnection,
-  KSRREGISTRATION,
-  KSR,
-  KSRMEMBERSHIP,
-  KSRFORM,
-  KSRUSER,
-  PROCUREMENT,
-  // sso,
-  // ssl,
+  mysqlConnection,
+  COMPANY_PROFILE,
+  QUESTIONNAIRE,
+  MSIC,
 };

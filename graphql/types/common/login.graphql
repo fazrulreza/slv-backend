@@ -3,27 +3,6 @@ type LdapUser {
     token: String
 }
 
-type RegisteredList {
-    REGISTRATION_ID: String
-    KSR_ID: String
-    KSR_NAME: String
-}
-
-type MembershipList {
-    TYPE: String
-    VALUE: String
-    EXPIRY_DATE: String
-}
-
-type userDataList {
-    registration: [RegisteredList!]!
-    membership: [MembershipList!]!
-}
-
-type Query {
-    userData(id: String!): userDataList
-}
-
 type Mutation {
   ldapLogin(input: String!): LdapUser!
 }

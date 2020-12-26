@@ -1,17 +1,17 @@
 type DeleteResp {
-    id: String
+    ID: String
     deleted: String
     error: String
 }
 
 type UpdateResp {
-    id: String
+    ID: String
     updated: Int
     error: String
 }
 
 type AddResp {
-    id: String
+    ID: String
     added: Int
     error: String
 }

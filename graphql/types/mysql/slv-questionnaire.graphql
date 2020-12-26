@@ -1,0 +1,60 @@
+input QuestionnaireInput {
+    COMPANY_ID: String!
+    data: String!
+    name: String!
+}
+
+type EmployeeCountDetail {
+  FULLTIME: Int
+  PARTTIME: Int
+}
+
+type Questionnaire {
+  ID: String
+  OPERATING_HISTORY: String
+  YEARLY_BUSINESS_PERFORMANCE: String
+  YEARLY_INDUSTRY_PERFORMANCE: String
+  PRODUCT_COUNT: String
+  PRODUCT_PERFORMANCE_2YEARS: String
+  PRODUCT_MARKET_LOCATION: String
+  PRODUCT_FEEDBACK_COLLECTION_FLAG: String
+  AVAILABLE_SYSTEM: [String]
+  MARKETING_TYPE: [String]
+  ONLINE_MARKETING_TYPE: [String]
+  OWNER_MANAGED_FLAG: String
+  ORGANIZATION_STRUCTURE_FLAG: String
+  EMPLOYEE_COUNT: String
+  FULLTIME_EMPLOYEE_COUNT: Int,
+  PARTTIME_EMPLOYEE_COUNT: Int,
+  BUSINESS_OWNER_INVOLVE_PERCENTAGE: String
+  EMPLOYEE_OJT_FLAG: String
+  EMPLOYEE_SOP_FLAG: String
+  EMPLOYEE_WRITTEN_CONTRACT_FLAG: String
+  EMPLOYEE_COUNT_2YEARS: String
+  EMPLOYEE_JD_KPI_FLAG: String
+  OPERATIONAL_GUIDELINE_FLAG: String
+  BUSINESS_PLAN_FLAG: String
+  BUSINESS_FUTURE_PLAN: [String]
+  SEEK_FINANCING_2YEARS_FLAG: String
+  SEEK_FINANCING_METHOD: [String]
+  CUSTOMER_PAYMENT_METHODS: [String]
+  LATE_PAYMENT_CUSTOMER: String
+  REGISTERED_BANK_ACCOUNT_FLAG: String
+  AUDIT_BUSINESS_ACCOUNT_FLAG: String
+  EMPLOYEE_COUNT_DETAIL: EmployeeCountDetail
+  SST_FLAG: String
+  COMPANY_ID: String
+  CREATED_AT: String
+  CREATED_BY: String
+  UPDATED_AT: String
+  UPDATED_BY: String
+}
+
+type Query {
+  oneQuestionnaire (COMPANY_ID: String!): Questionnaire
+}
+
+type Mutation {
+  createQuestionnaire(input: QuestionnaireInput!): Questionnaire!
+  updateQuestionnaire(input: QuestionnaireInput!): UpdateResp
+}

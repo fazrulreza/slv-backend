@@ -1,4 +1,5 @@
-import Sequelize from 'sequelize';
+const Sequelize = require('sequelize');
+const moment = require('moment');
 
 class MysqlModel {
   constructor({
@@ -51,6 +52,33 @@ class MysqlModel {
   update({ object, where }) {
     return this.model.update(object, { where });
   }
+
+  static generateId() {
+    const baseTime = moment().format('YYYYMMDDHHmmss');
+    const pad = '000000';
+    const n = (Math.random().toFixed(5) * 100000);
+    const randomNo = (pad + n).slice(-pad.length);
+    return baseTime + randomNo;
+  }
+
+  static generateHistory(user, purpose, createdAt) {
+    const baseTime = moment().format('YYYY-MM-DD HH:mm:ss');
+    const updatePart = {
+      UPDATED_AT: baseTime,
+      UPDATED_BY: user,
+    };
+    if (purpose === 'CREATE') {
+      return {
+        CREATED_AT: baseTime,
+        CREATED_BY: user,
+        ...updatePart,
+      };
+    }
+    return {
+      CREATED_AT: moment(createdAt).format('YYYY-MM-DD HH:mm:ss'),
+      ...updatePart,
+    };
+  }
 }
 
-export default MysqlModel;
+module.exports = MysqlModel;

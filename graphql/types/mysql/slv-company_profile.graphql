@@ -1,0 +1,42 @@
+input CompanyProfileInput {
+    name: String!
+    data: String!
+}
+
+type CompanyProfile {
+  ID: String
+  ENTITY_NAME: String
+  ENTRY_DATE: String
+  REGISTRATION_NO: String
+  INCORPORATION_DATE: String
+  BUMI_STATUS: String
+  ENTITY_STATUS: String
+  ENTITY_TYPE: String
+  ADDRESS_LINE_1: String
+  ADDRESS_LINE_2: String
+  POSTCODE: String
+  STATE: String
+  PHONE: String
+  EMAIL: String
+  NATURE_OF_BUSINESS: String
+  DIVISION: String
+  SECTION: String
+  GROUP: String
+  CLASS: String
+  MSIC: String
+  CREATED_AT: String
+  CREATED_BY: String
+  UPDATED_AT: String
+  UPDATED_BY: String
+}
+
+type Query {
+    oneCompany (ID: String!): CompanyProfile!
+    allCompanies (where: String): [CompanyProfile!]!
+}
+
+type Mutation {
+  createCompany(input: CompanyProfileInput!): CompanyProfile!
+  updateCompany(ID: String!, input: CompanyProfileInput!): UpdateResp
+  deleteCompany(ID: String!): DeleteResp
+}
