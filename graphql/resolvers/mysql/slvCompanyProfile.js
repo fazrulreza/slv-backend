@@ -15,12 +15,25 @@ module.exports = {
          * @param {Object} param0 main input object
          * @param {String} param0.id id
          */
-    oneCompany: async (parent, { ID }, { connectors: { MysqlSlvCompanyProfile } }) => {
+    oneCompany: async (parent,
+      { ID }, { connectors: { MysqlSlvCompanyProfile, MysqlSlvMSIC } }) => {
+      const where = getWhere('ALL');
+      const searchOpts = {
+        ...where,
+        order: [['MSIC']],
+      };
+      const result = await MysqlSlvMSIC.findAll(searchOpts);
+      const result2 = result.map(x => x.dataValues);
+
       const res = await MysqlSlvCompanyProfile.findById(ID);
       if (!res) {
         throw new Error(`No record found with id ${ID}`);
       }
-      return res;
+      const finalResult = {
+        allMSIC: result2,
+        company: res,
+      };
+      return finalResult;
     },
     /**
          * Retrieve all
@@ -69,7 +82,7 @@ module.exports = {
     updateCompany:
       async (parent, { ID, input }, { connectors: { MysqlSlvCompanyProfile } }) => {
         const parsedInput = JSON.parse(input.data);
-        const history = generateHistory(input.name, 'UPDATE');
+        const history = generateHistory(input.name, 'UPDATE', parsedInput.CREATED_AT);
         const searchOpts = {
           object: {
             ...parsedInput,

@@ -76,7 +76,7 @@ module.exports = {
     updateQuestionnaire:
       async (parent, { input }, { connectors: { MysqlSlvQuestionnaire } }) => {
         const postInput = processInput(input);
-        const history = generateHistory(input.name, 'UPDATE');
+        const history = generateHistory(input.name, 'UPDATE', postInput.CREATED_AT);
         const searchOpts = {
           object: {
             ...postInput,

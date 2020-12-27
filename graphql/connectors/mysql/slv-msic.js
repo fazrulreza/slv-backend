@@ -5,7 +5,10 @@ const { mysqlConnection, MSIC } = require('../../../config');
 const connection = mysqlConnection;
 
 const attributes = {
-  MSIC: Sequelize.STRING,
+  MSIC: {
+    primaryKey: true,
+    type: Sequelize.STRING,
+  },
   description_malay_detail: Sequelize.STRING,
   section: Sequelize.STRING,
   division: Sequelize.STRING,

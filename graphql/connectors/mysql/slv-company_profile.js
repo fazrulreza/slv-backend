@@ -22,7 +22,7 @@ const attributes = {
   STATE: Sequelize.STRING,
   PHONE: Sequelize.STRING,
   EMAIL: Sequelize.STRING,
-  NATURE_OF_BUSINESS: Sequelize.STRING,
+  SECTOR: Sequelize.STRING,
   DIVISION: Sequelize.STRING,
   SECTION: Sequelize.STRING,
   GROUP: Sequelize.STRING,

@@ -75,7 +75,7 @@ class MysqlModel {
       };
     }
     return {
-      CREATED_AT: moment(createdAt).format('YYYY-MM-DD HH:mm:ss'),
+      CREATED_AT: moment(createdAt, 'x').format('YYYY-MM-DD HH:mm:ss'),
       ...updatePart,
     };
   }

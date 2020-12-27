@@ -13,7 +13,7 @@ CREATE TABLE `company_profile` (
   `STATE` varchar(50) DEFAULT NULL,
   `PHONE` varchar(20) DEFAULT NULL,
   `EMAIL` varchar(255) DEFAULT NULL,
-  `NATURE_OF_BUSINESS` varchar(255) DEFAULT NULL,
+  `SECTOR` varchar(255) DEFAULT NULL,
   `SECTION` varchar(255) DEFAULT NULL,
   `DIVISION` varchar(255) DEFAULT NULL,
   `GROUP` varchar(255) DEFAULT NULL,

@@ -18,7 +18,7 @@ type CompanyProfile {
   STATE: String
   PHONE: String
   EMAIL: String
-  NATURE_OF_BUSINESS: String
+  SECTOR: String
   DIVISION: String
   SECTION: String
   GROUP: String
@@ -30,8 +30,13 @@ type CompanyProfile {
   UPDATED_BY: String
 }
 
+type CompanyProfileWithMSIC {
+  allMSIC: [MSICResult!]!,
+  company: CompanyProfile!
+}
+
 type Query {
-    oneCompany (ID: String!): CompanyProfile!
+    oneCompany (ID: String!): CompanyProfileWithMSIC!
     allCompanies (where: String): [CompanyProfile!]!
 }
 
