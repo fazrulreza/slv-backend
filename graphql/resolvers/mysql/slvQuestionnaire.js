@@ -71,7 +71,8 @@ module.exports = {
           COMPANY_ID: input.COMPANY_ID,
         };
         // console.log(newInput);
-        return MysqlSlvQuestionnaire.create(newInput);
+        const result = await MysqlSlvQuestionnaire.create(newInput);
+        return result;
       },
     updateQuestionnaire:
       async (parent, { input }, { connectors: { MysqlSlvQuestionnaire } }) => {
