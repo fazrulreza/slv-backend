@@ -8,10 +8,12 @@ const mysqlConnection = {
 const COMPANY_PROFILE = 'company_profile';
 const QUESTIONNAIRE = 'questionnaire';
 const MSIC = 'msic';
+const SCORING = 'scoring';
 
 module.exports = {
   mysqlConnection,
   COMPANY_PROFILE,
   QUESTIONNAIRE,
   MSIC,
+  SCORING,
 };

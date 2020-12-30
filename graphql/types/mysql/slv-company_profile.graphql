@@ -8,6 +8,7 @@ type CompanyProfile {
   ENTITY_NAME: String
   ENTRY_DATE: String
   REGISTRATION_NO: String
+  NEW_REGISTRATION_NO: String
   INCORPORATION_DATE: String
   BUMI_STATUS: String
   ENTITY_STATUS: String
@@ -18,6 +19,7 @@ type CompanyProfile {
   STATE: String
   PHONE: String
   EMAIL: String
+  NATURE_OF_BUSINESS: String
   SECTOR: String
   DIVISION: String
   SECTION: String

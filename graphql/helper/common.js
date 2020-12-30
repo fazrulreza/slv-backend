@@ -31,6 +31,29 @@ const getFilter = (size, state, sector, revenue, year, division, msic) => {
   return filter;
 };
 
+
+const processQuestionnaireResult = result => ({
+  AVAILABLE_SYSTEM: JSON.parse(result.AVAILABLE_SYSTEM),
+  MARKETING_TYPE: JSON.parse(result.MARKETING_TYPE),
+  ONLINE_MARKETING_TYPE: result.ONLINE_MARKETING_TYPE
+    ? JSON.parse(result.ONLINE_MARKETING_TYPE)
+    : [],
+  BUSINESS_FUTURE_PLAN: JSON.parse(result.BUSINESS_FUTURE_PLAN),
+  SEEK_FINANCING_METHOD: result.SEEK_FINANCING_METHOD
+    ? JSON.parse(result.SEEK_FINANCING_METHOD)
+    : [],
+  CUSTOMER_PAYMENT_METHODS: JSON.parse(result.CUSTOMER_PAYMENT_METHODS),
+  EMPLOYEE_COUNT_DETAIL: {
+    FULLTIME: result.FULLTIME_EMPLOYEE_COUNT,
+    PARTTIME: result.PARTTIME_EMPLOYEE_COUNT,
+  },
+  EMPLOYEE_DETAILS: {
+    FULLTIME: result.FULLTIME_EMPLOYEE_COUNT,
+    OWNER_MANAGED_100: result.OWNER_MANAGED_100,
+  },
+});
+
 module.exports = {
   getFilter,
+  processQuestionnaireResult,
 };

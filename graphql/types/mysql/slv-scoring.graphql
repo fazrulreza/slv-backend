@@ -1,0 +1,56 @@
+input ScoringInput {
+    COMPANY_ID: String!
+    data: String!
+    name: String!
+}
+
+type Scoring {
+  ID: String
+  OH_OPERATING_HISTORY: Int
+  OH_OPERATING_HISTORY_COMMENT: String
+  IG_INDUSTRY_POTENTIAL: Int
+  IG_INDUSTRY_POTENTIAL_COMMENT: String
+  BR_PRODUCT_LINE: Int
+  BR_PRODUCT_LINE_COMMENT: String
+  BR_PRODUCT_QUALITY: Int
+  BR_PRODUCT_QUALITY_COMMENT: String
+  BR_TECHNOLOGY: Int
+  BR_TECHNOLOGY_COMMENT: String
+  BR_DEVELOPMENT_CAPACITY: Int
+  BR_DEVELOPMENT_CAPACITY_COMMENT: String
+  LC_ORGANIZATION: Int
+  LC_ORGANIZATION_COMMENT: String
+  LC_PLANNING: Int
+  LC_PLANNING_COMMENT: String
+  PR_STAFFING: Int
+  PR_STAFFING_COMMENT: String
+  PR_STAFF_PERFORMANCE: Int
+  PR_STAFF_PERFORMANCE_COMMENT: String
+  SR_EXECUTION_CAPACITY: Int
+  SR_EXECUTION_CAPACITY_COMMENT: String
+  SR_BUDGETTING: Int
+  SR_BUDGETTING_COMMENT: String
+  FR_FINANCE: Int
+  FR_FINANCE_COMMENT: String
+  FR_FINANCIAL_SYSTEM: Int
+  FR_FINANCIAL_SYSTEM_COMMENT: String
+  COMPANY_ID: String
+  CREATED_AT: String
+  CREATED_BY: String
+  UPDATED_AT: String
+  UPDATED_BY: String
+}
+
+type ScoringQuestionnaire {
+  scoring: Scoring
+  questionnaire: Questionnaire
+}
+
+type Query {
+  oneScoring (COMPANY_ID: String!): ScoringQuestionnaire
+}
+
+type Mutation {
+  createScoring(input: ScoringInput!): Scoring!
+  updateScoring(input: ScoringInput!): UpdateResp
+}

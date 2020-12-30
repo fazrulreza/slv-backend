@@ -1,18 +1,22 @@
 const { generateId, generateHistory } = require('../../../packages/mysql-model');
+const { processQuestionnaireResult } = require('../../helper/common');
 
 const processInput = (input) => {
   const parsedInput = JSON.parse(input.data);
   const processedInput = {
     AVAILABLE_SYSTEM: JSON.stringify(parsedInput.AVAILABLE_SYSTEM),
     MARKETING_TYPE: JSON.stringify(parsedInput.MARKETING_TYPE),
-    ONLINE_MARKETING_TYPE: JSON.stringify(parsedInput.ONLINE_MARKETING_TYPE),
+    ONLINE_MARKETING_TYPE: parsedInput.SEEK_FINANCING_METHOD
+      ? JSON.stringify(parsedInput.ONLINE_MARKETING_TYPE)
+      : [],
     BUSINESS_FUTURE_PLAN: JSON.stringify(parsedInput.BUSINESS_FUTURE_PLAN),
     SEEK_FINANCING_METHOD: parsedInput.SEEK_FINANCING_METHOD
       ? JSON.stringify(parsedInput.SEEK_FINANCING_METHOD)
-      : '',
+      : [],
     CUSTOMER_PAYMENT_METHODS: JSON.stringify(parsedInput.CUSTOMER_PAYMENT_METHODS),
     FULLTIME_EMPLOYEE_COUNT: parsedInput.EMPLOYEE_COUNT_DETAIL.FULLTIME,
     PARTTIME_EMPLOYEE_COUNT: parsedInput.EMPLOYEE_COUNT_DETAIL.PARTTIME,
+    OWNER_MANAGED_100: parsedInput.EMPLOYEE_DETAILS.OWNER_MANAGED_100,
   };
   // combine input
   const postInput = {
@@ -29,29 +33,22 @@ module.exports = {
          * @param {Object} param0 main input object
          * @param {String} param0.id id
          */
-    oneQuestionnaire: async (parent, { COMPANY_ID }, { connectors: { MysqlSlvQuestionnaire } }) => {
+    oneQuestionnaire: async (parent,
+      { COMPANY_ID },
+      { connectors: { MysqlSlvQuestionnaire, MysqlSlvCompanyProfile } }) => {
       const searchOpts = { where: { COMPANY_ID } };
       const res = await MysqlSlvQuestionnaire.findOne(searchOpts);
       const result = res.dataValues;
 
+      const resCompany = await MysqlSlvCompanyProfile.findOne(COMPANY_ID);
+
       // process result
-      const processedResult = {
-        AVAILABLE_SYSTEM: JSON.parse(result.AVAILABLE_SYSTEM),
-        MARKETING_TYPE: JSON.parse(result.MARKETING_TYPE),
-        ONLINE_MARKETING_TYPE: JSON.parse(result.ONLINE_MARKETING_TYPE),
-        BUSINESS_FUTURE_PLAN: JSON.parse(result.BUSINESS_FUTURE_PLAN),
-        SEEK_FINANCING_METHOD: result.SEEK_FINANCING_METHOD
-          ? JSON.parse(result.SEEK_FINANCING_METHOD)
-          : '',
-        CUSTOMER_PAYMENT_METHODS: JSON.parse(result.CUSTOMER_PAYMENT_METHODS),
-        EMPLOYEE_COUNT_DETAIL: {
-          FULLTIME: result.FULLTIME_EMPLOYEE_COUNT,
-          PARTTIME: result.PARTTIME_EMPLOYEE_COUNT,
-        },
-      };
+      const processedResult = processQuestionnaireResult(result);
+
       const newResult = {
         ...result,
         ...processedResult,
+        SECTOR: resCompany.dataValues.SECTOR,
       };
 
       return newResult;

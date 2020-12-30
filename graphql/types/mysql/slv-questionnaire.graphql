@@ -9,6 +9,11 @@ type EmployeeCountDetail {
   PARTTIME: Int
 }
 
+type EmployeeDetails {
+    FULLTIME: Int
+    OWNER_MANAGED_100: String
+  },
+
 type Questionnaire {
   ID: String
   OPERATING_HISTORY: String
@@ -40,10 +45,15 @@ type Questionnaire {
   CUSTOMER_PAYMENT_METHODS: [String]
   LATE_PAYMENT_CUSTOMER: String
   REGISTERED_BANK_ACCOUNT_FLAG: String
+  REGISTERED_BANK_ACCOUNT: String
   AUDIT_BUSINESS_ACCOUNT_FLAG: String
   EMPLOYEE_COUNT_DETAIL: EmployeeCountDetail
+  EMPLOYEE_DETAILS: EmployeeDetails
+  SECTOR: String
   SST_FLAG: String
   COMPANY_ID: String
+  SALES_TURNOVER: Int
+  SME_CLASS: String
   CREATED_AT: String
   CREATED_BY: String
   UPDATED_AT: String
