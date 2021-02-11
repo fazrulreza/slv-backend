@@ -1,6 +1,6 @@
 const Sequelize = require('sequelize');
 const MysqlModel = require('../../../packages/mysql-model');
-const { mysqlConnection, QUESTIONNAIRE } = require('../../../config');
+const { mysqlConnection, SURVEY } = require('../../../config');
 
 const connection = mysqlConnection;
 
@@ -45,12 +45,13 @@ const attributes = {
   OWNER_MANAGED_100: Sequelize.STRING,
   SALES_TURNOVER: Sequelize.INTEGER,
   SME_CLASS: Sequelize.STRING,
+  ANNUAL_TURNOVER: Sequelize.DOUBLE,
   CREATED_AT: Sequelize.STRING,
   CREATED_BY: Sequelize.STRING,
   UPDATED_AT: Sequelize.STRING,
   UPDATED_BY: Sequelize.STRING,
 };
 
-const MysqlSlvQuestionnaire = new MysqlModel(connection, QUESTIONNAIRE, attributes);
+const MysqlSlvSurvey = new MysqlModel(connection, SURVEY, attributes);
 
-module.exports = MysqlSlvQuestionnaire;
+module.exports = MysqlSlvSurvey;

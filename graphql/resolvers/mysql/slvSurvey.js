@@ -1,5 +1,5 @@
 const { generateId, generateHistory } = require('../../../packages/mysql-model');
-const { processQuestionnaireResult } = require('../../helper/common');
+const { processSurveyResult } = require('../../helper/common');
 
 const processInput = (input) => {
   const parsedInput = JSON.parse(input.data);
@@ -33,17 +33,17 @@ module.exports = {
          * @param {Object} param0 main input object
          * @param {String} param0.id id
          */
-    oneQuestionnaire: async (parent,
+    oneSurvey: async (parent,
       { COMPANY_ID },
-      { connectors: { MysqlSlvQuestionnaire, MysqlSlvCompanyProfile } }) => {
+      { connectors: { MysqlSlvSurvey, MysqlSlvCompanyProfile } }) => {
       const searchOpts = { where: { COMPANY_ID } };
-      const res = await MysqlSlvQuestionnaire.findOne(searchOpts);
+      const res = await MysqlSlvSurvey.findOne(searchOpts);
       const result = res.dataValues;
 
       const resCompany = await MysqlSlvCompanyProfile.findOne(COMPANY_ID);
 
       // process result
-      const processedResult = processQuestionnaireResult(result);
+      const processedResult = processSurveyResult(result);
 
       const newResult = {
         ...result,
@@ -55,8 +55,8 @@ module.exports = {
     },
   },
   Mutation: {
-    createQuestionnaire:
-      async (parent, { input }, { connectors: { MysqlSlvQuestionnaire } }) => {
+    createSurvey:
+      async (parent, { input }, { connectors: { MysqlSlvSurvey } }) => {
         // process input
         const postInput = processInput(input);
 
@@ -68,29 +68,46 @@ module.exports = {
           COMPANY_ID: input.COMPANY_ID,
         };
         // console.log(newInput);
-        const result = await MysqlSlvQuestionnaire.create(newInput);
+        const result = await MysqlSlvSurvey.create(newInput);
         return result;
       },
-    updateQuestionnaire:
-      async (parent, { input }, { connectors: { MysqlSlvQuestionnaire } }) => {
-        const postInput = processInput(input);
-        const history = generateHistory(input.name, 'UPDATE', postInput.CREATED_AT);
-        const searchOpts = {
-          object: {
-            ...postInput,
-            ...history,
-          },
-          where: {
-            COMPANY_ID: input.COMPANY_ID,
-          },
-        };
-        const result = await MysqlSlvQuestionnaire.update(searchOpts);
-        const result2 = {
-          ID: input.COMPANY_ID,
-          updated: result[0],
-        };
-          // console.dir(result2, { depth: null, colorized: true });
-        return result2;
-      },
+    updateSurvey: async (
+      parent,
+      { input },
+      { connectors: { MysqlSlvSurvey, MysqlSlvSurveyHistory } },
+    ) => {
+      const postInput = processInput(input);
+
+      // store previous entry
+      const searchOptsHist = { where: { COMPANY_ID: input.COMPANY_ID } };
+      const resHist = await MysqlSlvSurvey.findOne(searchOptsHist);
+      const histInput = resHist.dataValues;
+      const historyHist = generateHistory(input.name, 'CREATE', histInput.CREATED_AT);
+      const finalHist = {
+        ...histInput,
+        ...historyHist,
+        ID: generateId(),
+      };
+      await MysqlSlvSurveyHistory.create(finalHist);
+
+      // store new entry
+      const history = generateHistory(input.name, 'UPDATE', postInput.CREATED_AT);
+      const searchOpts = {
+        object: {
+          ...postInput,
+          ...history,
+        },
+        where: {
+          COMPANY_ID: input.COMPANY_ID,
+        },
+      };
+      const result = await MysqlSlvSurvey.update(searchOpts);
+      const result2 = {
+        ID: input.COMPANY_ID,
+        updated: result[0],
+      };
+      // console.dir(result2, { depth: null, colorized: true });
+      return result2;
+    },
   },
 };

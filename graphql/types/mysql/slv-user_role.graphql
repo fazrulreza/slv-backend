@@ -1,0 +1,23 @@
+input UserRoleInput {
+    name: String!
+    data: String!
+}
+
+type UserRole {
+  USER: String
+  ROLE: String
+  CREATED_AT: String
+  CREATED_BY: String
+  UPDATED_AT: String
+  UPDATED_BY: String
+}
+
+type Query {
+  allUserRole (ID: String): [UserRole!]!
+}
+
+type Mutation {
+  createUserRole(input: UserRoleInput!): UserRole!
+  updateUserRole(USER: String!, input: UserRoleInput!): UpdateResp
+  deleteUserRole(USER: String!): DeleteResp
+}

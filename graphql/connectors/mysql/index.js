@@ -1,15 +1,21 @@
 const MysqlSlvCompanyProfile = require('./slv-company_profile');
-const MysqlSlvQuestionnaire = require('./slv-questionnaire');
+const MysqlSlvSurvey = require('./slv-survey');
 const MysqlSlvMSIC = require('./slv-msic');
-const MysqlSlvScoring = require('./slv-scoring');
+const MysqlSlvAssessment = require('./slv-assessment');
+const MysqlSlvSurveyHistory = require('./slv-survey_history');
+const MysqlSlvAssessmentHistory = require('./slv-assessment_history');
+const MysqlSlvUserRole = require('./slv-user_role');
 
 const mysqlConnectors = {
 
   // common
   MysqlSlvCompanyProfile,
-  MysqlSlvQuestionnaire,
+  MysqlSlvSurvey,
   MysqlSlvMSIC,
-  MysqlSlvScoring,
+  MysqlSlvAssessment,
+  MysqlSlvSurveyHistory,
+  MysqlSlvAssessmentHistory,
+  MysqlSlvUserRole,
 };
 
 module.exports = mysqlConnectors;

@@ -1,4 +1,4 @@
-CREATE TABLE `scoring` (
+CREATE TABLE `assessment_history` (
   `ID` varchar(30) NOT NULL,
   `OH_OPERATING_HISTORY` int(11) DEFAULT NULL,
   `OH_OPERATING_HISTORY_COMMENT` varchar(500) DEFAULT NULL,

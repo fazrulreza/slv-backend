@@ -1,0 +1,9 @@
+
+type SurveyHistory {
+  current: Survey
+  history: [Survey]
+}
+
+type Query {
+  allSurveyHistory (COMPANY_ID: String!): SurveyHistory
+}

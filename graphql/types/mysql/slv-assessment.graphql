@@ -1,10 +1,10 @@
-input ScoringInput {
+input AssessmentInput {
     COMPANY_ID: String!
     data: String!
     name: String!
 }
 
-type Scoring {
+type Assessment {
   ID: String
   OH_OPERATING_HISTORY: Int
   OH_OPERATING_HISTORY_COMMENT: String
@@ -41,16 +41,16 @@ type Scoring {
   UPDATED_BY: String
 }
 
-type ScoringQuestionnaire {
-  scoring: Scoring
-  questionnaire: Questionnaire
+type AssessmentSurvey {
+  assessment: Assessment
+  survey: Survey
 }
 
 type Query {
-  oneScoring (COMPANY_ID: String!): ScoringQuestionnaire
+  oneAssessment (COMPANY_ID: String!): AssessmentSurvey
 }
 
 type Mutation {
-  createScoring(input: ScoringInput!): Scoring!
-  updateScoring(input: ScoringInput!): UpdateResp
+  createAssessment(input: AssessmentInput!): Assessment!
+  updateAssessment(input: AssessmentInput!): UpdateResp
 }

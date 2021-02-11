@@ -1,6 +1,6 @@
 const Sequelize = require('sequelize');
 const MysqlModel = require('../../../packages/mysql-model');
-const { mysqlConnection, SCORING } = require('../../../config');
+const { mysqlConnection, ASSESSMENT_HISTORY } = require('../../../config');
 
 const connection = mysqlConnection;
 
@@ -44,6 +44,6 @@ const attributes = {
   UPDATED_BY: Sequelize.STRING,
 };
 
-const MysqlSlvScoring = new MysqlModel(connection, SCORING, attributes);
+const MysqlSlvAssessmentHistory = new MysqlModel(connection, ASSESSMENT_HISTORY, attributes);
 
-module.exports = MysqlSlvScoring;
+module.exports = MysqlSlvAssessmentHistory;

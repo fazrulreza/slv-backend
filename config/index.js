@@ -6,14 +6,20 @@ const mysqlConnection = {
 };
 
 const COMPANY_PROFILE = 'company_profile';
-const QUESTIONNAIRE = 'questionnaire';
+const SURVEY = 'survey';
+const SURVEY_HISTORY = 'survey_history';
 const MSIC = 'msic';
-const SCORING = 'scoring';
+const ASSESSMENT = 'assessment';
+const ASSESSMENT_HISTORY = 'assessment_history';
+const USER_ROLE = 'user_role';
 
 module.exports = {
   mysqlConnection,
   COMPANY_PROFILE,
-  QUESTIONNAIRE,
+  SURVEY,
+  SURVEY_HISTORY,
   MSIC,
-  SCORING,
+  ASSESSMENT,
+  ASSESSMENT_HISTORY,
+  USER_ROLE,
 };

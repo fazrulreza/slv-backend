@@ -1,4 +1,4 @@
-input QuestionnaireInput {
+input SurveyInput {
     COMPANY_ID: String!
     data: String!
     name: String!
@@ -14,7 +14,7 @@ type EmployeeDetails {
     OWNER_MANAGED_100: String
   },
 
-type Questionnaire {
+type Survey {
   ID: String
   OPERATING_HISTORY: String
   YEARLY_BUSINESS_PERFORMANCE: String
@@ -54,6 +54,7 @@ type Questionnaire {
   COMPANY_ID: String
   SALES_TURNOVER: Int
   SME_CLASS: String
+  ANNUAL_TURNOVER: Float
   CREATED_AT: String
   CREATED_BY: String
   UPDATED_AT: String
@@ -61,10 +62,10 @@ type Questionnaire {
 }
 
 type Query {
-  oneQuestionnaire (COMPANY_ID: String!): Questionnaire
+  oneSurvey (COMPANY_ID: String!): Survey
 }
 
 type Mutation {
-  createQuestionnaire(input: QuestionnaireInput!): Questionnaire!
-  updateQuestionnaire(input: QuestionnaireInput!): UpdateResp
+  createSurvey(input: SurveyInput!): Survey!
+  updateSurvey(input: SurveyInput!): UpdateResp
 }

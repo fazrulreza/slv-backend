@@ -74,6 +74,9 @@ class MysqlModel {
         ...updatePart,
       };
     }
+    if (!createdAt) {
+      return updatePart;
+    }
     return {
       CREATED_AT: moment(createdAt, 'x').format('YYYY-MM-DD HH:mm:ss'),
       ...updatePart,
