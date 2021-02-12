@@ -66,7 +66,7 @@ module.exports = {
       const result = await MysqlSlvUserRole.delete(searchOpts);
 
       const result2 = {
-        USER,
+        ID: USER,
         deleted: result,
       };
       // console.dir(result2, { depth: null, colorized: true });

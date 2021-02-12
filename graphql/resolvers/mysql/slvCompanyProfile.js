@@ -1,14 +1,6 @@
 const { generateId, generateHistory } = require('../../../packages/mysql-model');
 const { processSurveyResult, calculateScores, classScore } = require('../../helper/common');
 
-const getWhere = (msic) => {
-  const newMSIC = (msic && msic !== 'ALL') ? { MSIC: msic } : null;
-  return {
-    where: { ...newMSIC },
-  };
-};
-
-
 module.exports = {
   Query: {
     /**
@@ -20,9 +12,8 @@ module.exports = {
       parent,
       { ID }, { connectors: { MysqlSlvCompanyProfile, MysqlSlvMSIC } },
     ) => {
-      const where = getWhere('ALL');
       const searchOpts = {
-        ...where,
+        where: null,
         order: [['MSIC']],
       };
       const result = await MysqlSlvMSIC.findAll(searchOpts);
@@ -45,12 +36,18 @@ module.exports = {
          */
     allCompanies: async (
       parent,
-      { msic },
+      { user, userType },
       { connectors: { MysqlSlvCompanyProfile, MysqlSlvSurvey, MysqlSlvAssessment } },
     ) => {
-      const where = getWhere(msic);
+      let where = { CREATED_BY: user };
+
+      // check admin
+      if (userType === 'ADMIN') {
+        where = null;
+      }
+
       const searchOpts = {
-        ...where,
+        where,
         order: [['ENTITY_NAME']],
       };
       const result = await MysqlSlvCompanyProfile.findAll(searchOpts);

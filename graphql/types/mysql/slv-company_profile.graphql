@@ -62,7 +62,7 @@ type CompanyAssessmentSurvey {
 
 type Query {
     oneCompany (ID: String!): CompanyProfileWithMSIC!
-    allCompanies (where: String): [CompanyProfile!]!
+    allCompanies (user: String!, userType: String!): [CompanyProfile!]!
     oneAll (COMPANY_ID: String!): CompanyAssessmentSurvey
 }
 

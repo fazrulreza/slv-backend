@@ -6,7 +6,7 @@ const { SECRET } = process.env;
 
 module.exports = {
   Mutation: {
-    ldapLogin: async (parent, { input }) => {
+    ldapLogin: async (parent, { input }, { connectors: { MysqlSlvUserRole } }) => {
       // Retrieve LDAP account
 
       const userType = 'NON-MEMBER';
@@ -20,6 +20,12 @@ module.exports = {
 
       const photo = thumbnailPhoto.toString('base64');
 
+      const searchOpts = {
+        where: { USER: mail },
+      };
+      const resUser = await MysqlSlvUserRole.findOne(searchOpts);
+      const uRole = resUser ? resUser.dataValues.ROLE : userType;
+
       // return data structure
       const data = {
         username: x.username,
@@ -29,7 +35,7 @@ module.exports = {
         telephoneNumber,
         mobile,
         department,
-        userType,
+        userType: uRole,
         // membership,
       };
 
