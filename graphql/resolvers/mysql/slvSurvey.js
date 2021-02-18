@@ -6,13 +6,13 @@ const processInput = (input) => {
   const processedInput = {
     AVAILABLE_SYSTEM: JSON.stringify(parsedInput.AVAILABLE_SYSTEM),
     MARKETING_TYPE: JSON.stringify(parsedInput.MARKETING_TYPE),
-    ONLINE_MARKETING_TYPE: parsedInput.SEEK_FINANCING_METHOD
+    ONLINE_MARKETING_TYPE: parsedInput.ONLINE_MARKETING_TYPE
       ? JSON.stringify(parsedInput.ONLINE_MARKETING_TYPE)
-      : [],
+      : '[]',
     BUSINESS_FUTURE_PLAN: JSON.stringify(parsedInput.BUSINESS_FUTURE_PLAN),
     SEEK_FINANCING_METHOD: parsedInput.SEEK_FINANCING_METHOD
       ? JSON.stringify(parsedInput.SEEK_FINANCING_METHOD)
-      : [],
+      : '[]',
     CUSTOMER_PAYMENT_METHODS: JSON.stringify(parsedInput.CUSTOMER_PAYMENT_METHODS),
     FULLTIME_EMPLOYEE_COUNT: parsedInput.EMPLOYEE_COUNT_DETAIL.FULLTIME,
     PARTTIME_EMPLOYEE_COUNT: parsedInput.EMPLOYEE_COUNT_DETAIL.PARTTIME,
@@ -67,7 +67,6 @@ module.exports = {
           ...history,
           COMPANY_ID: input.COMPANY_ID,
         };
-        // console.log(newInput);
         const result = await MysqlSlvSurvey.create(newInput);
         return result;
       },
