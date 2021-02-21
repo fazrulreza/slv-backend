@@ -1,0 +1,46 @@
+input ELSAInput {
+    name: String!
+    COMPANY_ID: String!
+    ASSESSMENT_YEAR: Int!
+}
+type ELSAOutput {
+    name: String!
+    COMPANY_ID: String!
+    ASSESSMENT_YEAR: Int!
+}
+
+type ELSAGroup {
+  FACTOR: String
+  FINAL_SCORE: String
+  FINAL_SCORE_ROUNDDOWN: String
+  NEXT_DESIRED_SCORE: String
+  NEXT_DESIRED_PROFILE: String
+  PRIORITY_ACTION_TAKEN: String
+  RECOMMENDED_TIERED_INTERVENTION: String
+  ASSESSMENT_YEAR: Int
+  CREATED_AT: String
+  CREATED_BY: String
+  UPDATED_AT: String
+  UPDATED_BY: String
+}
+
+type ELSATotalOutput {
+  company: CompanyProfile
+  assessment: Assessment
+  survey: Survey
+  msicDetails: MSICResult
+  POTENTIAL: String
+  POTENTIAL_COMMENT: String
+  ELSA: [ELSAGroup]
+  TOTAL_FINAL_SCORE: String
+  ASSESSMENT_YEAR: Int
+}
+
+type Query {
+    oneAll (COMPANY_ID: String!): [ELSATotalOutput]
+}
+
+type Mutation {
+  createElsa(input: ELSAInput!): ELSAOutput!
+  deleteElsa(input: ELSAInput!): DeleteResp
+}

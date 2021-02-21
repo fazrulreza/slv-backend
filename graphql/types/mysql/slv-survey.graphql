@@ -51,10 +51,11 @@ type Survey {
   EMPLOYEE_DETAILS: EmployeeDetails
   SECTOR: String
   SST_FLAG: String
-  COMPANY_ID: String
   SALES_TURNOVER: Int
   SME_CLASS: String
   ANNUAL_TURNOVER: Float
+  COMPANY_ID: String
+  ASSESSMENT_YEAR: Int
   CREATED_AT: String
   CREATED_BY: String
   UPDATED_AT: String
@@ -62,7 +63,7 @@ type Survey {
 }
 
 type Query {
-  oneSurvey (COMPANY_ID: String!): Survey
+  allSurvey (COMPANY_ID: String!): [Survey]
 }
 
 type Mutation {

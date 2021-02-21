@@ -7,19 +7,17 @@ const mysqlConnection = {
 
 const COMPANY_PROFILE = 'company_profile';
 const SURVEY = 'survey';
-const SURVEY_HISTORY = 'survey_history';
 const MSIC = 'msic';
 const ASSESSMENT = 'assessment';
-const ASSESSMENT_HISTORY = 'assessment_history';
 const USER_ROLE = 'user_role';
+const ELSA_SCORECARD = 'elsa_scorecard';
 
 module.exports = {
   mysqlConnection,
-  COMPANY_PROFILE,
-  SURVEY,
-  SURVEY_HISTORY,
-  MSIC,
   ASSESSMENT,
-  ASSESSMENT_HISTORY,
+  COMPANY_PROFILE,
+  ELSA_SCORECARD,
+  MSIC,
+  SURVEY,
   USER_ROLE,
 };

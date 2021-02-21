@@ -8,29 +8,37 @@ module.exports = {
          * @param {Object} param0 main input object
          * @param {String} param0.id id
          */
-    oneAssessment: async (
+    allAssessment: async (
       parent,
       { COMPANY_ID },
       { connectors: { MysqlSlvSurvey, MysqlSlvAssessment } },
     ) => {
+      let resultQuest = [];
+      let resultScore = [];
+
       const searchOpts = { where: { COMPANY_ID } };
 
-      // assessment
-      const resScore = await MysqlSlvAssessment.findOne(searchOpts);
-      const resultScore = resScore ? resScore.dataValues : null;
       // survey
-      const resQuest = await MysqlSlvSurvey.findOne(searchOpts);
-      let resultQuest = resQuest ? resQuest.dataValues : null;
+      const resQuest = await MysqlSlvSurvey.findAll(searchOpts);
+      if (resQuest.length !== 0) {
+        resultQuest = resQuest.map((svy) => {
+          const result2 = svy.dataValues;
 
-      if (resultQuest) {
-        // process result
-        const processedResult = processSurveyResult(resultQuest);
+          // process result
+          const processedResult = processSurveyResult(result2);
 
-        resultQuest = {
-          ...resultQuest,
-          ...processedResult,
-        };
+          const newResult = {
+            ...result2,
+            ...processedResult,
+          };
+
+          return newResult;
+        });
       }
+
+      // assessment
+      const resScore = await MysqlSlvAssessment.findAll(searchOpts);
+      if (resScore.length !== 0)resultScore = resScore.map(asmt => asmt.dataValues);
 
       const result = {
         assessment: resultScore,
@@ -52,26 +60,15 @@ module.exports = {
         ID: generateId(),
         ...history,
         COMPANY_ID: input.COMPANY_ID,
+        ASSESSMENT_YEAR: 1000,
       };
         // console.log(newInput);
       const result = await MysqlSlvAssessment.create(newInput);
       return result;
     },
     updateAssessment: async (
-      parent, { input }, { connectors: { MysqlSlvAssessment, MysqlSlvAssessmentHistory } }) => {
+      parent, { input }, { connectors: { MysqlSlvAssessment } }) => {
       const parsedInput = JSON.parse(input.data);
-
-      // store previous entry
-      const searchOptsHist = { where: { COMPANY_ID: input.COMPANY_ID } };
-      const resHist = await MysqlSlvAssessment.findOne(searchOptsHist);
-      const histInput = resHist.dataValues;
-      const historyHist = generateHistory(input.name, 'CREATE', histInput.CREATED_AT);
-      const finalHist = {
-        ...histInput,
-        ...historyHist,
-        ID: generateId(),
-      };
-      await MysqlSlvAssessmentHistory.create(finalHist);
 
       // store new entry
       const history = generateHistory(input.name, 'UPDATE', parsedInput.CREATED_AT);
@@ -82,6 +79,7 @@ module.exports = {
         },
         where: {
           COMPANY_ID: input.COMPANY_ID,
+          ASSESSMENT_YEAR: 1000,
         },
       };
       const result = await MysqlSlvAssessment.update(searchOpts);

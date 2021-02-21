@@ -222,7 +222,7 @@ const calculateScores = (getClassScore, initial) => {
       : '';
   }
   const finalGroup = {
-    INITIAL: initial,
+    FACTOR: initial,
     FINAL_SCORE: finalScore,
     FINAL_SCORE_ROUNDDOWN: finalScoreFloor,
     NEXT_DESIRED_SCORE: nextDesiredScore,

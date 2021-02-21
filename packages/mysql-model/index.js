@@ -41,6 +41,10 @@ class MysqlModel {
     return this.model.create(object);
   }
 
+  bulkCreate(object) {
+    return this.model.bulkCreate(object);
+  }
+
   delete({ where }) {
     return this.model.destroy({ where });
   }

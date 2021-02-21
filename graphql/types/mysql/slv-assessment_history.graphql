@@ -1,9 +1,0 @@
-
-type AssessmentHistory {
-  current: Assessment
-  history: [Assessment]
-}
-
-type Query {
-  allAssessmentHistory (COMPANY_ID: String!): AssessmentHistory
-}

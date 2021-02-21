@@ -39,31 +39,9 @@ type CompanyProfileWithMSIC {
   company: CompanyProfile!
 }
 
-type AssessmentGroup {
-  INITIAL: String
-  FINAL_SCORE: String
-  FINAL_SCORE_ROUNDDOWN: String
-  NEXT_DESIRED_SCORE: String
-  NEXT_DESIRED_PROFILE: String
-  PRIORITY_ACTION_TAKEN: String
-  RECOMMENDED_TIERED_INTERVENTION: String
-}
-
-type CompanyAssessmentSurvey {
-  company: CompanyProfile
-  assessment: Assessment
-  survey: Survey
-  msicDetails: MSICResult
-  POTENTIAL: String
-  POTENTIAL_COMMENT: String
-  ELSA: [AssessmentGroup]
-  TOTAL_FINAL_SCORE: String
-}
-
 type Query {
     oneCompany (ID: String!): CompanyProfileWithMSIC!
     allCompanies (user: String!, userType: String!): [CompanyProfile!]!
-    oneAll (COMPANY_ID: String!): CompanyAssessmentSurvey
 }
 
 type Mutation {

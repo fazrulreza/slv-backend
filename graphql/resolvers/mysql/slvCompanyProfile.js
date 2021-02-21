@@ -1,5 +1,4 @@
 const { generateId, generateHistory } = require('../../../packages/mysql-model');
-const { processSurveyResult, calculateScores, classScore } = require('../../helper/common');
 
 module.exports = {
   Query: {
@@ -58,8 +57,12 @@ module.exports = {
       const resultQuest = await MysqlSlvSurvey.findAll(searchOpts2);
       const resultScore = await MysqlSlvAssessment.findAll(searchOpts2);
       const result3 = result2.map((x) => {
-        const resQ = resultQuest.filter(y => y.dataValues.COMPANY_ID === x.ID);
-        const resS = resultScore.filter(z => z.dataValues.COMPANY_ID === x.ID);
+        const resQ = resultQuest
+          .filter(y => y.dataValues.COMPANY_ID === x.ID
+          && y.dataValues.ASSESSMENT_YEAR === 1000);
+        const resS = resultScore
+          .filter(z => z.dataValues.COMPANY_ID === x.ID
+            && z.dataValues.ASSESSMENT_YEAR === 1000);
         const SURVEY_DONE = resQ.length !== 0;
         const ASSESSMENT_DONE = resS.length !== 0;
         return {
@@ -70,106 +73,6 @@ module.exports = {
       });
       // console.dir(resultQuest, { depth: null, colorized: true });
       return result3;
-    },
-    /**
-         * Retrieve all company, survey, assessment by ID
-         * @param {Object} param0 main input object
-         * @param {String} param0.id id
-         */
-    oneAll: async (
-      parent,
-      { COMPANY_ID },
-      {
-        connectors:
-        {
-          MysqlSlvCompanyProfile, MysqlSlvSurvey, MysqlSlvAssessment, MysqlSlvMSIC,
-        },
-      },
-    ) => {
-      let resultQuest = null;
-      let resultScore = null;
-      let scorecard = [];
-      let totalFinalScore = 0;
-
-      const searchOpts = { where: { COMPANY_ID } };
-
-      // company
-      const resultCompany = await MysqlSlvCompanyProfile.findById(COMPANY_ID);
-
-      // MSIC
-      const searchOpts2 = { where: { MSIC: resultCompany.MSIC } };
-      const resMSIC = await MysqlSlvMSIC.findOne(searchOpts2);
-      const resultMSIC = resMSIC.dataValues;
-
-
-      // survey
-      const resQuest = await MysqlSlvSurvey.findOne(searchOpts);
-      resultQuest = resQuest ? resQuest.dataValues : null;
-
-      if (resultQuest) {
-        // process result
-        const processedResult = processSurveyResult(resultQuest);
-
-        resultQuest = {
-          ...resultQuest,
-          ...processedResult,
-        };
-
-        // assessment
-        const resScore = await MysqlSlvAssessment.findOne(searchOpts);
-        resultScore = resScore ? resScore.dataValues : null;
-        if (resultScore) {
-          const getClassScore = Object.keys(resultScore)
-            .map((y) => {
-              const getUnitClassScore = (Number.isInteger(resultScore[y]) && classScore[y])
-                ? classScore[y][resultQuest.SME_CLASS]
-                : null;
-              const weightedScore = Number.isInteger(getUnitClassScore) ? resultScore[y] * getUnitClassScore : 'N/A';
-              const resClassScore = {
-                [y]: resultScore[y],
-                unitClassScore: getUnitClassScore,
-                weightedScore,
-              };
-              return resClassScore;
-            })
-            .filter(z => classScore[Object.keys(z)[0]]);
-
-          // console.log(getClassScore);
-
-          // get big class Score
-          const BR_GROUP = calculateScores(getClassScore, 'BR_');
-          const LC_GROUP = calculateScores(getClassScore, 'LC_');
-          const PR_GROUP = calculateScores(getClassScore, 'PR_');
-          const SR_GROUP = calculateScores(getClassScore, 'SR_');
-          const FR_GROUP = calculateScores(getClassScore, 'FR_');
-
-          scorecard = [
-            BR_GROUP,
-            LC_GROUP,
-            PR_GROUP,
-            SR_GROUP,
-            FR_GROUP,
-          ];
-
-          const sumScore = scorecard.reduce(((acc, v) => (v.FINAL_SCORE === 'N/A' ? acc : acc + v.FINAL_SCORE)), 0);
-          const countScore = scorecard.reduce(((acc, v) => (v.FINAL_SCORE === 'N/A' ? acc : acc + 1)), 0);
-          totalFinalScore = (Math.round((sumScore / countScore) * 10) / 10);
-          // console.log(sumScore);
-          // console.log(countScore);
-          // console.log(totalFinalScore);
-        }
-      }
-
-      const result = {
-        company: resultCompany,
-        assessment: resultScore,
-        survey: resultQuest,
-        msicDetails: resultMSIC,
-        ELSA: scorecard,
-        TOTAL_FINAL_SCORE: totalFinalScore,
-      };
-
-      return result;
     },
   },
   Mutation: {
@@ -189,7 +92,11 @@ module.exports = {
     deleteCompany: async (
       parent,
       { ID },
-      { connectors: { MysqlSlvCompanyProfile, MysqlSlvSurvey, MysqlSlvAssessment } },
+      {
+        connectors: {
+          MysqlSlvCompanyProfile, MysqlSlvSurvey, MysqlSlvAssessment, MysqlSlvELSAScorecard,
+        },
+      },
     ) => {
       // remove company
       const searchOpts = {
@@ -203,6 +110,7 @@ module.exports = {
       };
       await MysqlSlvSurvey.delete(searchOpts2);
       await MysqlSlvAssessment.delete(searchOpts2);
+      await MysqlSlvELSAScorecard.delete(searchOpts2);
 
       const result2 = {
         ID,

@@ -35,6 +35,7 @@ type Assessment {
   FR_FINANCIAL_SYSTEM: Int
   FR_FINANCIAL_SYSTEM_COMMENT: String
   COMPANY_ID: String
+  ASSESSMENT_YEAR: Int
   CREATED_AT: String
   CREATED_BY: String
   UPDATED_AT: String
@@ -42,12 +43,12 @@ type Assessment {
 }
 
 type AssessmentSurvey {
-  assessment: Assessment
-  survey: Survey
+  assessment: [Assessment]
+  survey: [Survey]
 }
 
 type Query {
-  oneAssessment (COMPANY_ID: String!): AssessmentSurvey
+  allAssessment (COMPANY_ID: String!): AssessmentSurvey
 }
 
 type Mutation {
