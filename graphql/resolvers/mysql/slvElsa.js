@@ -75,8 +75,14 @@ module.exports = {
             };
           });
         } else {
+          const searchOpts1000 = {
+            where: {
+              COMPANY_ID,
+              ASSESSMENT_YEAR: 1000,
+            },
+          };
           // survey
-          const resQuest = await MysqlSlvSurvey.findOne(searchOpts);
+          const resQuest = await MysqlSlvSurvey.findOne(searchOpts1000);
           resultQuest = resQuest ? resQuest.dataValues : null;
 
           if (resultQuest) {
@@ -89,7 +95,7 @@ module.exports = {
             };
 
             // assessment
-            const resScore = await MysqlSlvAssessment.findOne(searchOpts);
+            const resScore = await MysqlSlvAssessment.findOne(searchOpts1000);
             resultScore = resScore ? resScore.dataValues : null;
 
             if (resultScore) {
