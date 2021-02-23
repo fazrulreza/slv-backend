@@ -33,7 +33,8 @@ module.exports = {
          * @param {Object} param0 main input object
          * @param {String} param0.id id
          */
-    allSurvey: async (parent,
+    allSurvey: async (
+      parent,
       { COMPANY_ID },
       { connectors: { MysqlSlvSurvey, MysqlSlvCompanyProfile } }) => {
       let result = [];
@@ -55,6 +56,52 @@ module.exports = {
             ...result2,
             ...processedResult,
             SECTOR: resCompany.dataValues.SECTOR,
+          };
+
+          return newResult;
+        });
+      }
+
+      return result;
+    },
+    /**
+         * Retrieve one by ID
+         * @param {Object} param0 main input object
+         * @param {String} param0.id id
+         */
+    fullSurveyList: async (
+      parent,
+      { user, userType },
+      { connectors: { MysqlSlvSurvey, MysqlSlvCompanyProfile } }) => {
+      let result = [];
+      let where = { CREATED_BY: user };
+
+      // check admin
+      if (userType === 'ADMIN') {
+        where = null;
+      }
+      const searchOpts = { where };
+
+      // company
+      const resCom = await MysqlSlvCompanyProfile.findAll(searchOpts);
+
+      // survey
+      const res = await MysqlSlvSurvey.findAll(searchOpts);
+
+      if (res.length !== 0) {
+        result = res.map((svy) => {
+          const result2 = svy.dataValues;
+
+          // process result
+          const processedResult = processSurveyResult(result2);
+          const SECTOR = resCom
+            .filter(g => g.ID === result2.COMPANY_ID)
+            .map(h => h.SECTOR)[0];
+
+          const newResult = {
+            ...result2,
+            ...processedResult,
+            SECTOR,
           };
 
           return newResult;

@@ -17,6 +17,7 @@ type ELSAGroup {
   NEXT_DESIRED_PROFILE: String
   PRIORITY_ACTION_TAKEN: String
   RECOMMENDED_TIERED_INTERVENTION: String
+  COMPANY_ID: String
   ASSESSMENT_YEAR: Int
   CREATED_AT: String
   CREATED_BY: String
@@ -36,8 +37,14 @@ type ELSATotalOutput {
   ASSESSMENT_YEAR: Int
 }
 
+type ELSACount {
+  stage: Int
+  count: Int
+}
+
 type Query {
     oneAll (COMPANY_ID: String!): [ELSATotalOutput]
+    fullElsaList(user: String!, userType: String!): [ELSACount!]!
 }
 
 type Mutation {

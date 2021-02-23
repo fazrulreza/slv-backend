@@ -64,6 +64,7 @@ type Survey {
 
 type Query {
   allSurvey (COMPANY_ID: String!): [Survey]
+  fullSurveyList(user: String!, userType: String!): [Survey!]!
 }
 
 type Mutation {

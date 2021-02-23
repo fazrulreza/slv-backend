@@ -1,8 +1,61 @@
 const { generateId, generateHistory } = require('../../../packages/mysql-model');
-const { processSurveyResult, calculateScores, classScore } = require('../../helper/common');
+const {
+  processSurveyResult, calculateScores, classScore, profileGroup,
+} = require('../../helper/common');
+
+
+// calculate total score
+const getTotalScore = (scorecard) => {
+  const sumScore = scorecard
+    .reduce(((acc, v) => (v.FINAL_SCORE === 'N/A' ? acc : acc + parseFloat(v.FINAL_SCORE))), 0);
+  const countScore = scorecard
+    .reduce(((acc, v) => (v.FINAL_SCORE === 'N/A' ? acc : acc + 1)), 0);
+  return (Math.round((sumScore / countScore) * 10) / 10);
+};
 
 module.exports = {
   Query: {
+    /**
+         * Retrieve one by ID
+         * @param {Object} param0 main input object
+         * @param {String} param0.id id
+         */
+    fullElsaList: async (
+      parent,
+      { user, userType },
+      { connectors: { MysqlSlvELSAScorecard } }) => {
+      let result = [];
+      let where = { CREATED_BY: user };
+
+      // check admin
+      if (userType === 'ADMIN') where = null;
+      const searchOpts = { where };
+
+      // Elsa
+      const resElsa = await MysqlSlvELSAScorecard.findAll(searchOpts);
+      if (resElsa.length !== 0) {
+        const resultElsa = resElsa
+          .map(j => j.dataValues)
+          .filter(oa => oa.ASSESSMENT_YEAR === 1000);
+        const compData = resultElsa.map(c => c.COMPANY_ID);
+        const compDataUnique = [...new Set(compData)];
+
+        const scoreArray = compDataUnique.map((cm) => {
+          const scorecard = resultElsa.filter(cmp => cmp.COMPANY_ID === cm);
+          // calculate total score
+          const finalScore = getTotalScore(scorecard);
+          return Math.floor(finalScore);
+        });
+
+        result = Object.keys(profileGroup)
+          .map(k => ({
+            stage: k,
+            count: scoreArray.filter(m => m === (parseInt(k, 10) - 1)).length,
+          }));
+      }
+
+      return result;
+    },
     /**
          * Retrieve all company, survey, assessment by ID
          * @param {Object} param0 main input object
@@ -162,9 +215,7 @@ module.exports = {
         }
 
         // calculate total score
-        const sumScore = scorecard.reduce(((acc, v) => (v.FINAL_SCORE === 'N/A' ? acc : acc + v.FINAL_SCORE)), 0);
-        const countScore = scorecard.reduce(((acc, v) => (v.FINAL_SCORE === 'N/A' ? acc : acc + 1)), 0);
-        totalFinalScore = (Math.round((sumScore / countScore) * 10) / 10);
+        totalFinalScore = getTotalScore(scorecard);
 
         const result = {
           company: resultCompany.dataValues,

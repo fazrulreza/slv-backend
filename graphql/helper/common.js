@@ -153,10 +153,13 @@ const classScore = {
   },
 };
 
-const nextDesiredProfileGroup = {
+const profileGroup = {
+  1: 'PRE-TAKEOFF',
   2: 'TAKEOFF',
   3: 'MATURITY',
+  4: 'STAGNATION',
   5: 'RENEWAL',
+  6: 'DECLINE',
 };
 
 const tieredInterventionGroup = {
@@ -211,7 +214,7 @@ const calculateScores = (getClassScore, initial) => {
         nextDesiredScore = finalScoreFloor + 1;
         break;
     }
-    nextDesiredProfile = nextDesiredProfileGroup[nextDesiredScore] || 'N/A';
+    nextDesiredProfile = profileGroup[nextDesiredScore] || 'N/A';
     recommendedTieredIntervention = nextDesiredScore === 'N/A'
       ? 'N/A'
       : tieredInterventionGroup[finalScoreFloor];
@@ -240,5 +243,6 @@ module.exports = {
   processSurveyResult,
   cleanEmpty,
   calculateScores,
+  profileGroup,
   classScore,
 };
