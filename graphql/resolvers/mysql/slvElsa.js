@@ -50,7 +50,7 @@ module.exports = {
         result = Object.keys(profileGroup)
           .map(k => ({
             stage: k,
-            count: scoreArray.filter(m => m === (parseInt(k, 10) - 1)).length,
+            count: scoreArray.filter(m => m === (parseInt(k, 10))).length,
           }));
       }
 
