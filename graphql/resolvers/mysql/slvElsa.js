@@ -35,7 +35,7 @@ module.exports = {
 
       // company
       const resCompany = await MysqlSlvCompanyProfile.findAll(searchOpts);
-      resultCompany = resCompany.length !== 0 && resCompany.map(x => x.dataValues.ID);
+      if (resCompany.length !== 0) resultCompany = resCompany.map(x => x.dataValues.ID);
 
       // Elsa
       const resElsa = await MysqlSlvELSAScorecard.findAll(searchOptsAll);
