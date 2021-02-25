@@ -23,35 +23,44 @@ module.exports = {
     fullElsaList: async (
       parent,
       { user, userType },
-      { connectors: { MysqlSlvELSAScorecard } }) => {
+      { connectors: { MysqlSlvCompanyProfile, MysqlSlvELSAScorecard } }) => {
       let result = [];
+      let resultCompany = [];
       let where = { CREATED_BY: user };
 
       // check admin
       if (userType === 'ADMIN') where = null;
       const searchOpts = { where };
+      const searchOptsAll = { where: null };
+
+      // company
+      const resCompany = await MysqlSlvCompanyProfile.findAll(searchOpts);
+      resultCompany = resCompany.length !== 0 && resCompany.map(x => x.dataValues.ID);
 
       // Elsa
-      const resElsa = await MysqlSlvELSAScorecard.findAll(searchOpts);
-      if (resElsa.length !== 0) {
-        const resultElsa = resElsa
-          .map(j => j.dataValues)
-          .filter(oa => oa.ASSESSMENT_YEAR === 1000);
-        const compData = resultElsa.map(c => c.COMPANY_ID);
-        const compDataUnique = [...new Set(compData)];
+      const resElsa = await MysqlSlvELSAScorecard.findAll(searchOptsAll);
+      const resultElsa = resElsa
+        .map(j => j.dataValues)
+        .filter(oa => oa.ASSESSMENT_YEAR === 1000);
 
-        const scoreArray = compDataUnique.map((cm) => {
+      if (resultCompany.length !== 0) {
+        const scoreArray = resultCompany.map((cm) => {
           const scorecard = resultElsa.filter(cmp => cmp.COMPANY_ID === cm);
+          if (scorecard.length === 0) return 0;
           // calculate total score
           const finalScore = getTotalScore(scorecard);
           return Math.floor(finalScore);
         });
 
-        result = Object.keys(profileGroup)
-          .map(k => ({
-            stage: k,
-            count: scoreArray.filter(m => m === (parseInt(k, 10))).length,
-          }));
+        const noZeroScoreArray = scoreArray.filter(m => m !== 0);
+
+        if (noZeroScoreArray.length !== 0) {
+          result = Object.keys(profileGroup)
+            .map(k => ({
+              stage: k,
+              count: noZeroScoreArray.filter(m => m === (parseInt(k, 10))).length,
+            }));
+        }
       }
 
       return result;
@@ -63,7 +72,7 @@ module.exports = {
          */
     oneAll: async (
       parent,
-      { COMPANY_ID },
+      { input },
       {
         connectors:
         {
@@ -73,8 +82,8 @@ module.exports = {
       },
     ) => {
       // company
-      const searchOpts = { where: { COMPANY_ID } };
-      const resultCompany = await MysqlSlvCompanyProfile.findById(COMPANY_ID);
+      const searchOpts = { where: { COMPANY_ID: input.COMPANY_ID } };
+      const resultCompany = await MysqlSlvCompanyProfile.findById(input.COMPANY_ID);
 
       // MSIC
       const searchOpts2 = { where: { MSIC: resultCompany.MSIC } };
@@ -85,7 +94,7 @@ module.exports = {
       const resElsaScoreAll = await MysqlSlvELSAScorecard.findAll(searchOpts);
       const yearOnly = resElsaScoreAll.length !== 0
         ? resElsaScoreAll.map(e => e.dataValues.ASSESSMENT_YEAR)
-        : [1000];
+        : [input.ASSESSMENT_YEAR];
       const yearList = yearOnly.filter((item, index) => yearOnly.indexOf(item) === index);
 
       const finalResult = await Promise.all(yearList.map(async (yr) => {
@@ -97,7 +106,7 @@ module.exports = {
         if (yr !== 1000) {
           const searchOptsElsaAll = {
             where: {
-              COMPANY_ID,
+              COMPANY_ID: input.COMPANY_ID,
               ASSESSMENT_YEAR: yr,
             },
           };
@@ -130,8 +139,8 @@ module.exports = {
         } else {
           const searchOpts1000 = {
             where: {
-              COMPANY_ID,
-              ASSESSMENT_YEAR: 1000,
+              COMPANY_ID: input.COMPANY_ID,
+              ASSESSMENT_YEAR: input.ASSESSMENT_YEAR,
             },
           };
           // survey
@@ -187,13 +196,13 @@ module.exports = {
 
               // store in DB
               const dbStoreScoreCard = scorecard.map((b) => {
-                const history = generateHistory('system', 'CREATE');
+                const history = generateHistory(input.user, 'CREATE');
                 const newB = {
                   ...b,
                   ...history,
                   ID: generateId(),
-                  ASSESSMENT_YEAR: 1000,
-                  COMPANY_ID,
+                  ASSESSMENT_YEAR: input.ASSESSMENT_YEAR,
+                  COMPANY_ID: input.COMPANY_ID,
                 };
                 return newB;
               });
@@ -201,8 +210,8 @@ module.exports = {
               // remove and recreate with new value
               const searchOptsElsa = {
                 where: {
-                  COMPANY_ID,
-                  ASSESSMENT_YEAR: 1000,
+                  COMPANY_ID: input.COMPANY_ID,
+                  ASSESSMENT_YEAR: input.ASSESSMENT_YEAR,
                 },
               };
               const resElsaScore = await MysqlSlvELSAScorecard.findAll(searchOptsElsa);
