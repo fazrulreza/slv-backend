@@ -167,7 +167,9 @@ module.exports = {
                   const getUnitClassScore = (Number.isInteger(resultScore[y]) && classScore[y])
                     ? classScore[y][resultQuest.SME_CLASS]
                     : null;
-                  const weightedScore = Number.isInteger(getUnitClassScore) ? resultScore[y] * getUnitClassScore : 'N/A';
+                  const weightedScore = Number.isInteger(getUnitClassScore)
+                    ? resultScore[y] * getUnitClassScore
+                    : 'N/A';
                   const resClassScore = {
                     [y]: resultScore[y],
                     unitClassScore: getUnitClassScore,
