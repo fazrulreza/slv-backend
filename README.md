@@ -22,4 +22,4 @@ https://localhost:2020/graphql
 ### Run (PM2) in prod
 
 1. run `yarn build` in terminal
-2. run `pm2 start yarn --name backend -- start` 
+2. run `pm2 start yarn --name slv-backend -- start` 

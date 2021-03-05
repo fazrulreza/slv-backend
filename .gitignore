@@ -5,3 +5,4 @@ certificates
 .env
 .prod
 .local
+.uat
