@@ -85,6 +85,18 @@ module.exports = {
       const searchOpts = { where: { COMPANY_ID: input.COMPANY_ID } };
       const resultCompany = await MysqlSlvCompanyProfile.findById(input.COMPANY_ID);
 
+      // survey
+      const resQuestPre = await MysqlSlvSurvey.findAll(searchOpts);
+      const resQuest = resQuestPre.length !== 0 ? resQuestPre.map(s => s.dataValues) : resQuestPre;
+
+      // assessment
+      const resScorePre = await MysqlSlvAssessment.findAll(searchOpts);
+      const resScore = resScorePre.length !== 0 ? resScorePre.map(a => a.dataValues) : resScorePre;
+
+      // ELSA
+      const resElsaPre = await MysqlSlvELSAScorecard.findAll(searchOpts);
+      const resElsa = resElsaPre.length !== 0 ? resElsaPre.map(a => a.dataValues) : resElsaPre;
+
       // MSIC
       const searchOpts2 = { where: { MSIC: resultCompany.MSIC } };
       const resMSIC = await MysqlSlvMSIC.findOne(searchOpts2);
@@ -97,55 +109,37 @@ module.exports = {
         : [input.ASSESSMENT_YEAR];
       const yearList = yearOnly.filter((item, index) => yearOnly.indexOf(item) === index);
 
-      const finalResult = await Promise.all(yearList.map(async (yr) => {
+      const finalResult = yearList.map((yr) => {
         let resultQuest = null;
         let resultScore = null;
         let scorecard = [];
         let totalFinalScore = 0;
 
         if (yr !== 1000) {
-          const searchOptsElsaAll = {
-            where: {
-              COMPANY_ID: input.COMPANY_ID,
-              ASSESSMENT_YEAR: yr,
-            },
-          };
           // survey
-          const resQuest = await MysqlSlvSurvey.findOne(searchOptsElsaAll);
-          resultQuest = resQuest.dataValues;
+          [resultQuest] = resQuest.filter(x => x.ASSESSMENT_YEAR === yr);
           // process result
           const processedResult = processSurveyResult(resultQuest);
-
           resultQuest = {
             ...resultQuest,
             ...processedResult,
           };
 
           // assessment
-          const resScore = await MysqlSlvAssessment.findOne(searchOptsElsaAll);
-          resultScore = resScore.dataValues;
+          [resultScore] = resScore.filter(y => y.ASSESSMENT_YEAR === yr);
 
           // ELSA
-          const resElsaScore = await MysqlSlvELSAScorecard.findAll(searchOptsElsaAll);
-          scorecard = resElsaScore.map((d) => {
-            const newScore = d.dataValues;
-            return {
-              ...newScore,
-              FINAL_SCORE: parseFloat(newScore.FINAL_SCORE),
-              FINAL_SCORE_ROUNDDOWN: parseFloat(newScore.FINAL_SCORE_ROUNDDOWN),
-              NEXT_DESIRED_SCORE: parseFloat(newScore.NEXT_DESIRED_SCORE),
-            };
-          });
+          const resultElsa = resElsa.filter(e => e.ASSESSMENT_YEAR === yr);
+          scorecard = resultElsa.map(d => ({
+            ...d,
+            FINAL_SCORE: parseFloat(d.FINAL_SCORE),
+            FINAL_SCORE_ROUNDDOWN: parseFloat(d.FINAL_SCORE_ROUNDDOWN),
+            NEXT_DESIRED_SCORE: parseFloat(d.NEXT_DESIRED_SCORE),
+          }));
         } else {
-          const searchOpts1000 = {
-            where: {
-              COMPANY_ID: input.COMPANY_ID,
-              ASSESSMENT_YEAR: input.ASSESSMENT_YEAR,
-            },
-          };
           // survey
-          const resQuest = await MysqlSlvSurvey.findOne(searchOpts1000);
-          resultQuest = resQuest ? resQuest.dataValues : null;
+          const resultQuestPre = resQuest.filter(v => v.ASSESSMENT_YEAR === 1000);
+          resultQuest = resultQuestPre.length !== 0 ? resultQuestPre[0] : null;
 
           if (resultQuest) {
             // process result
@@ -157,8 +151,8 @@ module.exports = {
             };
 
             // assessment
-            const resScore = await MysqlSlvAssessment.findOne(searchOpts1000);
-            resultScore = resScore ? resScore.dataValues : null;
+            const resultScorePre = resScore.filter(w => w.ASSESSMENT_YEAR === 1000);
+            resultScore = resultScorePre.length !== 0 ? resultScorePre[0] : null;
 
             if (resultScore) {
               // calculate score
@@ -195,32 +189,6 @@ module.exports = {
                 SR_GROUP,
                 FR_GROUP,
               ];
-
-              // store in DB
-              const dbStoreScoreCard = scorecard.map((b) => {
-                const history = generateHistory(input.user, 'CREATE');
-                const newB = {
-                  ...b,
-                  ...history,
-                  ID: generateId(),
-                  ASSESSMENT_YEAR: input.ASSESSMENT_YEAR,
-                  COMPANY_ID: input.COMPANY_ID,
-                };
-                return newB;
-              });
-
-              // remove and recreate with new value
-              const searchOptsElsa = {
-                where: {
-                  COMPANY_ID: input.COMPANY_ID,
-                  ASSESSMENT_YEAR: input.ASSESSMENT_YEAR,
-                },
-              };
-              const resElsaScore = await MysqlSlvELSAScorecard.findAll(searchOptsElsa);
-              if (resElsaScore && resElsaScore.length !== 0) {
-                await MysqlSlvELSAScorecard.delete(searchOptsElsa);
-              }
-              await MysqlSlvELSAScorecard.bulkCreate(dbStoreScoreCard);
             }
           }
         }
@@ -239,7 +207,37 @@ module.exports = {
         };
 
         return result;
-      }));
+      });
+
+      // store in DB
+      const [toStore] = finalResult
+        .filter(i => i.ASSESSMENT_YEAR === 1000)
+        .map(j => j.ELSA);
+
+      const dbStoreScoreCard = toStore.map((b) => {
+        const history = generateHistory(input.user, 'CREATE');
+        const newB = {
+          ...b,
+          ...history,
+          ID: generateId(),
+          ASSESSMENT_YEAR: input.ASSESSMENT_YEAR,
+          COMPANY_ID: input.COMPANY_ID,
+        };
+        return newB;
+      });
+
+      // remove and recreate with new value
+      const searchOptsElsa = {
+        where: {
+          COMPANY_ID: input.COMPANY_ID,
+          ASSESSMENT_YEAR: input.ASSESSMENT_YEAR,
+        },
+      };
+      const resElsaScore = await MysqlSlvELSAScorecard.findAll(searchOptsElsa);
+      if (resElsaScore && resElsaScore.length !== 0) {
+        await MysqlSlvELSAScorecard.delete(searchOptsElsa);
+      }
+      await MysqlSlvELSAScorecard.bulkCreate(dbStoreScoreCard);
 
       return finalResult;
     },

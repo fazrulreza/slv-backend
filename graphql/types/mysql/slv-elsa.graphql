@@ -43,7 +43,7 @@ type ELSACount {
 }
 
 type Query {
-    oneAll (input: ELSAInput!): [ELSATotalOutput]
+    oneAll (input: ELSAInput!): [ELSATotalOutput!]!
     fullElsaList(user: String!, userType: String!): [ELSACount!]!
 }
 
