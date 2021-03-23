@@ -56,17 +56,26 @@ module.exports = {
       const searchOpts2 = { where: null };
       const resultQuest = await MysqlSlvSurvey.findAll(searchOpts2);
       const resultScore = await MysqlSlvAssessment.findAll(searchOpts2);
+
+      // compile result
       const result3 = result2.map((x) => {
         const resQ = resultQuest
-          .filter(y => y.dataValues.COMPANY_ID === x.ID
-          && y.dataValues.ASSESSMENT_YEAR === 1000);
+          .map(yy => yy.dataValues)
+          .filter(y => y.COMPANY_ID === x.ID
+          && y.ASSESSMENT_YEAR === 1000);
+
         const resS = resultScore
-          .filter(z => z.dataValues.COMPANY_ID === x.ID
-            && z.dataValues.ASSESSMENT_YEAR === 1000);
+          .map(zz => zz.dataValues)
+          .filter(z => z.COMPANY_ID === x.ID
+            && z.ASSESSMENT_YEAR === 1000);
+
         const SURVEY_DONE = resQ.length !== 0;
         const ASSESSMENT_DONE = resS.length !== 0;
+        const SME_CLASS = resQ.length !== 0 ? resQ[0].SME_CLASS : 'N/A';
+
         return {
           ...x,
+          SME_CLASS,
           SURVEY_DONE,
           ASSESSMENT_DONE,
         };

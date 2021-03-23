@@ -30,6 +30,7 @@ type CompanyProfile {
   CREATED_BY: String
   UPDATED_AT: String
   UPDATED_BY: String
+  SME_CLASS: String
   SURVEY_DONE: String
   ASSESSMENT_DONE: String
 }

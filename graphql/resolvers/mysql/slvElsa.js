@@ -23,9 +23,11 @@ module.exports = {
     fullElsaList: async (
       parent,
       { user, userType },
-      { connectors: { MysqlSlvCompanyProfile, MysqlSlvELSAScorecard } }) => {
+      { connectors: { MysqlSlvCompanyProfile, MysqlSlvELSAScorecard, MysqlSlvSurvey } }) => {
       let result = [];
       let resultCompany = [];
+      let resultQuest = [];
+      let resultElsa = [];
       let where = { CREATED_BY: user };
 
       // check admin
@@ -37,20 +39,34 @@ module.exports = {
       const resCompany = await MysqlSlvCompanyProfile.findAll(searchOpts);
       if (resCompany.length !== 0) resultCompany = resCompany.map(x => x.dataValues.ID);
 
-      // Elsa
-      const resElsa = await MysqlSlvELSAScorecard.findAll(searchOptsAll);
-      const resultElsa = resElsa
-        .map(j => j.dataValues)
-        .filter(oa => oa.ASSESSMENT_YEAR === 1000);
+      // survey
+      const resQuest = await MysqlSlvSurvey.findAll(searchOpts);
+      if (resQuest.length !== 0) {
+        resultQuest = resQuest
+          .map(s => s.dataValues)
+          .filter(oa => oa.ASSESSMENT_YEAR === 1000)
+          .filter(cls => cls.SME_CLASS !== 'LARGE ENTERPRISE')
+          .map(sv => sv.COMPANY_ID);
+      }
 
-      if (resultCompany.length !== 0) {
-        const scoreArray = resultCompany.map((cm) => {
-          const scorecard = resultElsa.filter(cmp => cmp.COMPANY_ID === cm);
-          if (scorecard.length === 0) return 0;
-          // calculate total score
-          const finalScore = getTotalScore(scorecard);
-          return Math.floor(finalScore);
-        });
+      // ELSA
+      const resElsa = await MysqlSlvELSAScorecard.findAll(searchOptsAll);
+      if (resElsa.length !== 0) {
+        resultElsa = resElsa
+          .map(j => j.dataValues)
+          .filter(oa => oa.ASSESSMENT_YEAR === 1000);
+      }
+
+      if (resultCompany.length !== 0 && resultQuest.length !== 0 && resultElsa.length !== 0) {
+        const scoreArray = resultCompany
+          .map((cm) => {
+            const scorecard = resultElsa.filter(cmp => cmp.COMPANY_ID === cm);
+            if (scorecard.length === 0) return 0;
+            if (!resultQuest.includes(cm)) return 0;
+            // calculate total score
+            const finalScore = getTotalScore(scorecard);
+            return Math.floor(finalScore);
+          });
 
         const noZeroScoreArray = scoreArray.filter(m => m !== 0);
 
@@ -154,7 +170,7 @@ module.exports = {
             const resultScorePre = resScore.filter(w => w.ASSESSMENT_YEAR === 1000);
             resultScore = resultScorePre.length !== 0 ? resultScorePre[0] : null;
 
-            if (resultScore) {
+            if (resultScore && resultQuest.SME_CLASS !== 'LARGE ENTERPRISE') {
               // calculate score
               const getClassScore = Object.keys(resultScore)
                 .map((y) => {

@@ -108,7 +108,10 @@ module.exports = {
         });
       }
 
-      return result;
+      // filter large enterprise
+      const finalResult = result.filter(cls => cls.SME_CLASS !== 'LARGE ENTERPRISE');
+
+      return finalResult;
     },
   },
   Mutation: {
