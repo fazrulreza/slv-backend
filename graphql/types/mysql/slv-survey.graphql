@@ -1,7 +1,6 @@
 input SurveyInput {
     COMPANY_ID: String!
     data: String!
-    name: String!
 }
 
 type EmployeeCountDetail {
@@ -64,7 +63,7 @@ type Survey {
 
 type Query {
   allSurvey (COMPANY_ID: String!): [Survey]
-  fullSurveyList(user: String!, userType: String!): [Survey!]!
+  fullSurveyList: [Survey!]!
 }
 
 type Mutation {

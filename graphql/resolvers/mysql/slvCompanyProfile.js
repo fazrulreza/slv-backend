@@ -1,4 +1,5 @@
 const { generateId, generateHistory } = require('../../../packages/mysql-model');
+const { companyResolver, allSLVResolver } = require('../../permissions/acl');
 
 module.exports = {
   Query: {
@@ -7,7 +8,7 @@ module.exports = {
          * @param {Object} param0 main input object
          * @param {String} param0.id id
          */
-    oneCompany: async (
+    oneCompany: companyResolver.createResolver(async (
       parent,
       { ID }, { connectors: { MysqlSlvCompanyProfile, MysqlSlvMSIC } },
     ) => {
@@ -27,18 +28,20 @@ module.exports = {
         company: res,
       };
       return finalResult;
-    },
+    }),
     /**
          * Retrieve all
          * @param {Object} param0 main input object
          * @param {String} param0.msic msic
          */
-    allCompanies: async (
-      parent,
-      { user, userType },
-      { connectors: { MysqlSlvCompanyProfile, MysqlSlvSurvey, MysqlSlvAssessment } },
+    allCompanies: allSLVResolver.createResolver(async (
+      parent, param,
+      {
+        connectors: { MysqlSlvCompanyProfile, MysqlSlvSurvey, MysqlSlvAssessment },
+        user: { mail, userType },
+      },
     ) => {
-      let where = { CREATED_BY: user };
+      let where = { CREATED_BY: mail };
 
       // check admin
       if (userType === 'ADMIN') {
@@ -82,14 +85,14 @@ module.exports = {
       });
       // console.dir(resultQuest, { depth: null, colorized: true });
       return result3;
-    },
+    }),
   },
   Mutation: {
-    createCompany: async (
-      parent, { input }, { connectors: { MysqlSlvCompanyProfile } },
+    createCompany: companyResolver.createResolver(async (
+      parent, { input }, { connectors: { MysqlSlvCompanyProfile }, user },
     ) => {
       const parsedInput = JSON.parse(input.data);
-      const history = generateHistory(input.name, 'CREATE');
+      const history = generateHistory(user.mail, 'CREATE');
       const newInput = {
         ...parsedInput,
         ID: generateId(),
@@ -97,8 +100,8 @@ module.exports = {
       };
         //   console.log(newInput);
       return MysqlSlvCompanyProfile.create(newInput);
-    },
-    deleteCompany: async (
+    }),
+    deleteCompany: companyResolver.createResolver(async (
       parent,
       { ID },
       {
@@ -127,14 +130,15 @@ module.exports = {
       };
       // console.dir(result2, { depth: null, colorized: true });
       return result2;
-    },
-    updateCompany: async (
+    }),
+    updateCompany: companyResolver.createResolver(async (
       parent,
       { ID, input },
       { connectors: { MysqlSlvCompanyProfile } },
+      user,
     ) => {
       const parsedInput = JSON.parse(input.data);
-      const history = generateHistory(input.name, 'UPDATE', parsedInput.CREATED_AT);
+      const history = generateHistory(user.mail, 'UPDATE', parsedInput.CREATED_AT);
       const searchOpts = {
         object: {
           ...parsedInput,
@@ -151,6 +155,6 @@ module.exports = {
       };
       // console.dir(result2, { depth: null, colorized: true });
       return result2;
-    },
+    }),
   },
 };

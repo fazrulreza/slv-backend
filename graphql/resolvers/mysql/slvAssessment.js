@@ -1,5 +1,6 @@
 const { generateId, generateHistory } = require('../../../packages/mysql-model');
 const { processSurveyResult } = require('../../helper/common');
+const { assessmentResolver, surveyAssessmentResolver } = require('../../permissions/acl');
 
 module.exports = {
   Query: {
@@ -8,7 +9,7 @@ module.exports = {
          * @param {Object} param0 main input object
          * @param {String} param0.id id
          */
-    allAssessment: async (
+    allAssessment: surveyAssessmentResolver.createResolver(async (
       parent,
       { COMPANY_ID },
       { connectors: { MysqlSlvSurvey, MysqlSlvAssessment } },
@@ -46,15 +47,15 @@ module.exports = {
       };
 
       return result;
-    },
+    }),
   },
   Mutation: {
-    createAssessment: async (
-      parent, { input }, { connectors: { MysqlSlvAssessment } }) => {
+    createAssessment: assessmentResolver.createResolver(async (
+      parent, { input }, { connectors: { MysqlSlvAssessment }, user }) => {
       // process input
       const parsedInput = JSON.parse(input.data);
 
-      const history = generateHistory(input.name, 'CREATE');
+      const history = generateHistory(user.mail, 'CREATE');
       const newInput = {
         ...parsedInput,
         ID: generateId(),
@@ -65,13 +66,13 @@ module.exports = {
         // console.log(newInput);
       const result = await MysqlSlvAssessment.create(newInput);
       return result;
-    },
-    updateAssessment: async (
-      parent, { input }, { connectors: { MysqlSlvAssessment } }) => {
+    }),
+    updateAssessment: assessmentResolver.createResolver(async (
+      parent, { input }, { connectors: { MysqlSlvAssessment }, user }) => {
       const parsedInput = JSON.parse(input.data);
 
       // store new entry
-      const history = generateHistory(input.name, 'UPDATE', parsedInput.CREATED_AT);
+      const history = generateHistory(user.mail, 'UPDATE', parsedInput.CREATED_AT);
       const searchOpts = {
         object: {
           ...parsedInput,
@@ -89,6 +90,6 @@ module.exports = {
       };
       // console.dir(result2, { depth: null, colorized: true });
       return result2;
-    },
+    }),
   },
 };

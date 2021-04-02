@@ -1,5 +1,4 @@
 input UserRoleInput {
-    name: String!
     data: String!
 }
 
@@ -13,7 +12,7 @@ type UserRole {
 }
 
 type Query {
-  allUserRole (ID: String): [UserRole!]!
+  allUserRole: [UserRole!]!
 }
 
 type Mutation {

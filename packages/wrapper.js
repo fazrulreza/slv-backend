@@ -4,9 +4,8 @@
    * @return {Object} data - contain data from Promise
    * @return {Object} error - contain error from Promise
     */
-   const wrapper = promise => promise
-   .then(data => ({ data, error: null }))
-   .catch(error => ({ error, data: null }));
- 
- module.exports = wrapper;
- 
+const wrapper = promise => promise
+  .then(data => ({ data, error: null }))
+  .catch(error => ({ error, data: null }));
+
+module.exports = wrapper;

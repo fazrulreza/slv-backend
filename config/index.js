@@ -12,6 +12,10 @@ const ASSESSMENT = 'assessment';
 const USER_ROLE = 'user_role';
 const ELSA_SCORECARD = 'elsa_scorecard';
 
+const ADMIN = 'ADMIN';
+const BC = 'BC';
+const PUBLIC = 'PUBLIC';
+
 module.exports = {
   mysqlConnection,
   ASSESSMENT,
@@ -20,4 +24,7 @@ module.exports = {
   MSIC,
   SURVEY,
   USER_ROLE,
+  ADMIN,
+  BC,
+  PUBLIC,
 };

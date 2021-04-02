@@ -1,7 +1,6 @@
 input AssessmentInput {
     COMPANY_ID: String!
     data: String!
-    name: String!
 }
 
 type Assessment {

@@ -1,10 +1,9 @@
 input ELSAInput {
-    name: String!
     COMPANY_ID: String!
     ASSESSMENT_YEAR: Int!
 }
+
 type ELSAOutput {
-    name: String!
     COMPANY_ID: String!
     ASSESSMENT_YEAR: Int!
 }
@@ -44,7 +43,7 @@ type ELSACount {
 
 type Query {
     oneAll (input: ELSAInput!): [ELSATotalOutput!]!
-    fullElsaList(user: String!, userType: String!): [ELSACount!]!
+    fullElsaList: [ELSACount!]!
 }
 
 type Mutation {

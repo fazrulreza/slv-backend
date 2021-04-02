@@ -1,5 +1,4 @@
 input CompanyProfileInput {
-    name: String!
     data: String!
 }
 
@@ -42,7 +41,7 @@ type CompanyProfileWithMSIC {
 
 type Query {
     oneCompany (ID: String!): CompanyProfileWithMSIC!
-    allCompanies (user: String!, userType: String!): [CompanyProfile!]!
+    allCompanies : [CompanyProfile!]!
 }
 
 type Mutation {

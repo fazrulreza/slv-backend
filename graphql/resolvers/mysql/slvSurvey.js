@@ -1,5 +1,6 @@
 const { generateId, generateHistory } = require('../../../packages/mysql-model');
 const { processSurveyResult } = require('../../helper/common');
+const { surveyResolver, companySurveyResolver } = require('../../permissions/acl');
 
 const processInput = (input) => {
   const parsedInput = JSON.parse(input.data);
@@ -33,7 +34,7 @@ module.exports = {
          * @param {Object} param0 main input object
          * @param {String} param0.id id
          */
-    allSurvey: async (
+    allSurvey: companySurveyResolver.createResolver(async (
       parent,
       { COMPANY_ID },
       { connectors: { MysqlSlvSurvey, MysqlSlvCompanyProfile } }) => {
@@ -63,18 +64,20 @@ module.exports = {
       }
 
       return result;
-    },
+    }),
     /**
          * Retrieve one by ID
          * @param {Object} param0 main input object
          * @param {String} param0.id id
          */
-    fullSurveyList: async (
-      parent,
-      { user, userType },
-      { connectors: { MysqlSlvSurvey, MysqlSlvCompanyProfile } }) => {
+    fullSurveyList: companySurveyResolver.createResolver(async (
+      parent, param,
+      {
+        connectors: { MysqlSlvSurvey, MysqlSlvCompanyProfile },
+        user: { mail, userType },
+      }) => {
       let result = [];
-      let where = { CREATED_BY: user };
+      let where = { CREATED_BY: mail };
 
       // check admin
       if (userType === 'ADMIN') {
@@ -112,34 +115,32 @@ module.exports = {
       const finalResult = result.filter(cls => cls.SME_CLASS !== 'LARGE ENTERPRISE');
 
       return finalResult;
-    },
+    }),
   },
   Mutation: {
-    createSurvey:
-      async (parent, { input }, { connectors: { MysqlSlvSurvey } }) => {
-        // process input
-        const postInput = processInput(input);
+    createSurvey: surveyResolver.createResolver(async (
+      parent, { input }, { connectors: { MysqlSlvSurvey }, user }) => {
+      // process input
+      const postInput = processInput(input);
 
-        const history = generateHistory(input.name, 'CREATE');
-        const newInput = {
-          ...postInput,
-          ID: generateId(),
-          ...history,
-          COMPANY_ID: input.COMPANY_ID,
-          ASSESSMENT_YEAR: 1000,
-        };
-        const result = await MysqlSlvSurvey.create(newInput);
-        return result;
-      },
-    updateSurvey: async (
-      parent,
-      { input },
-      { connectors: { MysqlSlvSurvey } },
+      const history = generateHistory(user.mail, 'CREATE');
+      const newInput = {
+        ...postInput,
+        ID: generateId(),
+        ...history,
+        COMPANY_ID: input.COMPANY_ID,
+        ASSESSMENT_YEAR: 1000,
+      };
+      const result = await MysqlSlvSurvey.create(newInput);
+      return result;
+    }),
+    updateSurvey: surveyResolver.createResolver(async (
+      parent, { input }, { connectors: { MysqlSlvSurvey }, user },
     ) => {
       const postInput = processInput(input);
 
       // store new entry
-      const history = generateHistory(input.name, 'UPDATE', postInput.CREATED_AT);
+      const history = generateHistory(user.mail, 'UPDATE', postInput.CREATED_AT);
       const searchOpts = {
         object: {
           ...postInput,
@@ -157,6 +158,6 @@ module.exports = {
       };
       // console.dir(result2, { depth: null, colorized: true });
       return result2;
-    },
+    }),
   },
 };

@@ -1,6 +1,7 @@
 
 type LdapUser {
     token: String
+    minitoken: String
 }
 
 type Mutation {

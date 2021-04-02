@@ -39,6 +39,11 @@ module.exports = {
         // membership,
       };
 
+      const mini = {
+        cn,
+        userType: uRole,
+      };
+
       // Create token from user's info (id, username, user_type)
       const token = jwt.sign(
         { user: data },
@@ -46,8 +51,16 @@ module.exports = {
         { expiresIn: '1y' },
       );
 
+      // Create mini token
+      const minitoken = jwt.sign(
+        mini,
+        SECRET,
+        { expiresIn: '1y' },
+      );
+
       return {
         token,
+        minitoken,
       };
     },
   },
