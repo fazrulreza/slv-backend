@@ -9,7 +9,7 @@ module.exports = {
     ldapLogin: async (parent, { input }, { connectors: { MysqlSlvUserRole } }) => {
       // Retrieve LDAP account
 
-      const userType = 'NON-MEMBER';
+      const userType = 'PUBLIC';
       const x = jwt.verify(input, SECRET);
 
       // login process
