@@ -11,7 +11,7 @@ const acl = [
   },
   {
     module: 'assessment',
-    user_types: [ADMIN, BC, PUBLIC],
+    user_types: [ADMIN, BC],
   },
   {
     module: 'company_survey',
@@ -19,11 +19,11 @@ const acl = [
   },
   {
     module: 'survey_assessment',
-    user_types: [ADMIN, BC, PUBLIC],
+    user_types: [ADMIN, BC],
   },
   {
     module: 'all_SLV',
-    user_types: [ADMIN, BC, PUBLIC],
+    user_types: [ADMIN, BC],
   },
 ];
 
