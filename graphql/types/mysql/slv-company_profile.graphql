@@ -10,6 +10,7 @@ type CompanyProfile {
   NEW_REGISTRATION_NO: String
   INCORPORATION_DATE: String
   BUMI_STATUS: String
+  WOMAN_OWNED: String
   ENTITY_STATUS: String
   ENTITY_TYPE: String
   ADDRESS_LINE_1: String
