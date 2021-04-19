@@ -1,5 +1,5 @@
 const { generateId, generateHistory } = require('../../../packages/mysql-model');
-const { companyResolver, allSLVResolver } = require('../../permissions/acl');
+const { companyResolver, allSLVResolver, allResolver } = require('../../permissions/acl');
 
 module.exports = {
   Query: {
@@ -48,12 +48,13 @@ module.exports = {
         where = null;
       }
 
+      // company
       const searchOpts = {
         where,
         order: [['ENTITY_NAME']],
       };
       const result = await MysqlSlvCompanyProfile.findAll(searchOpts);
-      const result2 = result.map(x => x.dataValues);
+      const resultCompany = result.map(x => x.dataValues);
 
       // survey + assessment
       const searchOpts2 = { where: null };
@@ -61,7 +62,7 @@ module.exports = {
       const resultScore = await MysqlSlvAssessment.findAll(searchOpts2);
 
       // compile result
-      const result3 = result2.map((x) => {
+      const resultFinal = resultCompany.map((x) => {
         const resQ = resultQuest
           .map(yy => yy.dataValues)
           .filter(y => y.COMPANY_ID === x.ID
@@ -84,7 +85,65 @@ module.exports = {
         };
       });
       // console.dir(resultQuest, { depth: null, colorized: true });
-      return result3;
+      return resultFinal;
+    }),
+    /**
+         * Retrieve completed process by user
+         * @param {Object} param0 main input object
+         */
+    userReports: allResolver.createResolver(async (
+      parent, param,
+      {
+        connectors: {
+          MysqlSlvCompanyProfile, MysqlSlvSurvey, MysqlSlvAssessment, MysqlSlvUserRole,
+        },
+        user: { mail, userType },
+      },
+    ) => {
+      const searchOpts = { where: null };
+
+      // user
+      const searchOptsUser = {
+        where: null,
+        order: [['USER']],
+      };
+      const resUser = await MysqlSlvUserRole.findAll(searchOptsUser);
+      const resultUser = resUser.map(x => x.dataValues);
+
+      // company
+      const resultCompany = await MysqlSlvCompanyProfile.findAll(searchOpts);
+
+      // survey
+      const resultQuest = await MysqlSlvSurvey.findAll(searchOpts);
+      // assessment
+      const resultScore = await MysqlSlvAssessment.findAll(searchOpts);
+
+      // compile result
+      const resultFinal = resultUser.map((x) => {
+        const resC = resultCompany
+          .map(ww => ww.dataValues)
+          .filter(w => w.CREATED_BY === x.USER);
+
+        const resQ = resultQuest
+          .map(yy => yy.dataValues)
+          .filter(y => y.CREATED_BY === x.USER
+          && y.ASSESSMENT_YEAR === 1000);
+
+        const resS = resultScore
+          .map(zz => zz.dataValues)
+          .filter(z => z.CREATED_BY === x.USER
+            && z.ASSESSMENT_YEAR === 1000);
+
+        return {
+          USER: x.USER.substring(0, x.USER.lastIndexOf('@')),
+          ROLE: x.ROLE,
+          PROFILE_COUNT: resC.length,
+          SURVEY_COUNT: resQ.length,
+          ASSESSMENT_COUNT: resS.length,
+        };
+      });
+      // console.dir(resultQuest, { depth: null, colorized: true });
+      return resultFinal;
     }),
   },
   Mutation: {

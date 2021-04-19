@@ -51,6 +51,10 @@ const allSLVResolver = isAuthenticatedResolver.createResolver((root, args, { use
   if (!canAccess('all_SLV', user.userType)) throw new ForbiddenError();
 });
 
+const allResolver = isAuthenticatedResolver.createResolver((root, args, { user }) => {
+  if (!canAccess('all', user.userType)) throw new ForbiddenError();
+});
+
 module.exports = {
   userResolver,
   companyResolver,
@@ -60,4 +64,5 @@ module.exports = {
   companySurveyResolver,
   surveyAssessmentResolver,
   allSLVResolver,
+  allResolver,
 };

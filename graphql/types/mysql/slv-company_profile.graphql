@@ -40,9 +40,18 @@ type CompanyProfileWithMSIC {
   company: CompanyProfile!
 }
 
+type UserReport {
+  USER: String,
+  ROLE: String,
+  PROFILE_COUNT: Int,
+  SURVEY_COUNT: Int,
+  ASSESSMENT_COUNT: Int,
+}
+
 type Query {
     oneCompany (ID: String!): CompanyProfileWithMSIC!
-    allCompanies : [CompanyProfile!]!
+    allCompanies: [CompanyProfile!]!
+    userReports: [UserReport!]!
 }
 
 type Mutation {

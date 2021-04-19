@@ -25,6 +25,10 @@ const acl = [
     module: 'all_SLV',
     user_types: [ADMIN, BC],
   },
+  {
+    module: 'all',
+    user_types: [ADMIN],
+  },
 ];
 
 module.exports = acl;
