@@ -40,7 +40,7 @@ module.exports = {
       };
 
       const mini = {
-        cn,
+        mail,
         userType: uRole,
       };
 
