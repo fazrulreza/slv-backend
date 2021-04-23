@@ -29,6 +29,10 @@ const acl = [
     module: 'all',
     user_types: [ADMIN],
   },
+  {
+    module: 'elsa',
+    user_types: [ADMIN, BC],
+  },
 ];
 
 module.exports = acl;
