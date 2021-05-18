@@ -55,6 +55,22 @@ const allResolver = isAuthenticatedResolver.createResolver((root, args, { user }
   if (!canAccess('all', user.userType)) throw new ForbiddenError();
 });
 
+const assessmentElsaResolver = isAuthenticatedResolver.createResolver((root, args, { user }) => {
+  if (!canAccess('assessment_elsa', user.userType)) throw new ForbiddenError();
+});
+
+const kpiResolver = isAuthenticatedResolver.createResolver((root, args, { user }) => {
+  if (!canAccess('kpi', user.userType)) throw new ForbiddenError();
+});
+
+const kpiCompanyResolver = isAuthenticatedResolver.createResolver((root, args, { user }) => {
+  if (!canAccess('kpi_company', user.userType)) throw new ForbiddenError();
+});
+
+const kpiElsaResolver = isAuthenticatedResolver.createResolver((root, args, { user }) => {
+  if (!canAccess('kpi_elsa', user.userType)) throw new ForbiddenError();
+});
+
 module.exports = {
   userResolver,
   companyResolver,
@@ -65,4 +81,8 @@ module.exports = {
   surveyAssessmentResolver,
   allSLVResolver,
   allResolver,
+  assessmentElsaResolver,
+  kpiResolver,
+  kpiElsaResolver,
+  kpiCompanyResolver,
 };

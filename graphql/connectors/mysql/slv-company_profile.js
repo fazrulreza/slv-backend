@@ -16,6 +16,7 @@ const attributes = {
   INCORPORATION_DATE: Sequelize.STRING,
   BUMI_STATUS: Sequelize.STRING,
   WOMAN_OWNED: Sequelize.STRING,
+  GETX_FLAG: Sequelize.STRING,
   ENTITY_STATUS: Sequelize.STRING,
   ENTITY_TYPE: Sequelize.STRING,
   ADDRESS_LINE_1: Sequelize.STRING,

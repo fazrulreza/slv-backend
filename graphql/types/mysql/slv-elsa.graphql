@@ -36,6 +36,13 @@ type ELSATotalOutput {
   ASSESSMENT_YEAR: Int
 }
 
+type ELSAOneOutput {
+  assessment: Assessment
+  ELSA: [ELSAGroup]
+  TOTAL_FINAL_SCORE: String
+  ASSESSMENT_YEAR: Int
+}
+
 type ELSACount {
   stage: Int
   count: Int
@@ -44,6 +51,7 @@ type ELSACount {
 type Query {
     oneAll (input: ELSAInput!): [ELSATotalOutput!]!
     fullElsaList: [ELSACount!]!
+    oneElsa (input: ELSAInput!): ELSAOneOutput
 }
 
 type Mutation {

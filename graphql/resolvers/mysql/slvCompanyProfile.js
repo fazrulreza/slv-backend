@@ -215,5 +215,34 @@ module.exports = {
       // console.dir(result2, { depth: null, colorized: true });
       return result2;
     }),
+    unlistCompany: companyResolver.createResolver(async (
+      parent,
+      { ID },
+      { connectors: { MysqlSlvCompanyProfile } },
+      user,
+    ) => {
+      // search company
+      const res = await MysqlSlvCompanyProfile.findById(ID);
+
+      // update flag to NO
+      const history = generateHistory(user.mail, 'UPDATE', res.CREATED_AT);
+      const searchOpts = {
+        object: {
+          ...res,
+          ...history,
+          GETX_FLAG: 'NO',
+        },
+        where: {
+          ID,
+        },
+      };
+      const result = await MysqlSlvCompanyProfile.update(searchOpts);
+      const result2 = {
+        ID,
+        updated: result[0],
+      };
+      // console.dir(result2, { depth: null, colorized: true });
+      return result2;
+    }),
   },
 };
