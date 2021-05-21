@@ -34,6 +34,8 @@ const apolloServer = new ApolloServer({
     const user = (token || req.body.operationName !== 'login') ? jwt.verify(token, SECRET) : '';
 
     // console.log(user);
+    // user.mail = 'rafidah.arif@smebank.com.my';
+    // user.userType = 'BC';
     return ({
       connectors,
       user,

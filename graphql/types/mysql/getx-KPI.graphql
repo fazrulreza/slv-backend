@@ -36,6 +36,7 @@ type GetXKPI {
     DIVERSIFY_Q4: String
     DIVERSIFY_TARGET: String
     DIVERSIFY_ACHIEVEMENT: String
+    DIVERSIFY_PERCENT: String
     DIVERSIFY_COMMENT: String
     END_DATE: String
     EXPORT_REVENUE_CURRENT: Int
@@ -85,6 +86,7 @@ type GetXKPI {
     TECHNOLOGY_Q4: String
     TECHNOLOGY_TARGET: String
     TECHNOLOGY_ACHIEVEMENT: String
+    TECHNOLOGY_PERCENT: String
     TECHNOLOGY_COMMENT: String
     TURNOVER_CURRENT: Int
     TURNOVER_Q1: Int
@@ -120,26 +122,37 @@ type GetXKPIOutput {
     KPI: GetXKPI
 }
 
-type KPICountOutput {
+type KPIQuarters {
   stage: String
   value: String
 }
 
-type KPICountOutputGroup {
-  TURNOVER: [KPICountOutput]
-  PROFITABILITY: [KPICountOutput]
-  SKILLED: [KPICountOutput]
-  UNSKILLED: [KPICountOutput]
-  DIVERSIFY: [KPICountOutput]
-  TECHNOLOGY: [KPICountOutput]
-  EXPORT_REVENUE: [KPICountOutput]
+type KPIActual {
+  CURRENT: String
+  TARGET: String
+  ACHIEVEMENT: String
+  PERCENT: String
+  COMMENT: String
+  QUARTERS: [KPIQuarters]
+}
+
+type KPIGroup {
+  TURNOVER: KPIActual
+  PROFITABILITY: KPIActual
+  SKILLED: KPIActual
+  UNSKILLED: KPIActual
+  DIVERSIFY: KPIActual
+  TECHNOLOGY: KPIActual
+  EXPORT_REVENUE: KPIActual
   ASSESSMENT_YEAR: Int
+  UPDATED_BY: String
+  UPDATED_AT: String
 }
 
 type DashboardOutput {
     company: CompanyProfile
     msicDetails: MSICResult
-    KPIGroup: [KPICountOutputGroup]
+    KPIGroup: [KPIGroup]
 }
 
 type Query {

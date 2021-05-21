@@ -2,12 +2,30 @@ const { generateId, generateHistory } = require('../../../packages/mysql-model')
 const { getTotalScore } = require('../../helper/common');
 const { kpiElsaResolver, kpiResolver, kpiCompanyResolver } = require('../../permissions/acl');
 
-const getKPIscores = (data, type) => Object.keys(data)
-  .filter(v1 => v1.startsWith(type))
-  .map(v3 => ({
-    stage: v3.replace(type, ''),
-    value: data[v3],
-  }));
+const getKPIscores = (data, type) => {
+  const QUARTERS = Object.keys(data)
+    .filter(v1 => v1.startsWith(type))
+    .filter(v2 => v2.includes('Q'))
+    .map(v3 => ({
+      stage: v3.replace(type, ''),
+      value: data[v3],
+    }));
+
+  const CURRENT = data[`${type}CURRENT`];
+  const TARGET = data[`${type}TARGET`];
+  const ACHIEVEMENT = data[`${type}ACHIEVEMENT`];
+  const PERCENT = data[`${type}PERCENT`];
+  const COMMENT = data[`${type}COMMENT`];
+
+  return {
+    CURRENT,
+    TARGET,
+    ACHIEVEMENT,
+    PERCENT,
+    COMMENT,
+    QUARTERS,
+  };
+};
 
 module.exports = {
   Query: {
@@ -53,6 +71,8 @@ module.exports = {
             TECHNOLOGY,
             EXPORT_REVENUE,
             ASSESSMENT_YEAR: resTemp.ASSESSMENT_YEAR,
+            UPDATED_BY: resTemp.UPDATED_BY,
+            UPDATED_AT: resTemp.UPDATED_AT,
           };
         });
       }
