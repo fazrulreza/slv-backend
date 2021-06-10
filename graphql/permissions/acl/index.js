@@ -71,6 +71,10 @@ const kpiElsaResolver = isAuthenticatedResolver.createResolver((root, args, { us
   if (!canAccess('kpi_elsa', user.userType)) throw new ForbiddenError();
 });
 
+const kpiUserResolver = isAuthenticatedResolver.createResolver((root, args, { user }) => {
+  if (!canAccess('kpi_user', user.userType)) throw new ForbiddenError();
+});
+
 module.exports = {
   userResolver,
   companyResolver,
@@ -85,4 +89,5 @@ module.exports = {
   kpiResolver,
   kpiElsaResolver,
   kpiCompanyResolver,
+  kpiUserResolver,
 };

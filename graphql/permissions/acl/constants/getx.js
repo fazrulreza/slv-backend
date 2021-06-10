@@ -13,6 +13,11 @@ const acl = [
     module: 'kpi_elsa',
     user_types: [ADMIN, BC],
   },
+  {
+    module: 'kpi_user',
+    user_types: [ADMIN, BC],
+  },
+
 ];
 
 module.exports = acl;

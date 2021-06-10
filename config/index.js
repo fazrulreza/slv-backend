@@ -14,7 +14,7 @@ const ELSA_SCORECARD = 'elsa_scorecard';
 
 const GETX_KPI = 'getx_kpi';
 const GETX_SIGN = 'getx_sign';
-const GETX_ASSESS = 'getx_assess';
+const GETX_ATTACHMENT = 'getx_attachment';
 
 const ADMIN = 'ADMIN';
 const BC = 'BC';
@@ -30,7 +30,7 @@ module.exports = {
   USER_ROLE,
   GETX_KPI,
   GETX_SIGN,
-  GETX_ASSESS,
+  GETX_ATTACHMENT,
   ADMIN,
   BC,
   PUBLIC,

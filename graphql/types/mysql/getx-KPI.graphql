@@ -5,6 +5,7 @@ input GetXKPIInput {
 
 type GetXKPI {
     ID: String
+    PROGRAMME: String
     BR_ACTION_PLAN: String
     BR_KEY_INITIATIVES: String
     BR_TIMELINE: String
@@ -88,6 +89,7 @@ type GetXKPI {
     TECHNOLOGY_ACHIEVEMENT: String
     TECHNOLOGY_PERCENT: String
     TECHNOLOGY_COMMENT: String
+    TECHNOLOGY_FOCUS: String
     TURNOVER_CURRENT: Int
     TURNOVER_Q1: Int
     TURNOVER_Q2: Int
@@ -104,6 +106,15 @@ type GetXKPI {
     UNSKILLED_TARGET: Int
     UNSKILLED_ACHIEVEMENT: Int
     UNSKILLED_COMMENT: String
+    NG_CURRENT: String
+    NG_TARGET: String
+    NG_ACHIEVEMENT: String
+    NG_PERCENT: String
+    NG_Q1: String
+    NG_Q2: String
+    NG_Q3: String
+    NG_Q4: String
+    NG_COMMENT: String
     COMPANY_ID: String
     ASSESSMENT_YEAR: Int
     CREATED_AT: String
@@ -112,6 +123,16 @@ type GetXKPI {
     UPDATED_BY: String
     SIGN_KPI_ID: String
     SIGN_ACTUAL_ID: String
+    ATTACHMENT_ID: String,
+    TURNOVER_ATTACHMENT: [FileType],
+    PROFITABILITY_ATTACHMENT: [FileType],
+    SKILLED_ATTACHMENT: [FileType],
+    UNSKILLED_ATTACHMENT: [FileType],
+    EXPORT_REVENUE_ATTACHMENT: [FileType],
+    DIVERSIFY_ATTACHMENT: [FileType],
+    TECHNOLOGY_ATTACHMENT: [FileType],
+    NG_ATTACHMENT: [FileType],
+    FILE_ATTACHMENT: [FileType],
 }
 
 type GetXKPIOutput {
@@ -133,6 +154,7 @@ type KPIActual {
   ACHIEVEMENT: String
   PERCENT: String
   COMMENT: String
+  FOCUS: String
   QUARTERS: [KPIQuarters]
 }
 
@@ -144,20 +166,37 @@ type KPIGroup {
   DIVERSIFY: KPIActual
   TECHNOLOGY: KPIActual
   EXPORT_REVENUE: KPIActual
+  NG: KPIActual
+  KPI_POINTS: DashboardOutput
   ASSESSMENT_YEAR: Int
   UPDATED_BY: String
   UPDATED_AT: String
 }
 
+type ScorecardOutput {
+  company: CompanyProfile
+  msicDetails: MSICResult
+  KPIGroup: [KPIGroup]
+}
+
 type DashboardOutput {
-    company: CompanyProfile
-    msicDetails: MSICResult
-    KPIGroup: [KPIGroup]
+  USER: String
+  TURNOVER: Int
+  PROFITABILITY: Int
+  EMPLOYMENT: Int
+  EXPORT: Int
+  TECHNOLOGY: Int
+  NG: Int
+  KPI_TOTAL: Int
+  TOTAL_G: Int
+  TOTAL_ETXNG: Int
+  ASSESSMENT_YEAR: Int
 }
 
 type Query {
   allGetXKPI (COMPANY_ID: String!): [GetXKPIOutput]
-  dashboardKPI(COMPANY_ID: String!): DashboardOutput
+  scorecardKPI(COMPANY_ID: String!): ScorecardOutput
+  dashboardKPI: [DashboardOutput]
 }
 
 type Mutation {
