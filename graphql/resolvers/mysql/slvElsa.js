@@ -334,7 +334,7 @@ module.exports = {
       const searchOptsAssess = { where: { COMPANY_ID: input.COMPANY_ID } };
       const resAssess = await MysqlSlvAssessment.findOne(searchOptsAssess);
       const assessInput = resAssess.dataValues;
-      const assessHist = generateHistory(input.name, 'CREATE');
+      const assessHist = generateHistory(user.mail, 'CREATE');
       const finalAssess = {
         ...assessInput,
         ...assessHist,
@@ -353,7 +353,7 @@ module.exports = {
       const resElsa = await MysqlSlvELSAScorecard.findAll(searchOptsElsa);
       const elsaInput = resElsa.map((b) => {
         const preB = b.dataValues;
-        const history = generateHistory(input.name, 'CREATE');
+        const history = generateHistory(user.mail, 'CREATE');
         const newB = {
           ...preB,
           ...history,

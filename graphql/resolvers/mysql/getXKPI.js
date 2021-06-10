@@ -1,4 +1,5 @@
 const flatten = require('lodash/flatten');
+const moment = require('moment');
 const { generateId, generateHistory } = require('../../../packages/mysql-model');
 const { getTotalScore } = require('../../helper/common');
 const {
@@ -606,6 +607,70 @@ module.exports = {
       };
       // console.dir(result2, { depth: null, colorized: true });
       return result2;
+    }),
+    finalizeKPI: kpiResolver.createResolver(async (
+      parent, { input }, {
+        connectors: {
+          MysqlGetxKPI, MysqlGetxSign, MysqlGetxAttachment,
+        },
+        user,
+      },
+    ) => {
+      // kpi
+      const searchOptsKPI = { where: { COMPANY_ID: input.COMPANY_ID } };
+      const resKPI = await MysqlGetxKPI.findOne(searchOptsKPI);
+      const KPIInput = resKPI.dataValues;
+      const KPIHist = generateHistory(user.mail, 'CREATE');
+      const finalKPI = {
+        ...KPIInput,
+        ...KPIHist,
+        KPI_DATE: moment(KPIInput.KPI_DATE, 'x').add(-8, 'hours').format('YYYY-MM-DD HH:mm:ss'),
+        ASSESSMENT_YEAR: input.ASSESSMENT_YEAR,
+        ID: generateId(),
+      };
+      await MysqlGetxKPI.create(finalKPI);
+
+      // attachment
+      const searchOptsAtt = { where: { COMPANY_ID: input.COMPANY_ID } };
+      const resAtt = await MysqlGetxAttachment.findOne(searchOptsAtt);
+      const attInput = resAtt.dataValues;
+      const attHist = generateHistory(user.mail, 'CREATE');
+      const finalAtt = {
+        ...attInput,
+        ...attHist,
+        ASSESSMENT_YEAR: input.ASSESSMENT_YEAR,
+        ID: generateId(),
+        GETX_ID: finalKPI.ID,
+      };
+      await MysqlGetxAttachment.create(finalAtt);
+
+      // scorecard
+      const searchOptsSign = {
+        where: {
+          COMPANY_ID: input.COMPANY_ID,
+          ASSESSMENT_YEAR: 1000,
+        },
+      };
+      const resSign = await MysqlGetxSign.findAll(searchOptsSign);
+      const signInput = resSign.map((b) => {
+        const preSign = b.dataValues;
+        const history = generateHistory(user.mail, 'CREATE');
+        const newSign = {
+          ...preSign,
+          ...history,
+          // BUS_COACH_DATE: preSign.BUS_COACH_DATE.toISOString(),
+          // BUS_OWNER_DATE: preSign.BUS_OWNER_DATE.toISOString(),
+          // CHECKER_DATE: preSign.CHECKER_DATE.toISOString(),
+          ASSESSMENT_YEAR: input.ASSESSMENT_YEAR,
+          COMPANY_ID: input.COMPANY_ID,
+          ID: generateId(),
+          GETX_ID: finalKPI.ID,
+        };
+        return newSign;
+      });
+      await MysqlGetxSign.bulkCreate(signInput);
+
+      return input;
     }),
   },
 };

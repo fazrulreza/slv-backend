@@ -202,4 +202,5 @@ type Query {
 type Mutation {
   createGetXKPI(input: GetXKPIInput!): GetXKPI!
   updateGetXKPI(input: GetXKPIInput!): UpdateResp
+  finalizeKPI(input: ELSAInput!): GetXKPI
 }
