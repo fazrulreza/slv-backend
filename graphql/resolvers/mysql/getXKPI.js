@@ -435,20 +435,27 @@ module.exports = {
           return newResult;
         });
       } else {
+        console.log('no kpi');
+        console.log(resElsa.length);
+        console.log(resScore.length);
         // elsa
-        const resElsa4 = resElsa
-          .map(e1 => e1.dataValues)
-          .filter(e2 => e2.COMPANY_ID === COMPANY_ID
+        const resElsa4 = resElsa.length === 0
+          ? []
+          : resElsa
+            .map(e1 => e1.dataValues)
+            .filter(e2 => e2.COMPANY_ID === COMPANY_ID
             && e2.ASSESSMENT_YEAR === 1000);
 
         // assessment
-        const resScore4 = resScore
-          .map(s1 => s1.dataValues)
-          .filter(s2 => s2.COMPANY_ID === COMPANY_ID
+        const resScore4 = resScore.length === 0
+          ? [{}]
+          : resScore
+            .map(s1 => s1.dataValues)
+            .filter(s2 => s2.COMPANY_ID === COMPANY_ID
             && s2.ASSESSMENT_YEAR === 1000);
 
         // calculate total score
-        const totalFinalScore2 = getTotalScore(resElsa4);
+        const totalFinalScore2 = resElsa4.length === 0 ? 0 : getTotalScore(resElsa4);
 
         newResult = {
           KPI: {},
