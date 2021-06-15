@@ -435,9 +435,6 @@ module.exports = {
           return newResult;
         });
       } else {
-        console.log('no kpi');
-        console.log(resElsa.length);
-        console.log(resScore.length);
         // elsa
         const resElsa4 = resElsa.length === 0
           ? []
