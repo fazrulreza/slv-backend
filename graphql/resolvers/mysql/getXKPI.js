@@ -150,7 +150,10 @@ const getKPIPoint = (data, abbr) => {
   if (abbr === 'TECHNOLOGY' || abbr === 'DIVERSIFY' || abbr === 'NG') {
     return parseInt(data[`${abbr}_PERCENT`], 10) >= 100 ? 1 : 0;
   }
-  return (parseInt(data[`${abbr}_ACHIEVEMENT`], 10) >= parseInt(data[`${abbr}_TARGET`], 10)) ? 1 : 0;
+  return (
+    (parseInt(data[`${abbr}_ACHIEVEMENT`], 10) >= parseInt(data[`${abbr}_TARGET`], 10))
+    && (parseInt(data[`${abbr}_ACHIEVEMENT`], 10) !== 0))
+    ? 1 : 0;
 };
 
 const getKPITotalPoint = (data, totalOnly = false) => {
