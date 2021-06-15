@@ -148,10 +148,19 @@ const calculateScores = (getClassScore, initial, year) => {
   return finalGroup;
 };
 
+const getTotalScore = (scorecard) => {
+  const sumScore = scorecard
+    .reduce(((acc, v) => (v.FINAL_SCORE === 'N/A' ? acc : acc + parseFloat(v.FINAL_SCORE))), 0);
+  const countScore = scorecard
+    .reduce(((acc, v) => (v.FINAL_SCORE === 'N/A' ? acc : acc + 1)), 0);
+  return (Math.round((sumScore / countScore) * 10) / 10);
+};
+
 module.exports = {
   // getFilter,
   getDifference,
   processSurveyResult,
   cleanEmpty,
   calculateScores,
+  getTotalScore,
 };

@@ -12,6 +12,10 @@ const ASSESSMENT = 'assessment';
 const USER_ROLE = 'user_role';
 const ELSA_SCORECARD = 'elsa_scorecard';
 
+const GETX_KPI = 'getx_kpi';
+const GETX_SIGN = 'getx_sign';
+const GETX_ATTACHMENT = 'getx_attachment';
+
 const ADMIN = 'ADMIN';
 const BC = 'BC';
 const PUBLIC = 'PUBLIC';
@@ -24,6 +28,9 @@ module.exports = {
   MSIC,
   SURVEY,
   USER_ROLE,
+  GETX_KPI,
+  GETX_SIGN,
+  GETX_ATTACHMENT,
   ADMIN,
   BC,
   PUBLIC,

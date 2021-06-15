@@ -33,6 +33,10 @@ const acl = [
     module: 'elsa',
     user_types: [ADMIN, BC],
   },
+  {
+    module: 'assessment_elsa',
+    user_types: [ADMIN, BC],
+  },
 ];
 
 module.exports = acl;

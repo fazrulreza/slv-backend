@@ -15,3 +15,9 @@ type AddResp {
     added: Int
     error: String
 }
+
+type FileType {
+    name: String
+    type: String
+    content: String
+}

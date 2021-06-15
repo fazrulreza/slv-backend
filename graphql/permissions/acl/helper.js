@@ -1,10 +1,12 @@
 const slvAcl = require('./constants/slv');
 const userAcl = require('./constants/user');
+const getXAcl = require('./constants/getx');
 
 
 const acl = [
   ...slvAcl,
   ...userAcl,
+  ...getXAcl,
 ];
 
 const canAccess = (module, userType) => {

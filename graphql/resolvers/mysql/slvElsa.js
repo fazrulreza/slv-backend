@@ -1,17 +1,8 @@
 const { generateId, generateHistory } = require('../../../packages/mysql-model');
-const { processSurveyResult, calculateScores } = require('../../helper/common');
+const { processSurveyResult, calculateScores, getTotalScore } = require('../../helper/common');
 const { classScore, profileGroup } = require('../../helper/parameter');
-const { allSLVResolver, elsaResolver } = require('../../permissions/acl');
+const { allSLVResolver, elsaResolver, assessmentElsaResolver } = require('../../permissions/acl');
 
-
-// calculate total score
-const getTotalScore = (scorecard) => {
-  const sumScore = scorecard
-    .reduce(((acc, v) => (v.FINAL_SCORE === 'N/A' ? acc : acc + parseFloat(v.FINAL_SCORE))), 0);
-  const countScore = scorecard
-    .reduce(((acc, v) => (v.FINAL_SCORE === 'N/A' ? acc : acc + 1)), 0);
-  return (Math.round((sumScore / countScore) * 10) / 10);
-};
 
 module.exports = {
   Query: {
@@ -80,6 +71,34 @@ module.exports = {
             }));
         }
       }
+
+      return result;
+    }),
+    oneElsa: assessmentElsaResolver.createResolver(async (
+      parent, { input }, { connectors: { MysqlSlvAssessment, MysqlSlvELSAScorecard } },
+    ) => {
+      const searchOpts = {
+        where: {
+          COMPANY_ID: input.COMPANY_ID,
+          ASSESSMENT_YEAR: input.ASSESSMENT_YEAR,
+        },
+      };
+
+      const resScore = await MysqlSlvAssessment.findAll(searchOpts);
+      const resultScore = resScore.length !== 0 ? resScore.map(a => a.dataValues) : resScore;
+
+      const resElsa = await MysqlSlvELSAScorecard.findAll(searchOpts);
+      const resultElsa = resElsa.length !== 0 ? resElsa.map(a => a.dataValues) : resElsa;
+
+      // calculate total score
+      const totalFinalScore = getTotalScore(resultElsa);
+
+      const result = {
+        assessment: resultScore[0],
+        ELSA: resultElsa,
+        TOTAL_FINAL_SCORE: totalFinalScore,
+        ASSESSMENT_YEAR: input.ASSESSMENT_YEAR,
+      };
 
       return result;
     }),
@@ -315,7 +334,7 @@ module.exports = {
       const searchOptsAssess = { where: { COMPANY_ID: input.COMPANY_ID } };
       const resAssess = await MysqlSlvAssessment.findOne(searchOptsAssess);
       const assessInput = resAssess.dataValues;
-      const assessHist = generateHistory(input.name, 'CREATE');
+      const assessHist = generateHistory(user.mail, 'CREATE');
       const finalAssess = {
         ...assessInput,
         ...assessHist,
@@ -334,7 +353,7 @@ module.exports = {
       const resElsa = await MysqlSlvELSAScorecard.findAll(searchOptsElsa);
       const elsaInput = resElsa.map((b) => {
         const preB = b.dataValues;
-        const history = generateHistory(input.name, 'CREATE');
+        const history = generateHistory(user.mail, 'CREATE');
         const newB = {
           ...preB,
           ...history,

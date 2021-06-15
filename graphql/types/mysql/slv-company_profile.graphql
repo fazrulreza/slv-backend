@@ -11,6 +11,7 @@ type CompanyProfile {
   INCORPORATION_DATE: String
   BUMI_STATUS: String
   WOMAN_OWNED: String
+  GETX_FLAG: String
   ENTITY_STATUS: String
   ENTITY_TYPE: String
   ADDRESS_LINE_1: String
@@ -58,4 +59,5 @@ type Mutation {
   createCompany(input: CompanyProfileInput!): CompanyProfile!
   updateCompany(ID: String!, input: CompanyProfileInput!): UpdateResp
   deleteCompany(ID: String!): DeleteResp
+  unlistCompany(ID: String!): DeleteResp
 }

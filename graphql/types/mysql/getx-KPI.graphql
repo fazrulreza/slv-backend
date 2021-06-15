@@ -1,0 +1,206 @@
+input GetXKPIInput {
+    COMPANY_ID: String!
+    data: String!
+}
+
+type GetXKPI {
+    ID: String
+    PROGRAMME: String
+    BR_ACTION_PLAN: String
+    BR_KEY_INITIATIVES: String
+    BR_TIMELINE: String
+    BUS_COACH: String
+    BUS_COACH_DATE: String
+    BUS_COACH_NAME: String
+    BUS_COACH_ACTUAL: String
+    BUS_COACH_ACTUAL_DATE: String
+    BUS_COACH_ACTUAL_NAME: String
+    BUS_OWNER: String
+    BUS_OWNER_DATE: String
+    BUS_OWNER_NAME: String
+    BUS_OWNER_ACTUAL: String
+    BUS_OWNER_ACTUAL_DATE: String
+    BUS_OWNER_ACTUAL_NAME: String
+    BUS_OWNER_POSITION: String
+    CHECKER: String
+    CHECKER_DATE: String
+    CHECKER_NAME: String
+    CHECKER_ACTUAL: String
+    CHECKER_ACTUAL_DATE: String
+    CHECKER_ACTUAL_NAME: String
+    CLIENT_ASPIRATIONS: String
+    CLIENT_CHALLENGES: String
+    DIVERSIFY_CURRENT: String
+    DIVERSIFY_Q1: String
+    DIVERSIFY_Q2: String
+    DIVERSIFY_Q3: String
+    DIVERSIFY_Q4: String
+    DIVERSIFY_TARGET: String
+    DIVERSIFY_ACHIEVEMENT: String
+    DIVERSIFY_PERCENT: String
+    DIVERSIFY_COMMENT: String
+    END_DATE: String
+    EXPORT_REVENUE_CURRENT: Int
+    EXPORT_REVENUE_Q1: Int
+    EXPORT_REVENUE_Q2: Int
+    EXPORT_REVENUE_Q3: Int
+    EXPORT_REVENUE_Q4: Int
+    EXPORT_REVENUE_TARGET: Int
+    EXPORT_REVENUE_ACHIEVEMENT: Int
+    EXPORT_REVENUE_COMMENT: String
+    FR_ACTION_PLAN: String
+    FR_KEY_INITIATIVES: String
+    FR_TIMELINE: String
+    FURTHER_NOTES: String
+    INTERVENTION: String
+    KPI_DATE: String
+    LC_ACTION_PLAN: String
+    LC_KEY_INITIATIVES: String
+    LC_TIMELINE: String
+    PROFITABILITY_CURRENT: Int
+    PROFITABILITY_Q1: Int
+    PROFITABILITY_Q2: Int
+    PROFITABILITY_Q3: Int
+    PROFITABILITY_Q4: Int
+    PROFITABILITY_TARGET: Int
+    PROFITABILITY_ACHIEVEMENT: Int
+    PROFITABILITY_COMMENT: String
+    PR_ACTION_PLAN: String
+    PR_KEY_INITIATIVES: String
+    PR_TIMELINE: String
+    SKILLED_CURRENT: Int
+    SKILLED_Q1: Int
+    SKILLED_Q2: Int
+    SKILLED_Q3: Int
+    SKILLED_Q4: Int
+    SKILLED_TARGET: Int
+    SKILLED_ACHIEVEMENT: Int
+    SKILLED_COMMENT: String
+    SR_ACTION_PLAN: String
+    SR_KEY_INITIATIVES: String
+    SR_TIMELINE: String
+    START_DATE: String
+    TECHNOLOGY_CURRENT: String
+    TECHNOLOGY_Q1: String
+    TECHNOLOGY_Q2: String
+    TECHNOLOGY_Q3: String
+    TECHNOLOGY_Q4: String
+    TECHNOLOGY_TARGET: String
+    TECHNOLOGY_ACHIEVEMENT: String
+    TECHNOLOGY_PERCENT: String
+    TECHNOLOGY_COMMENT: String
+    TECHNOLOGY_FOCUS: String
+    TURNOVER_CURRENT: Int
+    TURNOVER_Q1: Int
+    TURNOVER_Q2: Int
+    TURNOVER_Q3: Int
+    TURNOVER_Q4: Int
+    TURNOVER_TARGET: Int
+    TURNOVER_ACHIEVEMENT: Int
+    TURNOVER_COMMENT: String
+    UNSKILLED_CURRENT: Int
+    UNSKILLED_Q1: Int
+    UNSKILLED_Q2: Int
+    UNSKILLED_Q3: Int
+    UNSKILLED_Q4: Int
+    UNSKILLED_TARGET: Int
+    UNSKILLED_ACHIEVEMENT: Int
+    UNSKILLED_COMMENT: String
+    NG_CURRENT: String
+    NG_TARGET: String
+    NG_ACHIEVEMENT: String
+    NG_PERCENT: String
+    NG_Q1: String
+    NG_Q2: String
+    NG_Q3: String
+    NG_Q4: String
+    NG_COMMENT: String
+    COMPANY_ID: String
+    ASSESSMENT_YEAR: Int
+    CREATED_AT: String
+    CREATED_BY: String
+    UPDATED_AT: String
+    UPDATED_BY: String
+    SIGN_KPI_ID: String
+    SIGN_ACTUAL_ID: String
+    ATTACHMENT_ID: String,
+    TURNOVER_ATTACHMENT: [FileType],
+    PROFITABILITY_ATTACHMENT: [FileType],
+    SKILLED_ATTACHMENT: [FileType],
+    UNSKILLED_ATTACHMENT: [FileType],
+    EXPORT_REVENUE_ATTACHMENT: [FileType],
+    DIVERSIFY_ATTACHMENT: [FileType],
+    TECHNOLOGY_ATTACHMENT: [FileType],
+    NG_ATTACHMENT: [FileType],
+    FILE_ATTACHMENT: [FileType],
+}
+
+type GetXKPIOutput {
+    ELSA: [ELSAGroup]
+    assessment: Assessment
+    TOTAL_FINAL_SCORE: String
+    ASSESSMENT_YEAR: Int
+    KPI: GetXKPI
+}
+
+type KPIQuarters {
+  stage: String
+  value: String
+}
+
+type KPIActual {
+  CURRENT: String
+  TARGET: String
+  ACHIEVEMENT: String
+  PERCENT: String
+  COMMENT: String
+  FOCUS: String
+  QUARTERS: [KPIQuarters]
+}
+
+type KPIGroup {
+  TURNOVER: KPIActual
+  PROFITABILITY: KPIActual
+  SKILLED: KPIActual
+  UNSKILLED: KPIActual
+  DIVERSIFY: KPIActual
+  TECHNOLOGY: KPIActual
+  EXPORT_REVENUE: KPIActual
+  NG: KPIActual
+  KPI_POINTS: DashboardOutput
+  ASSESSMENT_YEAR: Int
+  UPDATED_BY: String
+  UPDATED_AT: String
+}
+
+type ScorecardOutput {
+  company: CompanyProfile
+  msicDetails: MSICResult
+  KPIGroup: [KPIGroup]
+}
+
+type DashboardOutput {
+  USER: String
+  TURNOVER: Int
+  PROFITABILITY: Int
+  EMPLOYMENT: Int
+  EXPORT: Int
+  TECHNOLOGY: Int
+  NG: Int
+  KPI_TOTAL: Int
+  TOTAL_G: Int
+  TOTAL_ETXNG: Int
+  ASSESSMENT_YEAR: Int
+}
+
+type Query {
+  allGetXKPI (COMPANY_ID: String!): [GetXKPIOutput]
+  scorecardKPI(COMPANY_ID: String!): ScorecardOutput
+  dashboardKPI: [DashboardOutput]
+}
+
+type Mutation {
+  createGetXKPI(input: GetXKPIInput!): GetXKPI!
+  updateGetXKPI(input: GetXKPIInput!): UpdateResp
+  finalizeKPI(input: ELSAInput!): GetXKPI
+}
