@@ -141,6 +141,7 @@ type GetXKPIOutput {
     TOTAL_FINAL_SCORE: String
     ASSESSMENT_YEAR: Int
     KPI: GetXKPI
+    SME_CLASS: String
 }
 
 type KPIQuarters {

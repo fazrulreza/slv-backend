@@ -318,7 +318,7 @@ module.exports = {
       {
         connectors: {
           MysqlGetxKPI, MysqlGetxSign, MysqlGetxAttachment,
-          MysqlSlvELSAScorecard, MysqlSlvAssessment,
+          MysqlSlvELSAScorecard, MysqlSlvAssessment, MysqlSlvSurvey,
         },
       },
     ) => {
@@ -336,6 +336,9 @@ module.exports = {
 
       // Assessment
       const resScore = await MysqlSlvAssessment.findAll(searchOpts);
+
+      // Survey
+      const resQuest = await MysqlSlvSurvey.findAll(searchOpts);
 
       if (resKPI.length !== 0) {
         result = resKPI.map((kpi) => {
@@ -376,6 +379,12 @@ module.exports = {
             .map(s1 => s1.dataValues)
             .filter(s2 => s2.COMPANY_ID === result2.COMPANY_ID
               && s2.ASSESSMENT_YEAR === result2.ASSESSMENT_YEAR);
+
+          // assessment
+          const resQuest2 = resQuest
+            .map(q1 => q1.dataValues)
+            .filter(q2 => q2.COMPANY_ID === result2.COMPANY_ID
+              && q2.ASSESSMENT_YEAR === result2.ASSESSMENT_YEAR);
 
           // kpi
           if (resSignKPI.length !== 0) {
@@ -433,6 +442,7 @@ module.exports = {
             assessment: resScore2[0],
             TOTAL_FINAL_SCORE: totalFinalScore,
             ASSESSMENT_YEAR: result2.ASSESSMENT_YEAR,
+            SME_CLASS: resQuest2[0].SME_CLASS,
           };
 
           return newResult;
@@ -444,7 +454,7 @@ module.exports = {
           : resElsa
             .map(e1 => e1.dataValues)
             .filter(e2 => e2.COMPANY_ID === COMPANY_ID
-            && e2.ASSESSMENT_YEAR === 1000);
+              && e2.ASSESSMENT_YEAR === 1000);
 
         // assessment
         const resScore4 = resScore.length === 0
@@ -452,7 +462,15 @@ module.exports = {
           : resScore
             .map(s1 => s1.dataValues)
             .filter(s2 => s2.COMPANY_ID === COMPANY_ID
-            && s2.ASSESSMENT_YEAR === 1000);
+              && s2.ASSESSMENT_YEAR === 1000);
+
+        // survey
+        const resQuest4 = resQuest.length === 0
+          ? [{}]
+          : resQuest
+            .map(q1 => q1.dataValues)
+            .filter(q2 => q2.COMPANY_ID === COMPANY_ID
+              && q2.ASSESSMENT_YEAR === 1000);
 
         // calculate total score
         const totalFinalScore2 = resElsa4.length === 0 ? 0 : getTotalScore(resElsa4);
@@ -463,6 +481,7 @@ module.exports = {
           assessment: resScore4[0],
           TOTAL_FINAL_SCORE: totalFinalScore2,
           ASSESSMENT_YEAR: resScore4[0].ASSESSMENT_YEAR,
+          SME_CLASS: resQuest4[0].SME_CLASS,
         };
         // console.log(newResult);
 
