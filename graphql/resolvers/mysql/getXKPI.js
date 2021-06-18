@@ -6,7 +6,7 @@ const {
   kpiElsaResolver, kpiResolver, kpiCompanyResolver, kpiUserResolver,
 } = require('../../permissions/acl');
 
-const processGetxData = (input, user) => {
+const processGetxData = (input, user, create = true) => {
   const parsedInput = JSON.parse(input.data);
 
   const {
@@ -47,7 +47,9 @@ const processGetxData = (input, user) => {
     ...others
   } = parsedInput;
 
-  const history = generateHistory(user.mail, 'CREATE');
+  const history = create
+    ? generateHistory(user.mail, 'CREATE')
+    : generateHistory(user.mail, 'UPDATE', parsedInput.CREATED_AT);
 
   const kpiInput = {
     ...others,
@@ -293,6 +295,8 @@ module.exports = {
             EXPORT_REVENUE,
             KPI_POINTS,
             ASSESSMENT_YEAR: resTemp.ASSESSMENT_YEAR,
+            CREATED_BY: resTemp.CREATED_BY,
+            CREATED_AT: resTemp.CREATED_AT,
             UPDATED_BY: resTemp.UPDATED_BY,
             UPDATED_AT: resTemp.UPDATED_AT,
           };
@@ -542,7 +546,9 @@ module.exports = {
       const {
         kpiInput, signKPIInput, signActualInput, attachmentInput,
         SIGN_KPI_ID, SIGN_ACTUAL_ID, ATTACHMENT_ID,
-      } = processGetxData(input, user);
+      } = processGetxData(input, user, false);
+
+      const createHistory = generateHistory(user.mail, 'CREATE');
 
       // KPI
       const searchOptsKPI = {
@@ -572,6 +578,7 @@ module.exports = {
       } else {
         const getXSignKPIInput = {
           ...signKPIInput,
+          ...createHistory,
           ID: generateId(),
           GETX_ID: kpiInput.ID,
         };
@@ -596,6 +603,7 @@ module.exports = {
       } else {
         const getXSignActualInput = {
           ...signActualInput,
+          ...createHistory,
           ID: generateId(),
           GETX_ID: kpiInput.ID,
         };
@@ -620,6 +628,7 @@ module.exports = {
       } else {
         const getXAttachmentInput = {
           ...attachmentInput,
+          ...createHistory,
           ID: generateId(),
           GETX_ID: kpiInput.ID,
         };

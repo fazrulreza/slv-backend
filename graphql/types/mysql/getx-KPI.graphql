@@ -170,6 +170,8 @@ type KPIGroup {
   NG: KPIActual
   KPI_POINTS: DashboardOutput
   ASSESSMENT_YEAR: Int
+  CREATED_AT: String
+  CREATED_BY: String
   UPDATED_BY: String
   UPDATED_AT: String
 }
