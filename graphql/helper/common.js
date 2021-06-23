@@ -1,4 +1,5 @@
-
+/* eslint-disable no-param-reassign */
+/* eslint-disable no-return-assign */
 const { profileGroup, tieredInterventionGroup } = require('./parameter');
 
 // const getFilter = (size, state, sector, revenue, year, division, msic) => {
@@ -37,8 +38,7 @@ const getDifference = (curr, hist) => Object.entries(hist)
   .filter(([key, val]) => curr[key] !== val && key in curr)
   .reduce((acc, [key, v]) => ({ ...acc, [key]: v }), {});
 
-
-const processSurveyResult = result => ({
+const processSurveyResult = (result) => ({
   AVAILABLE_SYSTEM: result.AVAILABLE_SYSTEM
     ? JSON.parse(result.AVAILABLE_SYSTEM)
     : [],
@@ -67,12 +67,11 @@ const processSurveyResult = result => ({
   },
 });
 
-
 const cleanEmpty = (obj) => {
   if (Array.isArray(obj)) {
     return obj
-      .map(v => ((v && typeof v === 'object') ? cleanEmpty(v) : v))
-      .filter(v => !(v == null));
+      .map((v) => ((v && typeof v === 'object') ? cleanEmpty(v) : v))
+      .filter((v) => !(v == null));
   }
   return Object.entries(obj)
     .map(([k, v]) => [k, v && typeof v === 'object' ? cleanEmpty(v) : v])
@@ -82,7 +81,7 @@ const cleanEmpty = (obj) => {
 
 const calculateScores = (getClassScore, initial, year) => {
   const tempGroup = getClassScore
-    .filter(x => Object.keys(x)[0].startsWith(initial))
+    .filter((x) => Object.keys(x)[0].startsWith(initial))
     .reduce((acc, v) => {
       if (v.unitClassScore === 'N/A') {
         return {

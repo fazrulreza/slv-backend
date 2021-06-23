@@ -1,4 +1,3 @@
-
 const { createResolver } = require('apollo-resolvers');
 const { isInstance } = require('apollo-errors');
 

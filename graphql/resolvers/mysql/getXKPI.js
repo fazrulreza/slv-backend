@@ -120,12 +120,11 @@ const processGetxData = (input, user, create = true) => {
   };
 };
 
-
 const getKPIscores = (data, type) => {
   const QUARTERS = Object.keys(data)
-    .filter(v1 => v1.startsWith(type))
-    .filter(v2 => v2.includes('Q'))
-    .map(v3 => ({
+    .filter((v1) => v1.startsWith(type))
+    .filter((v2) => v2.includes('Q'))
+    .map((v3) => ({
       stage: v3.replace(type, ''),
       value: data[v3],
     }));
@@ -204,16 +203,16 @@ module.exports = {
         order: [['USER']],
       };
       const resUser = await MysqlSlvUserRole.findAll(searchOptsUser);
-      const resultUser = resUser.map(x => x.dataValues.USER);
+      const resultUser = resUser.map((x) => x.dataValues.USER);
       // .filter(x2 => x2 === 'fazrul.reza@smebank.com.my');
 
       // all KPI
       const searchOptsKPI = { where: null };
       const resKPI = await MysqlGetxKPI.findAll(searchOptsKPI);
-      const resultKPI = resKPI.map(x => x.dataValues);
+      const resultKPI = resKPI.map((x) => x.dataValues);
 
       const result1 = resultUser.map((u) => {
-        const userKPI = resultKPI.filter(k => k.CREATED_BY === u);
+        const userKPI = resultKPI.filter((k) => k.CREATED_BY === u);
         const USER = u.substring(0, u.lastIndexOf('@'));
         if (userKPI.length === 0) {
           return {
@@ -243,7 +242,6 @@ module.exports = {
       });
 
       const result2 = flatten(result1);
-
 
       return result2;
     }),
@@ -353,41 +351,40 @@ module.exports = {
 
           // sign
           const resSignKPI = resSign
-            .map(k1 => k1.dataValues)
-            .filter(k2 => k2.GETX_ID === result2.ID
+            .map((k1) => k1.dataValues)
+            .filter((k2) => k2.GETX_ID === result2.ID
             && k2.ASSESSMENT_YEAR === result2.ASSESSMENT_YEAR)
-            .filter(k3 => k3.GETX_TYPE === 'KPI');
+            .filter((k3) => k3.GETX_TYPE === 'KPI');
 
           const resSignActual = resSign
-            .map(a1 => a1.dataValues)
-            .filter(a2 => a2.GETX_ID === result2.ID
+            .map((a1) => a1.dataValues)
+            .filter((a2) => a2.GETX_ID === result2.ID
             && a2.ASSESSMENT_YEAR === result2.ASSESSMENT_YEAR)
-            .filter(a3 => a3.GETX_TYPE === 'ACHIEVEMENT');
+            .filter((a3) => a3.GETX_TYPE === 'ACHIEVEMENT');
 
           // attachment
           const resAttachment2 = resAttachment
-            .map(at1 => at1.dataValues)
-            .filter(at2 => at2.GETX_ID === result2.ID
+            .map((at1) => at1.dataValues)
+            .filter((at2) => at2.GETX_ID === result2.ID
           && at2.ASSESSMENT_YEAR === result2.ASSESSMENT_YEAR)
-            .filter(at3 => at3.GETX_TYPE === 'ACHIEVEMENT');
-
+            .filter((at3) => at3.GETX_TYPE === 'ACHIEVEMENT');
 
           // elsa
           const resElsa2 = resElsa
-            .map(e1 => e1.dataValues)
-            .filter(e2 => e2.COMPANY_ID === result2.COMPANY_ID
+            .map((e1) => e1.dataValues)
+            .filter((e2) => e2.COMPANY_ID === result2.COMPANY_ID
               && e2.ASSESSMENT_YEAR === result2.ASSESSMENT_YEAR);
 
           // assessment
           const resScore2 = resScore
-            .map(s1 => s1.dataValues)
-            .filter(s2 => s2.COMPANY_ID === result2.COMPANY_ID
+            .map((s1) => s1.dataValues)
+            .filter((s2) => s2.COMPANY_ID === result2.COMPANY_ID
               && s2.ASSESSMENT_YEAR === result2.ASSESSMENT_YEAR);
 
           // assessment
           const resQuest2 = resQuest
-            .map(q1 => q1.dataValues)
-            .filter(q2 => q2.COMPANY_ID === result2.COMPANY_ID
+            .map((q1) => q1.dataValues)
+            .filter((q2) => q2.COMPANY_ID === result2.COMPANY_ID
               && q2.ASSESSMENT_YEAR === result2.ASSESSMENT_YEAR);
 
           // kpi
@@ -456,24 +453,24 @@ module.exports = {
         const resElsa4 = resElsa.length === 0
           ? []
           : resElsa
-            .map(e1 => e1.dataValues)
-            .filter(e2 => e2.COMPANY_ID === COMPANY_ID
+            .map((e1) => e1.dataValues)
+            .filter((e2) => e2.COMPANY_ID === COMPANY_ID
               && e2.ASSESSMENT_YEAR === 1000);
 
         // assessment
         const resScore4 = resScore.length === 0
           ? [{}]
           : resScore
-            .map(s1 => s1.dataValues)
-            .filter(s2 => s2.COMPANY_ID === COMPANY_ID
+            .map((s1) => s1.dataValues)
+            .filter((s2) => s2.COMPANY_ID === COMPANY_ID
               && s2.ASSESSMENT_YEAR === 1000);
 
         // survey
         const resQuest4 = resQuest.length === 0
           ? [{}]
           : resQuest
-            .map(q1 => q1.dataValues)
-            .filter(q2 => q2.COMPANY_ID === COMPANY_ID
+            .map((q1) => q1.dataValues)
+            .filter((q2) => q2.COMPANY_ID === COMPANY_ID
               && q2.ASSESSMENT_YEAR === 1000);
 
         // calculate total score
@@ -498,7 +495,8 @@ module.exports = {
     createGetXKPI: kpiResolver.createResolver(async (
       parent,
       { input },
-      { connectors: { MysqlGetxKPI, MysqlGetxSign, MysqlGetxAttachment }, user }) => {
+      { connectors: { MysqlGetxKPI, MysqlGetxSign, MysqlGetxAttachment }, user },
+    ) => {
       // process input
       const {
         kpiInput, signKPIInput, signActualInput, attachmentInput,
@@ -541,7 +539,8 @@ module.exports = {
     updateGetXKPI: kpiResolver.createResolver(async (
       parent,
       { input },
-      { connectors: { MysqlGetxKPI, MysqlGetxSign, MysqlGetxAttachment }, user }) => {
+      { connectors: { MysqlGetxKPI, MysqlGetxSign, MysqlGetxAttachment }, user },
+    ) => {
       // process input
       const {
         kpiInput, signKPIInput, signActualInput, attachmentInput,

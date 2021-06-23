@@ -17,7 +17,7 @@ module.exports = {
         order: [['MSIC']],
       };
       const result = await MysqlSlvMSIC.findAll(searchOpts);
-      const result2 = result.map(x => x.dataValues);
+      const result2 = result.map((x) => x.dataValues);
 
       const res = await MysqlSlvCompanyProfile.findById(ID);
       if (!res) {
@@ -54,7 +54,7 @@ module.exports = {
         order: [['ENTITY_NAME']],
       };
       const result = await MysqlSlvCompanyProfile.findAll(searchOpts);
-      const resultCompany = result.map(x => x.dataValues);
+      const resultCompany = result.map((x) => x.dataValues);
 
       // survey + assessment
       const searchOpts2 = { where: null };
@@ -64,13 +64,13 @@ module.exports = {
       // compile result
       const resultFinal = resultCompany.map((x) => {
         const resQ = resultQuest
-          .map(yy => yy.dataValues)
-          .filter(y => y.COMPANY_ID === x.ID
+          .map((yy) => yy.dataValues)
+          .filter((y) => y.COMPANY_ID === x.ID
           && y.ASSESSMENT_YEAR === 1000);
 
         const resS = resultScore
-          .map(zz => zz.dataValues)
-          .filter(z => z.COMPANY_ID === x.ID
+          .map((zz) => zz.dataValues)
+          .filter((z) => z.COMPANY_ID === x.ID
             && z.ASSESSMENT_YEAR === 1000);
 
         const SURVEY_DONE = resQ.length !== 0;
@@ -97,7 +97,7 @@ module.exports = {
         connectors: {
           MysqlSlvCompanyProfile, MysqlSlvSurvey, MysqlSlvAssessment, MysqlSlvUserRole,
         },
-        user: { mail, userType },
+        // user: { mail, userType },
       },
     ) => {
       const searchOpts = { where: null };
@@ -108,7 +108,7 @@ module.exports = {
         order: [['USER']],
       };
       const resUser = await MysqlSlvUserRole.findAll(searchOptsUser);
-      const resultUser = resUser.map(x => x.dataValues);
+      const resultUser = resUser.map((x) => x.dataValues);
 
       // company
       const resultCompany = await MysqlSlvCompanyProfile.findAll(searchOpts);
@@ -121,17 +121,17 @@ module.exports = {
       // compile result
       const resultFinal = resultUser.map((x) => {
         const resC = resultCompany
-          .map(ww => ww.dataValues)
-          .filter(w => w.CREATED_BY === x.USER);
+          .map((ww) => ww.dataValues)
+          .filter((w) => w.CREATED_BY === x.USER);
 
         const resQ = resultQuest
-          .map(yy => yy.dataValues)
-          .filter(y => y.CREATED_BY === x.USER
+          .map((yy) => yy.dataValues)
+          .filter((y) => y.CREATED_BY === x.USER
           && y.ASSESSMENT_YEAR === 1000);
 
         const resS = resultScore
-          .map(zz => zz.dataValues)
-          .filter(z => z.CREATED_BY === x.USER
+          .map((zz) => zz.dataValues)
+          .filter((z) => z.CREATED_BY === x.USER
             && z.ASSESSMENT_YEAR === 1000);
 
         return {

@@ -37,7 +37,8 @@ module.exports = {
     allSurvey: companySurveyResolver.createResolver(async (
       parent,
       { COMPANY_ID },
-      { connectors: { MysqlSlvSurvey, MysqlSlvCompanyProfile } }) => {
+      { connectors: { MysqlSlvSurvey, MysqlSlvCompanyProfile } },
+    ) => {
       let result = [];
       // company
       const resCompany = await MysqlSlvCompanyProfile.findOne(COMPANY_ID);
@@ -75,7 +76,8 @@ module.exports = {
       {
         connectors: { MysqlSlvSurvey, MysqlSlvCompanyProfile },
         user: { mail, userType },
-      }) => {
+      },
+    ) => {
       let result = [];
       let where = { CREATED_BY: mail };
 
@@ -98,8 +100,8 @@ module.exports = {
           // process result
           const processedResult = processSurveyResult(result2);
           const SECTOR = resCom
-            .filter(g => g.ID === result2.COMPANY_ID)
-            .map(h => h.SECTOR)[0];
+            .filter((g) => g.ID === result2.COMPANY_ID)
+            .map((h) => h.SECTOR)[0];
 
           const newResult = {
             ...result2,
@@ -112,14 +114,15 @@ module.exports = {
       }
 
       // filter large enterprise
-      const finalResult = result.filter(cls => cls.SME_CLASS !== 'LARGE ENTERPRISE');
+      const finalResult = result.filter((cls) => cls.SME_CLASS !== 'LARGE ENTERPRISE' && cls.SME_CLASS !== 'N/A');
 
       return finalResult;
     }),
   },
   Mutation: {
     createSurvey: surveyResolver.createResolver(async (
-      parent, { input }, { connectors: { MysqlSlvSurvey }, user }) => {
+      parent, { input }, { connectors: { MysqlSlvSurvey }, user },
+    ) => {
       // process input
       const postInput = processInput(input);
 

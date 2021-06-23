@@ -16,14 +16,15 @@ module.exports = {
         order: [['USER']],
       };
       const result = await MysqlSlvUserRole.findAll(searchOpts);
-      const result2 = result.map(x => x.dataValues);
+      const result2 = result.map((x) => x.dataValues);
 
       return result2;
     }),
   },
   Mutation: {
     createUserRole: userResolver.createResolver(async (
-      parent, { input }, { connectors: { MysqlSlvUserRole }, user: usr }) => {
+      parent, { input }, { connectors: { MysqlSlvUserRole }, user: usr },
+    ) => {
       // process input
       const parsedInput = JSON.parse(input.data);
 
@@ -37,7 +38,8 @@ module.exports = {
       return result;
     }),
     updateUserRole: userResolver.createResolver(async (
-      parent, { USER, input }, { connectors: { MysqlSlvUserRole }, user: usr }) => {
+      parent, { USER, input }, { connectors: { MysqlSlvUserRole }, user: usr },
+    ) => {
       const parsedInput = JSON.parse(input.data);
 
       const history = generateHistory(usr.mail, 'UPDATE');

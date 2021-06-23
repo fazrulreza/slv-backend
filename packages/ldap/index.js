@@ -1,3 +1,4 @@
+/* eslint-disable prefer-promise-reject-errors */
 const LDAP = require('ldapjs');
 // import { format as StringFormat } from 'util';
 
@@ -17,18 +18,18 @@ const getProperObject = (entry) => {
       if (item.length > 1) {
         obj[type] = item.slice();
       } else {
+        // eslint-disable-next-line prefer-destructuring
         obj[type] = item[0];
       }
     } else {
       obj[type] = [];
     }
   });
-  entry.controls.forEach((element, index, array) => {
+  entry.controls.forEach((element) => {
     obj.controls.push(element.json);
   });
   return obj;
 };
-
 
 /**
  * Authenticates the user using LDAP
@@ -55,7 +56,7 @@ const Login = (input) => {
   return new Promise((resolve, reject) => {
     client
       .on('error', (ex) => {
-        console.error('ex:', ex);
+        // console.error('ex:', ex);
         reject(ex);
       });
 
@@ -112,7 +113,7 @@ const Login = (input) => {
                 //   console.log(`referral: ${referral.uris.join()}`);
                 // });
                 res.on('error', (errx) => {
-                  console.log(errx);
+                  // console.log(errx);
                   reject(errx);
                 });
                 res.on('end', () => {

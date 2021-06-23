@@ -39,7 +39,7 @@ module.exports = {
 
       // assessment
       const resScore = await MysqlSlvAssessment.findAll(searchOpts);
-      if (resScore.length !== 0)resultScore = resScore.map(asmt => asmt.dataValues);
+      if (resScore.length !== 0)resultScore = resScore.map((asmt) => asmt.dataValues);
 
       const result = {
         assessment: resultScore,
@@ -51,7 +51,8 @@ module.exports = {
   },
   Mutation: {
     createAssessment: assessmentResolver.createResolver(async (
-      parent, { input }, { connectors: { MysqlSlvAssessment }, user }) => {
+      parent, { input }, { connectors: { MysqlSlvAssessment }, user },
+    ) => {
       // process input
       const parsedInput = JSON.parse(input.data);
 
@@ -68,7 +69,8 @@ module.exports = {
       return result;
     }),
     updateAssessment: assessmentResolver.createResolver(async (
-      parent, { input }, { connectors: { MysqlSlvAssessment }, user }) => {
+      parent, { input }, { connectors: { MysqlSlvAssessment }, user },
+    ) => {
       const parsedInput = JSON.parse(input.data);
 
       // store new entry

@@ -3,7 +3,6 @@ const { processSurveyResult, calculateScores, getTotalScore } = require('../../h
 const { classScore, profileGroup } = require('../../helper/parameter');
 const { allSLVResolver, elsaResolver, assessmentElsaResolver } = require('../../permissions/acl');
 
-
 module.exports = {
   Query: {
     /**
@@ -16,7 +15,8 @@ module.exports = {
       {
         connectors: { MysqlSlvCompanyProfile, MysqlSlvELSAScorecard, MysqlSlvSurvey },
         user: { mail, userType },
-      }) => {
+      },
+    ) => {
       let result = [];
       let resultCompany = [];
       let resultQuest = [];
@@ -30,30 +30,30 @@ module.exports = {
 
       // company
       const resCompany = await MysqlSlvCompanyProfile.findAll(searchOpts);
-      if (resCompany.length !== 0) resultCompany = resCompany.map(x => x.dataValues.ID);
+      if (resCompany.length !== 0) resultCompany = resCompany.map((x) => x.dataValues.ID);
 
       // survey
       const resQuest = await MysqlSlvSurvey.findAll(searchOpts);
       if (resQuest.length !== 0) {
         resultQuest = resQuest
-          .map(s => s.dataValues)
-          .filter(oa => oa.ASSESSMENT_YEAR === 1000)
-          .filter(cls => cls.SME_CLASS !== 'LARGE ENTERPRISE')
-          .map(sv => sv.COMPANY_ID);
+          .map((s) => s.dataValues)
+          .filter((oa) => oa.ASSESSMENT_YEAR === 1000)
+          .filter((cls) => cls.SME_CLASS !== 'LARGE ENTERPRISE' && cls.SME_CLASS !== 'N/A')
+          .map((sv) => sv.COMPANY_ID);
       }
 
       // ELSA
       const resElsa = await MysqlSlvELSAScorecard.findAll(searchOptsAll);
       if (resElsa.length !== 0) {
         resultElsa = resElsa
-          .map(j => j.dataValues)
-          .filter(oa => oa.ASSESSMENT_YEAR === 1000);
+          .map((j) => j.dataValues)
+          .filter((oa) => oa.ASSESSMENT_YEAR === 1000);
       }
 
       if (resultCompany.length !== 0 && resultQuest.length !== 0 && resultElsa.length !== 0) {
         const scoreArray = resultCompany
           .map((cm) => {
-            const scorecard = resultElsa.filter(cmp => cmp.COMPANY_ID === cm);
+            const scorecard = resultElsa.filter((cmp) => cmp.COMPANY_ID === cm);
             if (scorecard.length === 0) return 0;
             if (!resultQuest.includes(cm)) return 0;
             // calculate total score
@@ -61,13 +61,13 @@ module.exports = {
             return Math.floor(finalScore);
           });
 
-        const noZeroScoreArray = scoreArray.filter(m => m !== 0);
+        const noZeroScoreArray = scoreArray.filter((m) => m !== 0);
 
         if (noZeroScoreArray.length !== 0) {
           result = Object.keys(profileGroup)
-            .map(k => ({
+            .map((k) => ({
               stage: k,
-              count: noZeroScoreArray.filter(m => m === (parseInt(k, 10))).length,
+              count: noZeroScoreArray.filter((m) => m === (parseInt(k, 10))).length,
             }));
         }
       }
@@ -85,10 +85,10 @@ module.exports = {
       };
 
       const resScore = await MysqlSlvAssessment.findAll(searchOpts);
-      const resultScore = resScore.length !== 0 ? resScore.map(a => a.dataValues) : resScore;
+      const resultScore = resScore.length !== 0 ? resScore.map((a) => a.dataValues) : resScore;
 
       const resElsa = await MysqlSlvELSAScorecard.findAll(searchOpts);
-      const resultElsa = resElsa.length !== 0 ? resElsa.map(a => a.dataValues) : resElsa;
+      const resultElsa = resElsa.length !== 0 ? resElsa.map((a) => a.dataValues) : resElsa;
 
       // calculate total score
       const totalFinalScore = getTotalScore(resultElsa);
@@ -137,25 +137,29 @@ module.exports = {
 
       // survey
       const resQuestPre = await MysqlSlvSurvey.findAll(searchOpts);
-      const resQuest = resQuestPre.length !== 0 ? resQuestPre.map(s => s.dataValues) : resQuestPre;
+      const resQuest = resQuestPre.length !== 0
+        ? resQuestPre.map((s) => s.dataValues)
+        : resQuestPre;
 
       // assessment
       const resScorePre = await MysqlSlvAssessment.findAll(searchOpts);
-      const resScore = resScorePre.length !== 0 ? resScorePre.map(a => a.dataValues) : resScorePre;
+      const resScore = resScorePre.length !== 0
+        ? resScorePre.map((a) => a.dataValues)
+        : resScorePre;
 
       // ELSA
       const resElsaPre = await MysqlSlvELSAScorecard.findAll(searchOpts);
-      const resElsa = resElsaPre.length !== 0 ? resElsaPre.map(a => a.dataValues) : resElsaPre;
+      const resElsa = resElsaPre.length !== 0 ? resElsaPre.map((a) => a.dataValues) : resElsaPre;
 
       // MSIC
       const searchOpts2 = { where: { MSIC: resultCompany.MSIC } };
       const resMSIC = await MysqlSlvMSIC.findOne(searchOpts2);
-      const resultMSIC = resMSIC.dataValues;
+      const resultMSIC = resMSIC ? resMSIC.dataValues : null;
 
       // get all unique assessment year
       const resElsaScoreAll = await MysqlSlvELSAScorecard.findAll(searchOpts);
       const yearOnly = resElsaScoreAll.length !== 0
-        ? resElsaScoreAll.map(e => e.dataValues.ASSESSMENT_YEAR)
+        ? resElsaScoreAll.map((e) => e.dataValues.ASSESSMENT_YEAR)
         : [input.ASSESSMENT_YEAR];
       const uniqueYear = yearOnly.filter((item, index) => yearOnly.indexOf(item) === index);
       const yearList = uniqueYear.includes(1000) ? uniqueYear : [...uniqueYear, 1000];
@@ -168,7 +172,7 @@ module.exports = {
 
         if (yr === 1000) {
           // survey
-          const resultQuestPre = resQuest.filter(v => v.ASSESSMENT_YEAR === 1000);
+          const resultQuestPre = resQuest.filter((v) => v.ASSESSMENT_YEAR === 1000);
           resultQuest = resultQuestPre.length !== 0 ? resultQuestPre[0] : null;
 
           if (resultQuest) {
@@ -181,10 +185,10 @@ module.exports = {
             };
 
             // assessment
-            const resultScorePre = resScore.filter(w => w.ASSESSMENT_YEAR === 1000);
+            const resultScorePre = resScore.filter((w) => w.ASSESSMENT_YEAR === 1000);
             resultScore = resultScorePre.length !== 0 ? resultScorePre[0] : null;
 
-            if (resultScore && resultQuest.SME_CLASS !== 'LARGE ENTERPRISE') {
+            if (resultScore && resultQuest.SME_CLASS !== 'LARGE ENTERPRISE' && resultQuest.SME_CLASS !== 'N/A') {
               // calculate score
               const getClassScore = Object.keys(resultScore)
                 .map((y) => {
@@ -201,7 +205,7 @@ module.exports = {
                   };
                   return resClassScore;
                 })
-                .filter(z => classScore[Object.keys(z)[0]]);
+                .filter((z) => classScore[Object.keys(z)[0]]);
 
               // console.log(getClassScore);
 
@@ -223,7 +227,7 @@ module.exports = {
           }
         } else {
           // survey
-          [resultQuest] = resQuest.filter(x => x.ASSESSMENT_YEAR === yr);
+          [resultQuest] = resQuest.filter((x) => x.ASSESSMENT_YEAR === yr);
           if (!resultQuest) {
             return {
               company: null,
@@ -243,11 +247,11 @@ module.exports = {
           };
 
           // assessment
-          [resultScore] = resScore.filter(y => y.ASSESSMENT_YEAR === yr);
+          [resultScore] = resScore.filter((y) => y.ASSESSMENT_YEAR === yr);
 
           // ELSA
-          const resultElsa = resElsa.filter(e => e.ASSESSMENT_YEAR === yr);
-          scorecard = resultElsa.map(d => ({
+          const resultElsa = resElsa.filter((e) => e.ASSESSMENT_YEAR === yr);
+          scorecard = resultElsa.map((d) => ({
             ...d,
             FINAL_SCORE: parseFloat(d.FINAL_SCORE),
             FINAL_SCORE_ROUNDDOWN: parseFloat(d.FINAL_SCORE_ROUNDDOWN),
@@ -271,13 +275,12 @@ module.exports = {
         return result;
       });
 
-
       // store in DB if default 1000
       if (input.ASSESSMENT_YEAR === 1000) {
         // get elsa
         const [toStore] = finalResult
-          .filter(i => i.ASSESSMENT_YEAR === 1000)
-          .map(j => j.ELSA);
+          .filter((i) => i.ASSESSMENT_YEAR === 1000)
+          .map((j) => j.ELSA);
 
         // generate history
         const dbStoreScoreCard = toStore.map((b) => {

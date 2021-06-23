@@ -35,7 +35,6 @@ const UserLoginExistsError = createError('UserLoginExistsError', {
 });
 // ------------------
 
-
 // ------------------
 // ACL Errors
 const ForbiddenError = createError('ForbiddenError', {

@@ -1,4 +1,3 @@
-
 const classScore = {
   BR_PRODUCT_LINE: {
     'SOLE TRADER': 1,
@@ -90,7 +89,6 @@ const tieredInterventionGroup = {
   4: 'Tier 3: More intensive intervention',
   5: 'Tier 1: Awareness creation (readiness for next lifecycle stage)',
 };
-
 
 module.exports = {
   profileGroup,
