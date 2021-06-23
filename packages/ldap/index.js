@@ -12,7 +12,7 @@ const getProperObject = (entry) => {
     const buf = buffers;
     const val = vals;
     let item;
-    if (type == 'thumbnailPhoto') item = buf;
+    if (type === 'thumbnailPhoto') item = buf;
     else item = val;
     if (item && item.length) {
       if (item.length > 1) {
