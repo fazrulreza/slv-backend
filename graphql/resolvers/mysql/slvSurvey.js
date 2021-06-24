@@ -41,7 +41,7 @@ module.exports = {
     ) => {
       let result = [];
       // company
-      const resCompany = await MysqlSlvCompanyProfile.findOne(COMPANY_ID);
+      const resCompany = await MysqlSlvCompanyProfile.findById(COMPANY_ID);
 
       // survey
       const searchOpts = { where: { COMPANY_ID } };
