@@ -37,7 +37,9 @@ module.exports = {
     allCompanies: allSLVResolver.createResolver(async (
       parent, param,
       {
-        connectors: { MysqlSlvCompanyProfile, MysqlSlvSurvey, MysqlSlvAssessment },
+        connectors: {
+          MysqlSlvCompanyProfile, MysqlSlvSurvey, MysqlSlvAssessment, MysqlGetxKPI,
+        },
         user: { mail, userType },
       },
     ) => {
@@ -60,6 +62,7 @@ module.exports = {
       const searchOpts2 = { where: null };
       const resultQuest = await MysqlSlvSurvey.findAll(searchOpts2);
       const resultScore = await MysqlSlvAssessment.findAll(searchOpts2);
+      const resultKPI = await MysqlGetxKPI.findAll(searchOpts2);
 
       // compile result
       const resultFinal = resultCompany.map((x) => {
@@ -73,8 +76,14 @@ module.exports = {
           .filter((z) => z.COMPANY_ID === x.ID
             && z.ASSESSMENT_YEAR === 1000);
 
+        const resK = resultKPI
+          .map((aa) => aa.dataValues)
+          .filter((a) => a.COMPANY_ID === x.ID
+                && a.ASSESSMENT_YEAR === 1000);
+
         const SURVEY_DONE = resQ.length !== 0;
         const ASSESSMENT_DONE = resS.length !== 0;
+        const KPI_DONE = resK.length !== 0;
         const SME_CLASS = resQ.length !== 0 ? resQ[0].SME_CLASS : 'N/A';
 
         return {
@@ -82,6 +91,7 @@ module.exports = {
           SME_CLASS,
           SURVEY_DONE,
           ASSESSMENT_DONE,
+          KPI_DONE,
         };
       });
       // console.dir(resultQuest, { depth: null, colorized: true });

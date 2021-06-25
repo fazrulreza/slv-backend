@@ -34,6 +34,7 @@ type CompanyProfile {
   SME_CLASS: String
   SURVEY_DONE: String
   ASSESSMENT_DONE: String
+  KPI_DONE: String
 }
 
 type CompanyProfileWithMSIC {
