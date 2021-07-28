@@ -3,6 +3,18 @@ const { processSurveyResult, calculateScores, getTotalScore } = require('../../h
 const { classScore, profileGroup } = require('../../helper/parameter');
 const { allSLVResolver, elsaResolver, assessmentElsaResolver } = require('../../permissions/acl');
 
+const getPrediction = (resultPredict, fields, factor) => {
+  // prepare key
+  const keySearchPre = fields.reduce((fullT, t) => `${fullT}${t}`, '');
+  const keySearch = keySearchPre.replace(/\s+/g, '').toUpperCase();
+
+  // filter key
+  const keyDataPre = resultPredict
+    .filter((x) => x.FACTOR === factor && x.KEY === keySearch);
+  const keyData = keyDataPre.length !== 0 ? keyDataPre[0].dataValues.VALUE : 1;
+  return keyData;
+};
+
 module.exports = {
   Query: {
     /**
@@ -113,13 +125,15 @@ module.exports = {
         connectors:
         {
           MysqlSlvCompanyProfile, MysqlSlvSurvey, MysqlSlvAssessment,
-          MysqlSlvMSIC, MysqlSlvELSAScorecard,
+          MysqlSlvMSIC, MysqlSlvELSAScorecard, MysqlSlvPrediction,
         },
         user,
       },
     ) => {
       // company
       const searchOpts = { where: { COMPANY_ID: input.COMPANY_ID } };
+      const searchOptsAll = { where: null };
+
       const resultCompany = await MysqlSlvCompanyProfile.findById(input.COMPANY_ID);
 
       // no company, return null
@@ -156,6 +170,9 @@ module.exports = {
       const resMSIC = await MysqlSlvMSIC.findOne(searchOpts2);
       const resultMSIC = resMSIC ? resMSIC.dataValues : null;
 
+      // prediction
+      const resultPredict = await MysqlSlvPrediction.findAll(searchOptsAll);
+
       // get all unique assessment year
       const resElsaScoreAll = await MysqlSlvELSAScorecard.findAll(searchOpts);
       const yearOnly = resElsaScoreAll.length !== 0
@@ -187,6 +204,136 @@ module.exports = {
             // assessment
             const resultScorePre = resScore.filter((w) => w.ASSESSMENT_YEAR === 1000);
             resultScore = resultScorePre.length !== 0 ? resultScorePre[0] : null;
+
+            // intercept public here
+            if (input.PUBLIC) {
+              const IG_INDUSTRY_POTENTIAL = getPrediction(
+                resultPredict, [
+                  resultQuest.YEARLY_BUSINESS_PERFORMANCE,
+                  resultQuest.YEARLY_INDUSTRY_PERFORMANCE,
+                ],
+                'IG_INDUSTRY_POTENTIAL',
+              );
+
+              const BR_PRODUCT_LINE = getPrediction(
+                resultPredict, [
+                  resultQuest.PRODUCT_COUNT,
+                  resultQuest.PRODUCT_PERFORMANCE_2YEARS,
+                  resultQuest.PRODUCT_MARKET_LOCATION,
+                ],
+                'BR_PRODUCT_LINE',
+              );
+
+              const BR_PRODUCT_QUALITY = getPrediction(
+                resultPredict, [
+                  resultQuest.PRODUCT_FEEDBACK_COLLECTION_FLAG,
+                ],
+                'BR_PRODUCT_QUALITY',
+              );
+
+              const BR_TECHNOLOGY = getPrediction(
+                resultPredict, [
+                  resultQuest.AVAILABLE_SYSTEM.length,
+                ],
+                'BR_TECHNOLOGY',
+              );
+
+              const preBRDCheck1 = JSON.stringify(resultQuest.MARKETING_TYPE).includes('Online Marketing');
+              const preBRDCheck2 = preBRDCheck1 ? resultQuest.ONLINE_MARKETING_TYPE.length : 0;
+              const BR_DEVELOPMENT_CAPACITY = getPrediction(
+                resultPredict, [
+                  resultQuest.MARKETING_TYPE,
+                  preBRDCheck2,
+                ],
+                'BR_DEVELOPMENT_CAPACITY',
+              );
+
+              const LC_ORGANIZATION = getPrediction(
+                resultPredict, [
+                  resultQuest.OWNER_MANAGED_FLAG,
+                  resultQuest.ORGANIZATION_STRUCTURE_FLAG,
+                  resultQuest.EMPLOYEE_COUNT,
+                ],
+                'LC_ORGANIZATION',
+              );
+
+              const LC_PLANNING = getPrediction(
+                resultPredict, [
+                  resultQuest.SME_CLASS,
+                  resultQuest.BUSINESS_OWNER_INVOLVE_PERCENTAGE,
+                ],
+                'LC_PLANNING',
+              );
+
+              const PR_STAFFING = getPrediction(
+                resultPredict, [
+                  resultQuest.EMPLOYEE_OJT_FLAG,
+                  resultQuest.EMPLOYEE_SOP_FLAG,
+                  resultQuest.EMPLOYEE_WRITTEN_CONTRACT_FLAG,
+                  resultQuest.EMPLOYEE_COUNT_2YEARS,
+                ],
+                'PR_STAFFING',
+              );
+
+              const PR_STAFF_PERFORMANCE = getPrediction(
+                resultPredict, [
+                  resultQuest.EMPLOYEE_JD_KPI_FLAG,
+                ],
+                'PR_STAFF_PERFORMANCE',
+              );
+
+              const SR_EXECUTION_CAPACITY = getPrediction(
+                resultPredict, [
+                  resultQuest.OPERATIONAL_GUIDELINE_FLAG,
+                ],
+                'SR_EXECUTION_CAPACITY',
+              );
+
+              const SR_BUDGETTING = getPrediction(
+                resultPredict, [
+                  resultQuest.BUSINESS_PLAN_FLAG,
+                  resultQuest.BUSINESS_FUTURE_PLAN.length,
+                ],
+                'SR_BUDGETTING',
+              );
+
+              const preFICheck1 = resultQuest.SEEK_FINANCING_2YEARS_FLAG === 'YES';
+              const preFICheck2 = preFICheck1 ? resultQuest.SEEK_FINANCING_METHOD.length : 0;
+              const FR_FINANCE = getPrediction(
+                resultPredict, [
+                  resultQuest.SEEK_FINANCING_2YEARS_FLAG,
+                  resultQuest.LATE_PAYMENT_CUSTOMER,
+                  preFICheck2,
+                  resultQuest.CUSTOMER_PAYMENT_METHODS.length,
+                ],
+                'FR_FINANCE',
+              );
+
+              const FR_FINANCIAL_SYSTEM = getPrediction(
+                resultPredict, [
+                  resultQuest.REGISTERED_BANK_ACCOUNT_FLAG,
+                  resultQuest.AUDIT_BUSINESS_ACCOUNT_FLAG,
+                  resultQuest.SST_FLAG,
+                ],
+                'FR_FINANCIAL_SYSTEM',
+              );
+
+              resultScore = {
+                IG_INDUSTRY_POTENTIAL,
+                BR_PRODUCT_LINE,
+                BR_PRODUCT_QUALITY,
+                BR_TECHNOLOGY,
+                BR_DEVELOPMENT_CAPACITY,
+                LC_ORGANIZATION,
+                LC_PLANNING,
+                PR_STAFFING,
+                PR_STAFF_PERFORMANCE,
+                SR_EXECUTION_CAPACITY,
+                SR_BUDGETTING,
+                FR_FINANCE,
+                FR_FINANCIAL_SYSTEM,
+              };
+            }
 
             if (resultScore && resultQuest.SME_CLASS !== 'LARGE ENTERPRISE' && resultQuest.SME_CLASS !== 'N/A') {
               // calculate score
@@ -276,7 +423,7 @@ module.exports = {
       });
 
       // store in DB if default 1000
-      if (input.ASSESSMENT_YEAR === 1000) {
+      if (input.ASSESSMENT_YEAR === 1000 && !input.PUBLIC) {
         // get elsa
         const [toStore] = finalResult
           .filter((i) => i.ASSESSMENT_YEAR === 1000)

@@ -7,10 +7,12 @@ const MysqlSlvELSAScorecard = require('./slv-elsa_scorecard');
 const MysqlGetxKPI = require('./getx-kpi');
 const MysqlGetxSign = require('./getx-sign');
 const MysqlGetxAttachment = require('./getx-attachment');
+const MysqlSlvPrediction = require('./slv-prediction');
 
 const mysqlConnectors = {
   MysqlSlvCompanyProfile,
   MysqlSlvSurvey,
+  MysqlSlvPrediction,
   MysqlSlvMSIC,
   MysqlSlvAssessment,
   MysqlSlvUserRole,

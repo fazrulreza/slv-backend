@@ -38,34 +38,52 @@ const getDifference = (curr, hist) => Object.entries(hist)
   .filter(([key, val]) => curr[key] !== val && key in curr)
   .reduce((acc, [key, v]) => ({ ...acc, [key]: v }), {});
 
-const processSurveyResult = (result) => ({
-  AVAILABLE_SYSTEM: result.AVAILABLE_SYSTEM
+const processSurveyResult = (result) => {
+  const AVAILABLE_SYSTEM = result.AVAILABLE_SYSTEM
     ? JSON.parse(result.AVAILABLE_SYSTEM)
-    : [],
-  MARKETING_TYPE: result.MARKETING_TYPE
+    : [];
+
+  const MARKETING_TYPE = result.MARKETING_TYPE
     ? JSON.parse(result.MARKETING_TYPE)
-    : [],
-  ONLINE_MARKETING_TYPE: result.ONLINE_MARKETING_TYPE
+    : [];
+
+  const ONLINE_MARKETING_TYPE = result.ONLINE_MARKETING_TYPE
     ? JSON.parse(result.ONLINE_MARKETING_TYPE)
-    : [],
-  BUSINESS_FUTURE_PLAN: result.BUSINESS_FUTURE_PLAN
+    : [];
+
+  const BUSINESS_FUTURE_PLAN = result.BUSINESS_FUTURE_PLAN
     ? JSON.parse(result.BUSINESS_FUTURE_PLAN)
-    : [],
-  SEEK_FINANCING_METHOD: result.SEEK_FINANCING_METHOD
+    : [];
+
+  const SEEK_FINANCING_METHOD = result.SEEK_FINANCING_METHOD
     ? JSON.parse(result.SEEK_FINANCING_METHOD)
-    : [],
-  CUSTOMER_PAYMENT_METHODS: result.CUSTOMER_PAYMENT_METHODS
+    : [];
+
+  const CUSTOMER_PAYMENT_METHODS = result.CUSTOMER_PAYMENT_METHODS
     ? JSON.parse(result.CUSTOMER_PAYMENT_METHODS)
-    : [],
-  EMPLOYEE_COUNT_DETAIL: {
-    FULLTIME: result.FULLTIME_EMPLOYEE_COUNT || 0,
-    PARTTIME: result.PARTTIME_EMPLOYEE_COUNT || 0,
-  },
-  EMPLOYEE_DETAILS: {
-    FULLTIME: result.FULLTIME_EMPLOYEE_COUNT || 0,
-    OWNER_MANAGED_100: result.OWNER_MANAGED_100 || 0,
-  },
-});
+    : [];
+
+  const FULLTIME = result.FULLTIME_EMPLOYEE_COUNT || 0;
+  const PARTTIME = result.PARTTIME_EMPLOYEE_COUNT || 0;
+  const OWNER_MANAGED_100 = result.OWNER_MANAGED_100 || 0;
+
+  return {
+    AVAILABLE_SYSTEM,
+    MARKETING_TYPE,
+    ONLINE_MARKETING_TYPE,
+    BUSINESS_FUTURE_PLAN,
+    SEEK_FINANCING_METHOD,
+    CUSTOMER_PAYMENT_METHODS,
+    EMPLOYEE_COUNT_DETAIL: {
+      FULLTIME,
+      PARTTIME,
+    },
+    EMPLOYEE_DETAILS: {
+      FULLTIME,
+      OWNER_MANAGED_100,
+    },
+  };
+};
 
 const cleanEmpty = (obj) => {
   if (Array.isArray(obj)) {

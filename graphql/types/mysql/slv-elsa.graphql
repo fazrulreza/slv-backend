@@ -1,6 +1,7 @@
 input ELSAInput {
     COMPANY_ID: String!
     ASSESSMENT_YEAR: Int!
+    PUBLIC: Boolean
 }
 
 type ELSAOutput {

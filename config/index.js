@@ -8,6 +8,7 @@ const mysqlConnection = {
 const COMPANY_PROFILE = 'company_profile';
 const SURVEY = 'survey';
 const MSIC = 'msic';
+const PREDICTION = 'prediction';
 const ASSESSMENT = 'assessment';
 const USER_ROLE = 'user_role';
 const ELSA_SCORECARD = 'elsa_scorecard';
@@ -26,6 +27,7 @@ module.exports = {
   COMPANY_PROFILE,
   ELSA_SCORECARD,
   MSIC,
+  PREDICTION,
   SURVEY,
   USER_ROLE,
   GETX_KPI,
