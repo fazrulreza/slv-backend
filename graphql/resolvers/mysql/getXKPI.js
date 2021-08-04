@@ -213,7 +213,7 @@ module.exports = {
 
       const result1 = resultUser.map((u) => {
         const userKPI = resultKPI.filter((k) => k.CREATED_BY === u);
-        const USER = u.substring(0, u.lastIndexOf('@'));
+        const USER = u.includes('@') ? u.substring(0, u.lastIndexOf('@')) : u;
         if (userKPI.length === 0) {
           return {
             USER,

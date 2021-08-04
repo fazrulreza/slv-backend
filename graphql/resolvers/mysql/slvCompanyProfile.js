@@ -145,7 +145,7 @@ module.exports = {
             && z.ASSESSMENT_YEAR === 1000);
 
         return {
-          USER: x.USER.substring(0, x.USER.lastIndexOf('@')),
+          USER: x.USER.includes('@') ? x.USER.substring(0, x.USER.lastIndexOf('@')) : x.USER,
           ROLE: x.ROLE,
           PROFILE_COUNT: resC.length,
           SURVEY_COUNT: resQ.length,
