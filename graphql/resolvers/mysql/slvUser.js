@@ -8,22 +8,22 @@ module.exports = {
          * @param {Object} param0 main input object
          * @param {String} param0.id id
          */
-    allUserRole: userResolver.createResolver(async (
-      parent, param, { connectors: { MysqlSlvUserRole } },
+    allUser: userResolver.createResolver(async (
+      parent, param, { connectors: { MysqlSlvUser } },
     ) => {
       const searchOpts = {
         where: null,
         order: [['USER']],
       };
-      const result = await MysqlSlvUserRole.findAll(searchOpts);
+      const result = await MysqlSlvUser.findAll(searchOpts);
       const result2 = result.map((x) => x.dataValues);
 
       return result2;
     }),
   },
   Mutation: {
-    createUserRole: userResolver.createResolver(async (
-      parent, { input }, { connectors: { MysqlSlvUserRole }, user: usr },
+    createUser: userResolver.createResolver(async (
+      parent, { input }, { connectors: { MysqlSlvUser }, user: usr },
     ) => {
       // process input
       const parsedInput = JSON.parse(input.data);
@@ -34,11 +34,11 @@ module.exports = {
         ...history,
       };
         // console.log(newInput);
-      const result = await MysqlSlvUserRole.create(newInput);
+      const result = await MysqlSlvUser.create(newInput);
       return result;
     }),
-    updateUserRole: userResolver.createResolver(async (
-      parent, { USER, input }, { connectors: { MysqlSlvUserRole }, user: usr },
+    updateUser: userResolver.createResolver(async (
+      parent, { USER, input }, { connectors: { MysqlSlvUser }, user: usr },
     ) => {
       const parsedInput = JSON.parse(input.data);
 
@@ -52,21 +52,21 @@ module.exports = {
           USER,
         },
       };
-      const result = await MysqlSlvUserRole.update(searchOpts);
+      const result = await MysqlSlvUser.update(searchOpts);
       const result2 = {
         ID: USER,
         updated: result[0],
       };
       return result2;
     }),
-    deleteUserRole: async (
-      parent, { USER }, { connectors: { MysqlSlvUserRole } },
+    deleteUser: async (
+      parent, { USER }, { connectors: { MysqlSlvUser } },
     ) => {
       // remove user
       const searchOpts = {
         where: { USER },
       };
-      const result = await MysqlSlvUserRole.delete(searchOpts);
+      const result = await MysqlSlvUser.delete(searchOpts);
 
       const result2 = {
         ID: USER,

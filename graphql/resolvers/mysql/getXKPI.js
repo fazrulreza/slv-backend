@@ -195,14 +195,14 @@ module.exports = {
     dashboardKPI: kpiUserResolver.createResolver(async (
       parent,
       param,
-      { connectors: { MysqlGetxKPI, MysqlSlvUserRole } },
+      { connectors: { MysqlGetxKPI, MysqlSlvUser } },
     ) => {
       // user list
       const searchOptsUser = {
         where: null,
         order: [['USER']],
       };
-      const resUser = await MysqlSlvUserRole.findAll(searchOptsUser);
+      const resUser = await MysqlSlvUser.findAll(searchOptsUser);
       const resultUser = resUser.map((x) => x.dataValues.USER);
       // .filter(x2 => x2 === 'fazrul.reza@smebank.com.my');
 

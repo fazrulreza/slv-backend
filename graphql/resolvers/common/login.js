@@ -5,43 +5,52 @@ const { SECRET } = process.env;
 
 module.exports = {
   Mutation: {
-    ldapLogin: async (parent, { input }, { connectors: { MysqlSlvUserRole } }) => {
+    ldapLogin: async (parent, { input }, { connectors: { MysqlSlvUser } }) => {
       // Retrieve LDAP account
 
       const userType = 'PUBLIC';
-      const x = jwt.verify(input, SECRET);
+      const userData = jwt.verify(input, SECRET);
+
+      let data = {};
+      let mini = {};
 
       // login process
-      const userInfo = await Login(x);
-      const {
-        cn, mail, thumbnailPhoto, telephoneNumber, department, mobile,
-      } = userInfo;
+      if (!userData.public) {
+        // find from AD
 
-      const photo = thumbnailPhoto.toString('base64');
+        const userInfo = await Login(userData);
+        const {
+          cn, mail, thumbnailPhoto, telephoneNumber, department, mobile,
+        } = userInfo;
 
-      const searchOpts = {
-        where: { USER: mail },
-      };
-      const resUser = await MysqlSlvUserRole.findOne(searchOpts);
-      const uRole = resUser ? resUser.dataValues.ROLE : userType;
+        const photo = thumbnailPhoto.toString('base64');
 
-      // return data structure
-      const data = {
-        username: x.username,
-        cn,
-        mail,
-        photo,
-        telephoneNumber,
-        mobile,
-        department,
-        userType: uRole,
+        const searchOpts = {
+          where: { USER: mail },
+        };
+        const resUser = await MysqlSlvUser.findOne(searchOpts);
+        const uRole = resUser ? resUser.dataValues.ROLE : userType;
+
+        // return data structure
+        data = {
+          username: userData.username,
+          cn,
+          mail,
+          photo,
+          telephoneNumber,
+          mobile,
+          department,
+          userType: uRole,
         // membership,
-      };
+        };
 
-      const mini = {
-        mail,
-        userType: uRole,
-      };
+        mini = {
+          mail,
+          userType: uRole,
+        };
+      } else {
+        // find from db
+      }
 
       // Create token from user's info (id, username, user_type)
       const token = jwt.sign(

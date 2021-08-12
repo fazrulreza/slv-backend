@@ -10,7 +10,7 @@ const SURVEY = 'survey';
 const MSIC = 'msic';
 const PREDICTION = 'prediction';
 const ASSESSMENT = 'assessment';
-const USER_ROLE = 'user_role';
+const USER = 'user';
 const ELSA_SCORECARD = 'elsa_scorecard';
 
 const GETX_KPI = 'getx_kpi';
@@ -29,7 +29,7 @@ module.exports = {
   MSIC,
   PREDICTION,
   SURVEY,
-  USER_ROLE,
+  USER,
   GETX_KPI,
   GETX_SIGN,
   GETX_ATTACHMENT,

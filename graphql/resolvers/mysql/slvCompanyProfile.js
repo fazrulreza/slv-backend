@@ -105,7 +105,7 @@ module.exports = {
       parent, param,
       {
         connectors: {
-          MysqlSlvCompanyProfile, MysqlSlvSurvey, MysqlSlvAssessment, MysqlSlvUserRole,
+          MysqlSlvCompanyProfile, MysqlSlvSurvey, MysqlSlvAssessment, MysqlSlvUser,
         },
         // user: { mail, userType },
       },
@@ -117,7 +117,7 @@ module.exports = {
         where: null,
         order: [['USER']],
       };
-      const resUser = await MysqlSlvUserRole.findAll(searchOptsUser);
+      const resUser = await MysqlSlvUser.findAll(searchOptsUser);
       const resultUser = resUser.map((x) => x.dataValues);
 
       // company

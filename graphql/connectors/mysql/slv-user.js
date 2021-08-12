@@ -1,6 +1,6 @@
 const Sequelize = require('sequelize');
 const MysqlModel = require('../../../packages/mysql-model');
-const { mysqlConnection, USER_ROLE } = require('../../../config');
+const { mysqlConnection, USER } = require('../../../config');
 
 const connection = mysqlConnection;
 
@@ -16,6 +16,6 @@ const attributes = {
   UPDATED_BY: Sequelize.STRING,
 };
 
-const MysqlSlvUserRole = new MysqlModel(connection, USER_ROLE, attributes);
+const MysqlSlvUser = new MysqlModel(connection, USER, attributes);
 
-module.exports = MysqlSlvUserRole;
+module.exports = MysqlSlvUser;
