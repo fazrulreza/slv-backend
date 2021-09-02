@@ -32,6 +32,7 @@ const attributes = {
   GROUP: Sequelize.STRING,
   CLASS: Sequelize.STRING,
   MSIC: Sequelize.STRING,
+  MODULE: Sequelize.STRING,
   CREATED_AT: Sequelize.STRING,
   CREATED_BY: Sequelize.STRING,
   UPDATED_AT: Sequelize.STRING,

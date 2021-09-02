@@ -1,6 +1,7 @@
 const { generateId, generateHistory } = require('../../../packages/mysql-model');
-const { processSurveyResult } = require('../../helper/common');
-const { assessmentResolver, surveyAssessmentResolver } = require('../../permissions/acl');
+const { processSurveyResult, checkPermission } = require('../../helper/common');
+const { isAuthenticatedResolver } = require('../../permissions/acl');
+const { ForbiddenError } = require('../../permissions/errors');
 
 module.exports = {
   Query: {
@@ -9,11 +10,14 @@ module.exports = {
          * @param {Object} param0 main input object
          * @param {String} param0.id id
          */
-    allAssessment: surveyAssessmentResolver.createResolver(async (
-      parent,
-      { COMPANY_ID },
-      { connectors: { MysqlSlvSurvey, MysqlSlvAssessment } },
+    allAssessment: isAuthenticatedResolver.createResolver(async (
+      parent, { COMPANY_ID }, {
+        connectors: { MysqlSlvSurvey, MysqlSlvAssessment },
+        user: { mail, userRoleList },
+      },
     ) => {
+      if (!checkPermission('ASSESSMENT-READ', userRoleList)) throw new ForbiddenError();
+
       let resultQuest = [];
       let resultScore = [];
 
@@ -50,31 +54,42 @@ module.exports = {
     }),
   },
   Mutation: {
-    createAssessment: assessmentResolver.createResolver(async (
-      parent, { input }, { connectors: { MysqlSlvAssessment }, user },
+    createAssessment: isAuthenticatedResolver.createResolver(async (
+      parent, { input }, {
+        connectors: { MysqlSlvAssessment },
+        user: { mail, userRoleList },
+      },
     ) => {
+      if (!checkPermission('ASSESSMENT-CREATE', userRoleList)) throw new ForbiddenError();
+
       // process input
       const parsedInput = JSON.parse(input.data);
 
-      const history = generateHistory(user.mail, 'CREATE');
+      const history = generateHistory(mail, 'CREATE');
       const newInput = {
         ...parsedInput,
         ID: generateId(),
         ...history,
         COMPANY_ID: input.COMPANY_ID,
+        MODULE: userRoleList.MODULE,
         ASSESSMENT_YEAR: 1000,
       };
         // console.log(newInput);
       const result = await MysqlSlvAssessment.create(newInput);
       return result;
     }),
-    updateAssessment: assessmentResolver.createResolver(async (
-      parent, { input }, { connectors: { MysqlSlvAssessment }, user },
+    updateAssessment: isAuthenticatedResolver.createResolver(async (
+      parent, { input }, {
+        connectors: { MysqlSlvAssessment },
+        user: { mail, userRoleList },
+      },
     ) => {
+      if (!checkPermission('ASSESSMENT-UPDATE', userRoleList)) throw new ForbiddenError();
+
       const parsedInput = JSON.parse(input.data);
 
       // store new entry
-      const history = generateHistory(user.mail, 'UPDATE', parsedInput.CREATED_AT);
+      const history = generateHistory(mail, 'UPDATE', parsedInput.CREATED_AT);
       const searchOpts = {
         object: {
           ...parsedInput,

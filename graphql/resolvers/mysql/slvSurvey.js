@@ -1,6 +1,7 @@
 const { generateId, generateHistory } = require('../../../packages/mysql-model');
-const { processSurveyResult } = require('../../helper/common');
-const { surveyResolver, companySurveyResolver } = require('../../permissions/acl');
+const { processSurveyResult, checkPermission } = require('../../helper/common');
+const { isAuthenticatedResolver } = require('../../permissions/acl');
+const { ForbiddenError } = require('../../permissions/errors');
 
 const processInput = (input) => {
   const parsedInput = JSON.parse(input.data);
@@ -34,11 +35,14 @@ module.exports = {
          * @param {Object} param0 main input object
          * @param {String} param0.id id
          */
-    allSurvey: companySurveyResolver.createResolver(async (
-      parent,
-      { COMPANY_ID },
-      { connectors: { MysqlSlvSurvey, MysqlSlvCompanyProfile } },
+    allSurvey: isAuthenticatedResolver.createResolver(async (
+      parent, { COMPANY_ID }, {
+        connectors: { MysqlSlvSurvey, MysqlSlvCompanyProfile },
+        user: { mail, userRoleList },
+      },
     ) => {
+      if (!checkPermission('SURVEY-READ', userRoleList)) throw new ForbiddenError();
+
       let result = [];
       // company
       const resCompany = await MysqlSlvCompanyProfile.findById(COMPANY_ID);
@@ -71,18 +75,24 @@ module.exports = {
          * @param {Object} param0 main input object
          * @param {String} param0.id id
          */
-    fullSurveyList: companySurveyResolver.createResolver(async (
+    fullSurveyList: isAuthenticatedResolver.createResolver(async (
       parent, param,
       {
         connectors: { MysqlSlvSurvey, MysqlSlvCompanyProfile },
-        user: { mail, userType },
+        user: { mail, userRoleList },
       },
     ) => {
+      if (!checkPermission('SURVEY-READ', userRoleList)) throw new ForbiddenError();
+
       let result = [];
       let where = { CREATED_BY: mail };
 
+      // check module admin
+      if (userRoleList.DATA_VIEW === 'MODULE') {
+        where = { MODULE: userRoleList.MODULE };
+      }
       // check admin
-      if (userType === 'ADMIN') {
+      if (userRoleList.MODULE === 'ALL') {
         where = null;
       }
       const searchOpts = { where };
@@ -114,36 +124,48 @@ module.exports = {
       }
 
       // filter large enterprise
-      const finalResult = result.filter((cls) => cls.SME_CLASS !== 'LARGE ENTERPRISE' && cls.SME_CLASS !== 'N/A');
+      const finalResult = result
+        .filter((cls) => cls.SME_CLASS !== 'LARGE ENTERPRISE' && cls.SME_CLASS !== 'N/A');
 
       return finalResult;
     }),
   },
   Mutation: {
-    createSurvey: surveyResolver.createResolver(async (
-      parent, { input }, { connectors: { MysqlSlvSurvey }, user },
+    createSurvey: isAuthenticatedResolver.createResolver(async (
+      parent, { input }, {
+        connectors: { MysqlSlvSurvey },
+        user: { mail, userRoleList },
+      },
     ) => {
+      if (!checkPermission('SURVEY-CREATE', userRoleList)) throw new ForbiddenError();
+
       // process input
       const postInput = processInput(input);
 
-      const history = generateHistory(user.mail, 'CREATE');
+      const history = generateHistory(mail, 'CREATE');
       const newInput = {
         ...postInput,
         ID: generateId(),
         ...history,
         COMPANY_ID: input.COMPANY_ID,
+        MODULE: userRoleList.MODULE,
         ASSESSMENT_YEAR: 1000,
       };
       const result = await MysqlSlvSurvey.create(newInput);
       return result;
     }),
-    updateSurvey: surveyResolver.createResolver(async (
-      parent, { input }, { connectors: { MysqlSlvSurvey }, user },
+    updateSurvey: isAuthenticatedResolver.createResolver(async (
+      parent, { input }, {
+        connectors: { MysqlSlvSurvey },
+        user: { mail, userRoleList },
+      },
     ) => {
+      if (!checkPermission('SURVEY-UPDATE', userRoleList)) throw new ForbiddenError();
+
       const postInput = processInput(input);
 
       // store new entry
-      const history = generateHistory(user.mail, 'UPDATE', postInput.CREATED_AT);
+      const history = generateHistory(mail, 'UPDATE', postInput.CREATED_AT);
       const searchOpts = {
         object: {
           ...postInput,

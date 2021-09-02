@@ -21,6 +21,7 @@ const attributes = {
   CHECKER_DATE: Sequelize.STRING,
   CHECKER: Sequelize.STRING,
   COMPANY_ID: Sequelize.STRING,
+  MODULE: Sequelize.STRING,
   ASSESSMENT_YEAR: Sequelize.INTEGER.UNSIGNED,
   CREATED_AT: Sequelize.STRING,
   CREATED_BY: Sequelize.STRING,

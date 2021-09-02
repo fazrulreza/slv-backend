@@ -1,0 +1,33 @@
+input UserRoleInput {
+    data: String!
+}
+
+type UserRole {
+  ID: Int
+  NAME: String
+  MODULE: String
+  STATUS: String
+  DATA_VIEW: String
+  USER_MODULE: [String]
+  COMPANY_MODULE: [String]
+  SURVEY_MODULE: [String]
+  ASSESSMENT_MODULE: [String]
+  GETX_MODULE: [String]
+  ROLES_MODULE: [String]
+  ELSA_MODULE: [String]
+  CREATED_AT: String
+  CREATED_BY: String
+  UPDATED_AT: String
+  UPDATED_BY: String
+}
+
+type Query {
+  allUserRole: [UserRole!]!
+  oneUserRole(ID: Int!): UserRole!
+}
+
+type Mutation {
+  createUserRole(input: UserRoleInput!): UserRole!
+  updateUserRole(ID: Int!, input: UserRoleInput!): UpdateResp
+  deleteUserRole(ID: Int!): DeleteResp
+}

@@ -38,6 +38,7 @@ const attributes = {
   FR_FINANCIAL_SYSTEM: Sequelize.INTEGER,
   FR_FINANCIAL_SYSTEM_COMMENT: Sequelize.STRING,
   COMPANY_ID: Sequelize.STRING,
+  MODULE: Sequelize.STRING,
   ASSESSMENT_YEAR: Sequelize.INTEGER.UNSIGNED,
   CREATED_AT: Sequelize.STRING,
   CREATED_BY: Sequelize.STRING,

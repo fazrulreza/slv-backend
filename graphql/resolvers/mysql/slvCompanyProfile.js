@@ -1,5 +1,7 @@
 const { generateId, generateHistory } = require('../../../packages/mysql-model');
-const { companyResolver, allSLVResolver, allResolver } = require('../../permissions/acl');
+const { checkPermission } = require('../../helper/common');
+const { isAuthenticatedResolver } = require('../../permissions/acl');
+const { ForbiddenError } = require('../../permissions/errors');
 
 module.exports = {
   Query: {
@@ -8,10 +10,14 @@ module.exports = {
          * @param {Object} param0 main input object
          * @param {String} param0.id id
          */
-    oneCompany: companyResolver.createResolver(async (
-      parent,
-      { ID }, { connectors: { MysqlSlvCompanyProfile, MysqlSlvMSIC } },
+    oneCompany: isAuthenticatedResolver.createResolver(async (
+      parent, { ID }, {
+        connectors: { MysqlSlvCompanyProfile, MysqlSlvMSIC },
+        user: { mail, userRoleList },
+      },
     ) => {
+      if (!checkPermission('COMPANY-READ', userRoleList)) throw new ForbiddenError();
+
       const searchOpts = {
         where: null,
         order: [['MSIC']],
@@ -34,19 +40,24 @@ module.exports = {
          * @param {Object} param0 main input object
          * @param {String} param0.msic msic
          */
-    allCompanies: allSLVResolver.createResolver(async (
-      parent, param,
-      {
+    allCompanies: isAuthenticatedResolver.createResolver(async (
+      parent, param, {
         connectors: {
           MysqlSlvCompanyProfile, MysqlSlvSurvey, MysqlSlvAssessment, MysqlGetxKPI,
         },
-        user: { mail, userType },
+        user: { mail, userRoleList },
       },
     ) => {
+      if (!checkPermission('COMPANY-READ', userRoleList)) throw new ForbiddenError();
+
       let where = { CREATED_BY: mail };
 
+      // check module admin
+      if (userRoleList.DATA_VIEW === 'MODULE') {
+        where = { MODULE: userRoleList.MODULE };
+      }
       // check admin
-      if (userType === 'ADMIN') {
+      if (userRoleList.MODULE === 'ALL') {
         where = null;
       }
 
@@ -101,28 +112,37 @@ module.exports = {
          * Retrieve completed process by user
          * @param {Object} param0 main input object
          */
-    userReports: allResolver.createResolver(async (
-      parent, param,
-      {
+    userReports: isAuthenticatedResolver.createResolver(async (
+      parent, param, {
         connectors: {
-          MysqlSlvCompanyProfile, MysqlSlvSurvey, MysqlSlvAssessment, MysqlSlvUser,
+          MysqlSlvCompanyProfile, MysqlSlvSurvey, MysqlSlvAssessment, MysqlSlvUser, MysqlSlvUserRole,
         },
-        // user: { mail, userType },
+        user: { mail, userRoleList },
       },
     ) => {
-      const searchOpts = { where: null };
+      if (!checkPermission('COMPANY-READ', userRoleList)) throw new ForbiddenError();
+
+      let where = { MODULE: userRoleList.MODULE };
+
+      // check admin
+      if (userRoleList.MODULE === 'ALL') {
+        where = null;
+      }
+
+      const searchOpts = { where };
 
       // user
       const searchOptsUser = {
-        where: null,
+        where,
         order: [['USER']],
       };
       const resUser = await MysqlSlvUser.findAll(searchOptsUser);
       const resultUser = resUser.map((x) => x.dataValues);
 
+      // user role
+      const resultUserRole = await MysqlSlvUserRole.findAll(searchOpts);
       // company
       const resultCompany = await MysqlSlvCompanyProfile.findAll(searchOpts);
-
       // survey
       const resultQuest = await MysqlSlvSurvey.findAll(searchOpts);
       // assessment
@@ -130,6 +150,8 @@ module.exports = {
 
       // compile result
       const resultFinal = resultUser.map((x) => {
+        const resUR = resultUserRole.filter((vv) => x.ROLE === vv.ID)[0];
+
         const resC = resultCompany
           .map((ww) => ww.dataValues)
           .filter((w) => w.CREATED_BY === x.USER);
@@ -146,43 +168,49 @@ module.exports = {
 
         return {
           USER: x.USER.includes('@') ? x.USER.substring(0, x.USER.lastIndexOf('@')) : x.USER,
-          ROLE: x.ROLE,
+          ROLE_NAME: resUR.NAME,
+          STATUS: x.STATUS,
           PROFILE_COUNT: resC.length,
           SURVEY_COUNT: resQ.length,
           ASSESSMENT_COUNT: resS.length,
         };
       });
-      // console.dir(resultQuest, { depth: null, colorized: true });
+      // console.dir(resultFinal, { depth: null, colorized: true });
       return resultFinal;
     }),
   },
   Mutation: {
-    createCompany: companyResolver.createResolver(async (
-      parent, { input }, { connectors: { MysqlSlvCompanyProfile }, user },
+    createCompany: isAuthenticatedResolver.createResolver(async (
+      parent, { input }, {
+        connectors: { MysqlSlvCompanyProfile },
+        user: { mail, userRoleList },
+      },
     ) => {
+      if (!checkPermission('COMPANY-CREATE', userRoleList)) throw new ForbiddenError();
+
       const parsedInput = JSON.parse(input.data);
-      const history = generateHistory(user.mail, 'CREATE');
+      const history = generateHistory(mail, 'CREATE');
       const newInput = {
         ...parsedInput,
         ID: generateId(),
+        MODULE: userRoleList.MODULE,
         ...history,
       };
         //   console.log(newInput);
       return MysqlSlvCompanyProfile.create(newInput);
     }),
-    deleteCompany: companyResolver.createResolver(async (
-      parent,
-      { ID },
-      {
+    deleteCompany: isAuthenticatedResolver.createResolver(async (
+      parent, { ID }, {
         connectors: {
           MysqlSlvCompanyProfile, MysqlSlvSurvey, MysqlSlvAssessment, MysqlSlvELSAScorecard,
         },
+        user: { mail, userRoleList },
       },
     ) => {
+      if (!checkPermission('COMPANY-DELETE', userRoleList)) throw new ForbiddenError();
+
       // remove company
-      const searchOpts = {
-        where: { ID },
-      };
+      const searchOpts = { where: { ID } };
       const result = await MysqlSlvCompanyProfile.delete(searchOpts);
 
       // remove company from other tables
@@ -200,22 +228,22 @@ module.exports = {
       // console.dir(result2, { depth: null, colorized: true });
       return result2;
     }),
-    updateCompany: companyResolver.createResolver(async (
-      parent,
-      { ID, input },
-      { connectors: { MysqlSlvCompanyProfile } },
-      user,
+    updateCompany: isAuthenticatedResolver.createResolver(async (
+      parent, { ID, input }, {
+        connectors: { MysqlSlvCompanyProfile },
+        user: { mail, userRoleList },
+      },
     ) => {
+      if (!checkPermission('COMPANY-UPDATE', userRoleList)) throw new ForbiddenError();
+
       const parsedInput = JSON.parse(input.data);
-      const history = generateHistory(user.mail, 'UPDATE', parsedInput.CREATED_AT);
+      const history = generateHistory(mail, 'UPDATE', parsedInput.CREATED_AT);
       const searchOpts = {
         object: {
           ...parsedInput,
           ...history,
         },
-        where: {
-          ID,
-        },
+        where: { ID },
       };
       const result = await MysqlSlvCompanyProfile.update(searchOpts);
       const result2 = {
@@ -225,26 +253,26 @@ module.exports = {
       // console.dir(result2, { depth: null, colorized: true });
       return result2;
     }),
-    unlistCompany: companyResolver.createResolver(async (
-      parent,
-      { ID },
-      { connectors: { MysqlSlvCompanyProfile } },
-      user,
+    unlistCompany: isAuthenticatedResolver.createResolver(async (
+      parent, { ID }, {
+        connectors: { MysqlSlvCompanyProfile },
+        user: { mail, userRoleList },
+      },
     ) => {
+      if (!checkPermission('GETX-DELETE', userRoleList)) throw new ForbiddenError();
+
       // search company
       const res = await MysqlSlvCompanyProfile.findById(ID);
 
       // update flag to NO
-      const history = generateHistory(user.mail, 'UPDATE', res.CREATED_AT);
+      const history = generateHistory(mail, 'UPDATE', res.CREATED_AT);
       const searchOpts = {
         object: {
           ...res,
           ...history,
           GETX_FLAG: 'NO',
         },
-        where: {
-          ID,
-        },
+        where: { ID },
       };
       const result = await MysqlSlvCompanyProfile.update(searchOpts);
       const result2 = {

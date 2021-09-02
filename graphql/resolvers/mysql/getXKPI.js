@@ -1,12 +1,11 @@
 const flatten = require('lodash/flatten');
 const moment = require('moment');
 const { generateId, generateHistory } = require('../../../packages/mysql-model');
-const { getTotalScore } = require('../../helper/common');
-const {
-  kpiElsaResolver, kpiResolver, kpiCompanyResolver, kpiUserResolver,
-} = require('../../permissions/acl');
+const { getTotalScore, checkPermission } = require('../../helper/common');
+const { isAuthenticatedResolver } = require('../../permissions/acl');
+const { ForbiddenError } = require('../../permissions/errors');
 
-const processGetxData = (input, user, create = true) => {
+const processGetxData = (input, mail, modul, create = true) => {
   const parsedInput = JSON.parse(input.data);
 
   const {
@@ -48,13 +47,14 @@ const processGetxData = (input, user, create = true) => {
   } = parsedInput;
 
   const history = create
-    ? generateHistory(user.mail, 'CREATE')
-    : generateHistory(user.mail, 'UPDATE', parsedInput.CREATED_AT);
+    ? generateHistory(mail, 'CREATE')
+    : generateHistory(mail, 'UPDATE', parsedInput.CREATED_AT);
 
   const kpiInput = {
     ...others,
     ...history,
     COMPANY_ID: input.COMPANY_ID,
+    MODULE: modul,
     ASSESSMENT_YEAR: 1000,
   };
 
@@ -70,6 +70,7 @@ const processGetxData = (input, user, create = true) => {
     CHECKER_DATE,
     CHECKER,
     COMPANY_ID: input.COMPANY_ID,
+    MODULE: modul,
     ASSESSMENT_YEAR: 1000,
     GETX_TYPE: 'KPI',
     ...history,
@@ -87,6 +88,7 @@ const processGetxData = (input, user, create = true) => {
     CHECKER_DATE: CHECKER_ACTUAL_DATE,
     CHECKER: CHECKER_ACTUAL,
     COMPANY_ID: input.COMPANY_ID,
+    MODULE: modul,
     ASSESSMENT_YEAR: 1000,
     GETX_TYPE: 'ACHIEVEMENT',
     ...history,
@@ -104,6 +106,7 @@ const processGetxData = (input, user, create = true) => {
     NG_ATTACHMENT: JSON.stringify(NG_ATTACHMENT),
     FILE_ATTACHMENT: JSON.stringify(FILE_ATTACHMENT),
     COMPANY_ID: input.COMPANY_ID,
+    MODULE: modul,
     ASSESSMENT_YEAR: 1000,
     GETX_TYPE: 'ACHIEVEMENT',
     ...history,
@@ -192,11 +195,14 @@ module.exports = {
     /**
      * Get data for dashboard (aggregated)
      */
-    dashboardKPI: kpiUserResolver.createResolver(async (
-      parent,
-      param,
-      { connectors: { MysqlGetxKPI, MysqlSlvUser } },
+    dashboardKPI: isAuthenticatedResolver.createResolver(async (
+      parent, param, {
+        connectors: { MysqlGetxKPI, MysqlSlvUser },
+        user: { mail, userRoleList },
+      },
     ) => {
+      if (!checkPermission('GETX-READ', userRoleList)) throw new ForbiddenError();
+
       // user list
       const searchOptsUser = {
         where: null,
@@ -248,13 +254,14 @@ module.exports = {
     /**
      * Get data for score card (individual)
      */
-    scorecardKPI: kpiCompanyResolver.createResolver(async (
-      parent,
-      { COMPANY_ID },
-      {
+    scorecardKPI: isAuthenticatedResolver.createResolver(async (
+      parent, { COMPANY_ID }, {
         connectors: { MysqlGetxKPI, MysqlSlvMSIC, MysqlSlvCompanyProfile },
+        user: { mail, userRoleList },
       },
     ) => {
+      if (!checkPermission('GETX-READ', userRoleList)) throw new ForbiddenError();
+
       let resultKPI = [];
       const searchOpts = { where: { COMPANY_ID } };
 
@@ -314,16 +321,17 @@ module.exports = {
      * @param {Object} param0 main input object
      * @param {String} param0.id id
      */
-    allGetXKPI: kpiElsaResolver.createResolver(async (
-      parent,
-      { COMPANY_ID },
-      {
+    allGetXKPI: isAuthenticatedResolver.createResolver(async (
+      parent, { COMPANY_ID }, {
         connectors: {
           MysqlGetxKPI, MysqlGetxSign, MysqlGetxAttachment,
           MysqlSlvELSAScorecard, MysqlSlvAssessment, MysqlSlvSurvey,
         },
+        user: { mail, userRoleList },
       },
     ) => {
+      if (!checkPermission('GETX-READ', userRoleList)) throw new ForbiddenError();
+
       let result = [];
       let newResult = [];
       const searchOpts = { where: { COMPANY_ID } };
@@ -492,15 +500,18 @@ module.exports = {
     }),
   },
   Mutation: {
-    createGetXKPI: kpiResolver.createResolver(async (
-      parent,
-      { input },
-      { connectors: { MysqlGetxKPI, MysqlGetxSign, MysqlGetxAttachment }, user },
+    createGetXKPI: isAuthenticatedResolver.createResolver(async (
+      parent, { input }, {
+        connectors: { MysqlGetxKPI, MysqlGetxSign, MysqlGetxAttachment },
+        user: { mail, userRoleList },
+      },
     ) => {
+      if (!checkPermission('GETX-CREATE', userRoleList)) throw new ForbiddenError();
+
       // process input
       const {
         kpiInput, signKPIInput, signActualInput, attachmentInput,
-      } = processGetxData(input, user);
+      } = processGetxData(input, mail, userRoleList.MODULE);
 
       // main KPI
       const getXKPIInput = {
@@ -536,18 +547,21 @@ module.exports = {
       return resultKPI;
     }),
 
-    updateGetXKPI: kpiResolver.createResolver(async (
-      parent,
-      { input },
-      { connectors: { MysqlGetxKPI, MysqlGetxSign, MysqlGetxAttachment }, user },
+    updateGetXKPI: isAuthenticatedResolver.createResolver(async (
+      parent, { input }, {
+        connectors: { MysqlGetxKPI, MysqlGetxSign, MysqlGetxAttachment },
+        user: { mail, userRoleList },
+      },
     ) => {
+      if (!checkPermission('GETX-UPDATE', userRoleList)) throw new ForbiddenError();
+
       // process input
       const {
         kpiInput, signKPIInput, signActualInput, attachmentInput,
         SIGN_KPI_ID, SIGN_ACTUAL_ID, ATTACHMENT_ID,
-      } = processGetxData(input, user, false);
+      } = processGetxData(input, mail, userRoleList.MODULE, false);
 
-      const createHistory = generateHistory(user.mail, 'CREATE');
+      const createHistory = generateHistory(mail, 'CREATE');
 
       // KPI
       const searchOptsKPI = {
@@ -642,19 +656,21 @@ module.exports = {
       // console.dir(result2, { depth: null, colorized: true });
       return result2;
     }),
-    finalizeKPI: kpiResolver.createResolver(async (
+    finalizeKPI: isAuthenticatedResolver.createResolver(async (
       parent, { input }, {
-        connectors: {
-          MysqlGetxKPI, MysqlGetxSign, MysqlGetxAttachment,
-        },
-        user,
+        connectors: { MysqlGetxKPI, MysqlGetxSign, MysqlGetxAttachment },
+        user: { mail, userRoleList },
       },
     ) => {
+      if (!checkPermission('GETX-CREATE', userRoleList)) throw new ForbiddenError();
+
       // kpi
       const searchOptsKPI = { where: { COMPANY_ID: input.COMPANY_ID } };
+
       const resKPI = await MysqlGetxKPI.findOne(searchOptsKPI);
       const KPIInput = resKPI.dataValues;
-      const KPIHist = generateHistory(user.mail, 'CREATE');
+
+      const KPIHist = generateHistory(mail, 'CREATE');
       const finalKPI = {
         ...KPIInput,
         ...KPIHist,
@@ -666,9 +682,11 @@ module.exports = {
 
       // attachment
       const searchOptsAtt = { where: { COMPANY_ID: input.COMPANY_ID } };
+
       const resAtt = await MysqlGetxAttachment.findOne(searchOptsAtt);
       const attInput = resAtt.dataValues;
-      const attHist = generateHistory(user.mail, 'CREATE');
+
+      const attHist = generateHistory(mail, 'CREATE');
       const finalAtt = {
         ...attInput,
         ...attHist,
@@ -685,10 +703,11 @@ module.exports = {
           ASSESSMENT_YEAR: 1000,
         },
       };
+
       const resSign = await MysqlGetxSign.findAll(searchOptsSign);
       const signInput = resSign.map((b) => {
         const preSign = b.dataValues;
-        const history = generateHistory(user.mail, 'CREATE');
+        const history = generateHistory(mail, 'CREATE');
         const newSign = {
           ...preSign,
           ...history,

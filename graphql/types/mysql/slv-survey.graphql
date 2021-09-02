@@ -54,6 +54,7 @@ type Survey {
   SME_CLASS: String
   ANNUAL_TURNOVER: Float
   COMPANY_ID: String
+  MODULE: String
   ASSESSMENT_YEAR: Int
   CREATED_AT: String
   CREATED_BY: String

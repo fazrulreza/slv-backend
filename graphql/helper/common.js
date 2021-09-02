@@ -173,6 +173,28 @@ const getTotalScore = (scorecard) => {
   return (Math.round((sumScore / countScore) * 10) / 10);
 };
 
+const processUserRolesOutput = (data) => {
+  const preOutput = data.dataValues;
+  const processedOutput = {
+    ...preOutput,
+    COMPANY_MODULE: JSON.parse(preOutput.COMPANY_MODULE),
+    SURVEY_MODULE: JSON.parse(preOutput.SURVEY_MODULE),
+    ASSESSMENT_MODULE: JSON.parse(preOutput.ASSESSMENT_MODULE),
+    USER_MODULE: JSON.parse(preOutput.USER_MODULE),
+    ROLES_MODULE: JSON.parse(preOutput.ROLES_MODULE),
+    GETX_MODULE: JSON.parse(preOutput.GETX_MODULE),
+    ELSA_MODULE: JSON.parse(preOutput.ELSA_MODULE),
+  };
+  return processedOutput;
+};
+
+const checkPermission = (permission, userRoleList) => {
+  const [subModule, auth] = permission.split('-');
+
+  if (userRoleList.STATUS !== 'ACTIVE') return false;
+  return userRoleList[`${subModule}_MODULE`].includes(auth);
+};
+
 module.exports = {
   // getFilter,
   getDifference,
@@ -180,4 +202,6 @@ module.exports = {
   cleanEmpty,
   calculateScores,
   getTotalScore,
+  processUserRolesOutput,
+  checkPermission,
 };

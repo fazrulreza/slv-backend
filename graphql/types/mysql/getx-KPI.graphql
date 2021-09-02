@@ -116,6 +116,7 @@ type GetXKPI {
     NG_Q4: String
     NG_COMMENT: String
     COMPANY_ID: String
+    MODULE: String
     ASSESSMENT_YEAR: Int
     CREATED_AT: String
     CREATED_BY: String

@@ -4,7 +4,10 @@ input UserInput {
 
 type User {
   USER: String
-  ROLE: String
+  ROLE: Int
+  STATUS: String
+  USER_ROLE: String
+  MODULE: String
   CREATED_AT: String
   CREATED_BY: String
   UPDATED_AT: String

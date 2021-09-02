@@ -8,15 +8,20 @@ const MysqlGetxKPI = require('./getx-kpi');
 const MysqlGetxSign = require('./getx-sign');
 const MysqlGetxAttachment = require('./getx-attachment');
 const MysqlSlvPrediction = require('./slv-prediction');
+const MysqlSlvUserRole = require('./slv-user_role');
 
 const mysqlConnectors = {
+  // elsa
   MysqlSlvCompanyProfile,
   MysqlSlvSurvey,
   MysqlSlvPrediction,
   MysqlSlvMSIC,
   MysqlSlvAssessment,
-  MysqlSlvUser,
   MysqlSlvELSAScorecard,
+
+  // user
+  MysqlSlvUser,
+  MysqlSlvUserRole,
 
   // getx
   MysqlGetxKPI,

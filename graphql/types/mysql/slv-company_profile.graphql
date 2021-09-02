@@ -12,6 +12,7 @@ type CompanyProfile {
   BUMI_STATUS: String
   WOMAN_OWNED: String
   GETX_FLAG: String
+  MODULE: String
   ENTITY_STATUS: String
   ENTITY_TYPE: String
   ADDRESS_LINE_1: String
@@ -44,7 +45,8 @@ type CompanyProfileWithMSIC {
 
 type UserReport {
   USER: String,
-  ROLE: String,
+  ROLE_NAME: String,
+  STATUS: String,
   PROFILE_COUNT: Int,
   SURVEY_COUNT: Int,
   ASSESSMENT_COUNT: Int,

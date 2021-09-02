@@ -102,6 +102,7 @@ const attributes = {
   INTERVENTION: Sequelize.STRING,
   FURTHER_NOTES: Sequelize.STRING,
   COMPANY_ID: Sequelize.STRING,
+  MODULE: Sequelize.STRING,
   ASSESSMENT_YEAR: Sequelize.INTEGER.UNSIGNED,
   CREATED_AT: Sequelize.STRING,
   CREATED_BY: Sequelize.STRING,

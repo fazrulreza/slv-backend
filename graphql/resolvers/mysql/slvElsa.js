@@ -1,7 +1,10 @@
 const { generateId, generateHistory } = require('../../../packages/mysql-model');
-const { processSurveyResult, calculateScores, getTotalScore } = require('../../helper/common');
+const {
+  processSurveyResult, calculateScores, getTotalScore, checkPermission,
+} = require('../../helper/common');
 const { classScore, profileGroup } = require('../../helper/parameter');
-const { allSLVResolver, elsaResolver, assessmentElsaResolver } = require('../../permissions/acl');
+const { isAuthenticatedResolver } = require('../../permissions/acl');
+const { ForbiddenError } = require('../../permissions/errors');
 
 const getPrediction = (resultPredict, fields, factor) => {
   // prepare key
@@ -22,21 +25,30 @@ module.exports = {
          * @param {Object} param0 main input object
          * @param {String} param0.id id
          */
-    fullElsaList: allSLVResolver.createResolver(async (
+    fullElsaList: isAuthenticatedResolver.createResolver(async (
       parent, param,
       {
         connectors: { MysqlSlvCompanyProfile, MysqlSlvELSAScorecard, MysqlSlvSurvey },
-        user: { mail, userType },
+        user: { mail, userRoleList },
       },
     ) => {
+      if (!checkPermission('ELSA-READ', userRoleList)) throw new ForbiddenError();
+
       let result = [];
       let resultCompany = [];
       let resultQuest = [];
       let resultElsa = [];
       let where = { CREATED_BY: mail };
 
+      // check module admin
+      if (userRoleList.DATA_VIEW === 'MODULE') {
+        where = { MODULE: userRoleList.MODULE };
+      }
       // check admin
-      if (userType === 'ADMIN') where = null;
+      if (userRoleList.MODULE === 'ALL') {
+        where = null;
+      }
+
       const searchOpts = { where };
       const searchOptsAll = { where: null };
 
@@ -86,9 +98,14 @@ module.exports = {
 
       return result;
     }),
-    oneElsa: assessmentElsaResolver.createResolver(async (
-      parent, { input }, { connectors: { MysqlSlvAssessment, MysqlSlvELSAScorecard } },
+    oneElsa: isAuthenticatedResolver.createResolver(async (
+      parent, { input }, {
+        connectors: { MysqlSlvAssessment, MysqlSlvELSAScorecard },
+        user: { mail, userRoleList },
+      },
     ) => {
+      if (!checkPermission('ELSA-READ', userRoleList)) throw new ForbiddenError();
+
       const searchOpts = {
         where: {
           COMPANY_ID: input.COMPANY_ID,
@@ -119,7 +136,7 @@ module.exports = {
          * @param {Object} param0 main input object
          * @param {String} param0.id id
          */
-    oneAll: allSLVResolver.createResolver(async (
+    oneAll: isAuthenticatedResolver.createResolver(async (
       parent, { input },
       {
         connectors:
@@ -127,9 +144,11 @@ module.exports = {
           MysqlSlvCompanyProfile, MysqlSlvSurvey, MysqlSlvAssessment,
           MysqlSlvMSIC, MysqlSlvELSAScorecard, MysqlSlvPrediction,
         },
-        user,
+        user: { mail, userRoleList },
       },
     ) => {
+      if (!checkPermission('ELSA-READ', userRoleList)) throw new ForbiddenError();
+
       // company
       const searchOpts = { where: { COMPANY_ID: input.COMPANY_ID } };
       const searchOptsAll = { where: null };
@@ -335,7 +354,9 @@ module.exports = {
               };
             }
 
-            if (resultScore && resultQuest.SME_CLASS !== 'LARGE ENTERPRISE' && resultQuest.SME_CLASS !== 'N/A') {
+            if (resultScore
+              && resultQuest.SME_CLASS !== 'LARGE ENTERPRISE'
+              && resultQuest.SME_CLASS !== 'N/A') {
               // calculate score
               const getClassScore = Object.keys(resultScore)
                 .map((y) => {
@@ -423,7 +444,9 @@ module.exports = {
       });
 
       // store in DB if default 1000
-      if (input.ASSESSMENT_YEAR === 1000 && !input.PUBLIC) {
+      if (input.ASSESSMENT_YEAR === 1000
+        && !input.PUBLIC
+        && checkPermission('ELSA-CREATE', userRoleList)) {
         // get elsa
         const [toStore] = finalResult
           .filter((i) => i.ASSESSMENT_YEAR === 1000)
@@ -431,12 +454,13 @@ module.exports = {
 
         // generate history
         const dbStoreScoreCard = toStore.map((b) => {
-          const history = generateHistory(user.mail, 'CREATE');
+          const history = generateHistory(mail, 'CREATE');
           const newB = {
             ...b,
             ...history,
             ID: generateId(),
             COMPANY_ID: input.COMPANY_ID,
+            MODULE: userRoleList.MODULE,
           };
           return newB;
         });
@@ -459,19 +483,19 @@ module.exports = {
     }),
   },
   Mutation: {
-    createElsa: elsaResolver.createResolver(async (
+    createElsa: isAuthenticatedResolver.createResolver(async (
       parent, { input }, {
-        connectors: {
-          MysqlSlvSurvey, MysqlSlvAssessment, MysqlSlvELSAScorecard,
-        },
-        user,
+        connectors: { MysqlSlvSurvey, MysqlSlvAssessment, MysqlSlvELSAScorecard },
+        user: { mail, userRoleList },
       },
     ) => {
+      if (!checkPermission('ELSA-CREATE', userRoleList)) throw new ForbiddenError();
+
       // survey
       const searchOptsSurvey = { where: { COMPANY_ID: input.COMPANY_ID } };
       const resSurvey = await MysqlSlvSurvey.findOne(searchOptsSurvey);
       const surveyInput = resSurvey.dataValues;
-      const surveyHist = generateHistory(user.mail, 'CREATE');
+      const surveyHist = generateHistory(mail, 'CREATE');
       const finalSurvey = {
         ...surveyInput,
         ...surveyHist,
@@ -484,7 +508,7 @@ module.exports = {
       const searchOptsAssess = { where: { COMPANY_ID: input.COMPANY_ID } };
       const resAssess = await MysqlSlvAssessment.findOne(searchOptsAssess);
       const assessInput = resAssess.dataValues;
-      const assessHist = generateHistory(user.mail, 'CREATE');
+      const assessHist = generateHistory(mail, 'CREATE');
       const finalAssess = {
         ...assessInput,
         ...assessHist,
@@ -503,13 +527,14 @@ module.exports = {
       const resElsa = await MysqlSlvELSAScorecard.findAll(searchOptsElsa);
       const elsaInput = resElsa.map((b) => {
         const preB = b.dataValues;
-        const history = generateHistory(user.mail, 'CREATE');
+        const history = generateHistory(mail, 'CREATE');
         const newB = {
           ...preB,
           ...history,
           ID: generateId(),
           ASSESSMENT_YEAR: input.ASSESSMENT_YEAR,
           COMPANY_ID: input.COMPANY_ID,
+          MODULE: userRoleList.MODULE,
         };
         return newB;
       });

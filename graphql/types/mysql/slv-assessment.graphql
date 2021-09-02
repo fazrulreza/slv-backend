@@ -34,6 +34,7 @@ type Assessment {
   FR_FINANCIAL_SYSTEM: Int
   FR_FINANCIAL_SYSTEM_COMMENT: String
   COMPANY_ID: String
+  MODULE: String
   ASSESSMENT_YEAR: Int
   CREATED_AT: String
   CREATED_BY: String
