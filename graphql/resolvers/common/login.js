@@ -6,7 +6,10 @@ const { SECRET, NODE_ENV } = process.env;
 
 module.exports = {
   Mutation: {
-    ldapLogin: async (parent, { input }, { connectors: { MysqlSlvUser, MysqlSlvUserRole } }) => {
+    ldapLogin: async (
+      parent, { input },
+      { connectors: { MysqlSlvUser, MysqlSlvUserRole } },
+    ) => {
       // Retrieve LDAP account
 
       const userType = 'PUBLIC';
@@ -72,15 +75,11 @@ module.exports = {
         }
       }
 
-      const searchOptsRole = {
-        where: { NAME: data.userType },
-      };
-
-      const resUserRole = await MysqlSlvUserRole.findOne(searchOptsRole);
+      const resUserRole = await MysqlSlvUserRole.findById(data.userType);
       if (resUserRole) {
         const uRoleList = processUserRolesOutput(resUserRole);
         const {
-          ID, NAME, CREATED_BY, CREATED_AT, UPDATED_BY, UPDATED_AT,
+          ID, CREATED_BY, CREATED_AT, UPDATED_BY, UPDATED_AT,
           ...others
         } = uRoleList;
 

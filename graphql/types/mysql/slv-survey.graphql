@@ -62,9 +62,18 @@ type Survey {
   UPDATED_BY: String
 }
 
+type smeScatterOutput {
+  COMPANY_ID: String
+  SECTOR: String
+  ANNUAL_TURNOVER: Float
+  FULLTIME_EMPLOYEE_COUNT: Int
+  SME_CLASS: String
+  ASSESSMENT_DONE: Int
+}
+
 type Query {
   allSurvey (COMPANY_ID: String!): [Survey]
-  fullSurveyList: [Survey!]!
+  smeScatter: [smeScatterOutput!]!
 }
 
 type Mutation {

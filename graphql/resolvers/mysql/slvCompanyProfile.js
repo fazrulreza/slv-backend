@@ -1,5 +1,6 @@
 const { generateId, generateHistory } = require('../../../packages/mysql-model');
 const { checkPermission } = require('../../helper/common');
+const { stateList } = require('../../helper/parameter');
 const { isAuthenticatedResolver } = require('../../permissions/acl');
 const { ForbiddenError } = require('../../permissions/errors');
 
@@ -115,7 +116,8 @@ module.exports = {
     userReports: isAuthenticatedResolver.createResolver(async (
       parent, param, {
         connectors: {
-          MysqlSlvCompanyProfile, MysqlSlvSurvey, MysqlSlvAssessment, MysqlSlvUser, MysqlSlvUserRole,
+          MysqlSlvCompanyProfile, MysqlSlvSurvey, MysqlSlvAssessment,
+          MysqlSlvUser, MysqlSlvUserRole,
         },
         user: { mail, userRoleList },
       },
@@ -177,6 +179,84 @@ module.exports = {
       });
       // console.dir(resultFinal, { depth: null, colorized: true });
       return resultFinal;
+    }),
+    stateReports: isAuthenticatedResolver.createResolver(async (
+      parent, param, {
+        connectors: { MysqlSlvCompanyProfile, MysqlSlvSurvey, MysqlSlvAssessment },
+        user: { mail, userRoleList },
+      },
+    ) => {
+      if (!checkPermission('COMPANY-READ', userRoleList)) throw new ForbiddenError();
+
+      let where = { CREATED_BY: mail };
+      let resultCompany = [];
+      let resultQuest = [];
+      let resultScore = [];
+
+      // check module admin
+      if (userRoleList.DATA_VIEW === 'MODULE') {
+        where = { MODULE: userRoleList.MODULE };
+      }
+      // check admin
+      if (userRoleList.MODULE === 'ALL') {
+        where = null;
+      }
+      const searchOpts = { where };
+
+      // Assessment
+      const resScore = await MysqlSlvSurvey.findAll(searchOpts);
+      if (resScore.length !== 0) {
+        resultScore = resScore
+          .map((a) => a.dataValues)
+          .filter((oa) => oa.ASSESSMENT_YEAR === 1000);
+      }
+
+      // Survey
+      const resQuest = await MysqlSlvAssessment.findAll(searchOpts);
+      if (resQuest.length !== 0) {
+        resultQuest = resQuest
+          .map((s) => s.dataValues)
+          .filter((oa) => oa.ASSESSMENT_YEAR === 1000);
+      }
+
+      // company
+      const resCompany = await MysqlSlvCompanyProfile.findAll(searchOpts);
+      resultCompany = resCompany
+        .map((x) => {
+          const resC = x.dataValues;
+          const resQ = resultQuest.filter((y) => y.COMPANY_ID === resC.ID);
+          const resS = resultScore.filter((z) => z.COMPANY_ID === resC.ID);
+          return {
+            ...resC,
+            SME_CLASS: resQ.length !== 0 ? resQ[0].SME_CLASS : 'N/A',
+            ASSESSMENT_DONE: resS.length,
+          };
+        })
+        .filter((cls) => cls.SME_CLASS !== 'LARGE ENTERPRISE' && cls.SME_CLASS !== 'N/A')
+        .filter(((as) => as.ASSESSMENT_DONE !== 0));
+
+      // get count list
+      const stateStats = stateList.map((st) => {
+        const count = resultCompany.filter((c) => c.STATE === st).length;
+        // const colorCount = Math.round((count / resultCompany.length) * 20);
+        return {
+          STATE: st,
+          COUNT: count,
+        };
+      });
+
+      // get value for color (max 20)
+      const stateStatsColor = stateStats.map((y) => {
+        const countList = stateStats.map((z) => z.COUNT);
+        const maxCount = Math.max(...countList);
+        const countColor = Math.round((y.COUNT / maxCount) * 20);
+        return {
+          ...y,
+          COUNT_COLOR: countColor,
+        };
+      });
+
+      return stateStatsColor;
     }),
   },
   Mutation: {

@@ -75,17 +75,19 @@ module.exports = {
          * @param {Object} param0 main input object
          * @param {String} param0.id id
          */
-    fullSurveyList: isAuthenticatedResolver.createResolver(async (
+    smeScatter: isAuthenticatedResolver.createResolver(async (
       parent, param,
       {
-        connectors: { MysqlSlvSurvey, MysqlSlvCompanyProfile },
+        connectors: { MysqlSlvSurvey, MysqlSlvCompanyProfile, MysqlSlvAssessment },
         user: { mail, userRoleList },
       },
     ) => {
       if (!checkPermission('SURVEY-READ', userRoleList)) throw new ForbiddenError();
 
-      let result = [];
       let where = { CREATED_BY: mail };
+      let resultCompany = [];
+      let resultQuest = [];
+      let resultScore = [];
 
       // check module admin
       if (userRoleList.DATA_VIEW === 'MODULE') {
@@ -97,37 +99,42 @@ module.exports = {
       }
       const searchOpts = { where };
 
-      // company
-      const resCom = await MysqlSlvCompanyProfile.findAll(searchOpts);
-
-      // survey
-      const res = await MysqlSlvSurvey.findAll(searchOpts);
-
-      if (res.length !== 0) {
-        result = res.map((svy) => {
-          const result2 = svy.dataValues;
-
-          // process result
-          const processedResult = processSurveyResult(result2);
-          const SECTOR = resCom
-            .filter((g) => g.ID === result2.COMPANY_ID)
-            .map((h) => h.SECTOR)[0];
-
-          const newResult = {
-            ...result2,
-            ...processedResult,
-            SECTOR,
-          };
-
-          return newResult;
-        });
+      // Assessment
+      const resScore = await MysqlSlvAssessment.findAll(searchOpts);
+      if (resScore.length !== 0) {
+        resultScore = resScore
+          .map((a) => a.dataValues)
+          .filter((oa) => oa.ASSESSMENT_YEAR === 1000);
       }
 
-      // filter large enterprise
-      const finalResult = result
-        .filter((cls) => cls.SME_CLASS !== 'LARGE ENTERPRISE' && cls.SME_CLASS !== 'N/A');
+      // Survey
+      const resQuest = await MysqlSlvSurvey.findAll(searchOpts);
+      if (resQuest.length !== 0) {
+        resultQuest = resQuest
+          .map((s) => s.dataValues)
+          .filter((oa) => oa.ASSESSMENT_YEAR === 1000);
+      }
 
-      return finalResult;
+      // company
+      const resCompany = await MysqlSlvCompanyProfile.findAll(searchOpts);
+      resultCompany = resCompany
+        .map((x) => {
+          const resC = x.dataValues;
+          const resQ = resultQuest.filter((y) => y.COMPANY_ID === resC.ID);
+          const resS = resultScore.filter((z) => z.COMPANY_ID === resC.ID);
+          return {
+            COMPANY_ID: resC.ID,
+            SECTOR: resC.SECTOR,
+            ANNUAL_TURNOVER: resQ.length !== 0 ? resQ[0].ANNUAL_TURNOVER : 0,
+            FULLTIME_EMPLOYEE_COUNT: resQ.length !== 0 ? resQ[0].FULLTIME_EMPLOYEE_COUNT : 0,
+            SME_CLASS: resQ.length !== 0 ? resQ[0].SME_CLASS : 'N/A',
+            ASSESSMENT_DONE: resS.length,
+          };
+        })
+        .filter((cls) => cls.SME_CLASS !== 'LARGE ENTERPRISE' && cls.SME_CLASS !== 'N/A')
+        .filter(((as) => as.ASSESSMENT_DONE !== 0));
+
+      return resultCompany;
     }),
   },
   Mutation: {

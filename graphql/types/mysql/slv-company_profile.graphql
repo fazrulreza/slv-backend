@@ -43,7 +43,7 @@ type CompanyProfileWithMSIC {
   company: CompanyProfile!
 }
 
-type UserReport {
+type UserReportList {
   USER: String,
   ROLE_NAME: String,
   STATUS: String,
@@ -52,10 +52,17 @@ type UserReport {
   ASSESSMENT_COUNT: Int,
 }
 
+type StateList {
+  STATE: String,
+  COUNT: Int,
+  COUNT_COLOR: Int,
+}
+
 type Query {
     oneCompany (ID: String!): CompanyProfileWithMSIC!
     allCompanies: [CompanyProfile!]!
-    userReports: [UserReport!]!
+    userReports: [UserReportList!]!
+    stateReports: [StateList!]!
 }
 
 type Mutation {

@@ -90,8 +90,28 @@ const tieredInterventionGroup = {
   5: 'Tier 1: Awareness creation (readiness for next lifecycle stage)',
 };
 
+const stateList = [
+  'JOHOR',
+  'KEDAH',
+  'KELANTAN',
+  'MELAKA',
+  'NEGERI SEMBILAN',
+  'PAHANG',
+  'PERAK',
+  'PERLIS',
+  'PULAU PINANG',
+  'SABAH',
+  'SARAWAK',
+  'SELANGOR',
+  'TERENGGANU',
+  'KUALA LUMPUR',
+  'LABUAN',
+  'PUTRAJAYA',
+];
+
 module.exports = {
   profileGroup,
   classScore,
   tieredInterventionGroup,
+  stateList,
 };
