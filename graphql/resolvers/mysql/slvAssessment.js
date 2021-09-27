@@ -12,7 +12,7 @@ module.exports = {
          */
     allAssessment: isAuthenticatedResolver.createResolver(async (
       parent, { COMPANY_ID }, {
-        connectors: { MysqlSlvSurvey, MysqlSlvAssessment },
+        connectors: { FileSlvSurvey, FileSlvAssessment },
         user: { mail, userRoleList },
       },
     ) => {
@@ -24,10 +24,10 @@ module.exports = {
       const searchOpts = { where: { COMPANY_ID } };
 
       // survey
-      const resQuest = await MysqlSlvSurvey.findAll(searchOpts);
+      const resQuest = await FileSlvSurvey.findAll(searchOpts);
       if (resQuest.length !== 0) {
         resultQuest = resQuest.map((svy) => {
-          const result2 = svy.dataValues;
+          const result2 = svy;
 
           // process result
           const processedResult = processSurveyResult(result2);
@@ -42,8 +42,8 @@ module.exports = {
       }
 
       // assessment
-      const resScore = await MysqlSlvAssessment.findAll(searchOpts);
-      if (resScore.length !== 0)resultScore = resScore.map((asmt) => asmt.dataValues);
+      const resScore = await FileSlvAssessment.findAll(searchOpts);
+      if (resScore.length !== 0) resultScore = resScore;
 
       const result = {
         assessment: resultScore,
@@ -56,7 +56,7 @@ module.exports = {
   Mutation: {
     createAssessment: isAuthenticatedResolver.createResolver(async (
       parent, { input }, {
-        connectors: { MysqlSlvAssessment },
+        connectors: { FileSlvAssessment },
         user: { mail, userRoleList },
       },
     ) => {
@@ -75,12 +75,12 @@ module.exports = {
         ASSESSMENT_YEAR: 1000,
       };
         // console.log(newInput);
-      const result = await MysqlSlvAssessment.create(newInput);
+      const result = await FileSlvAssessment.create(newInput);
       return result;
     }),
     updateAssessment: isAuthenticatedResolver.createResolver(async (
       parent, { input }, {
-        connectors: { MysqlSlvAssessment },
+        connectors: { FileSlvAssessment },
         user: { mail, userRoleList },
       },
     ) => {
@@ -100,7 +100,7 @@ module.exports = {
           ASSESSMENT_YEAR: 1000,
         },
       };
-      const result = await MysqlSlvAssessment.update(searchOpts);
+      const result = await FileSlvAssessment.update(searchOpts);
       const result2 = {
         ID: input.COMPANY_ID,
         updated: result[0],

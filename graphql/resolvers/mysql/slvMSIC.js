@@ -13,16 +13,15 @@ module.exports = {
          * @param {String} param0.msic msic
          */
     allMSIC: async (
-      parent, { msic }, { connectors: { MysqlSlvMSIC } },
+      parent, { msic }, { connectors: { FileSlvMSIC } },
     ) => {
       const where = getWhere(msic);
       const searchOpts = {
         ...where,
         order: [['MSIC']],
       };
-      const result = await MysqlSlvMSIC.findAll(searchOpts);
-      const result2 = result.map((x) => x.dataValues);
-      return result2;
+      const result = await FileSlvMSIC.findAll(searchOpts);
+      return result;
     },
   },
 };

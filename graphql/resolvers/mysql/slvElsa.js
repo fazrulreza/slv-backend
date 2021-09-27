@@ -14,7 +14,7 @@ const getPrediction = (resultPredict, fields, factor) => {
   // filter key
   const keyDataPre = resultPredict
     .filter((x) => x.FACTOR === factor && x.KEY === keySearch);
-  const keyData = keyDataPre.length !== 0 ? keyDataPre[0].dataValues.VALUE : 1;
+  const keyData = keyDataPre.length !== 0 ? keyDataPre[0].VALUE : 1;
   return keyData;
 };
 
@@ -28,7 +28,7 @@ module.exports = {
     fullElsaList: isAuthenticatedResolver.createResolver(async (
       parent, param,
       {
-        connectors: { MysqlSlvCompanyProfile, MysqlSlvELSAScorecard, MysqlSlvSurvey },
+        connectors: { FileSlvCompanyProfile, FileSlvELSAScorecard, FileSlvSurvey },
         user: { mail, userRoleList },
       },
     ) => {
@@ -53,24 +53,22 @@ module.exports = {
       const searchOptsAll = { where: null };
 
       // company
-      const resCompany = await MysqlSlvCompanyProfile.findAll(searchOpts);
-      if (resCompany.length !== 0) resultCompany = resCompany.map((x) => x.dataValues.ID);
+      const resCompany = await FileSlvCompanyProfile.findAll(searchOpts);
+      if (resCompany.length !== 0) resultCompany = resCompany.map((x) => x.ID);
 
       // survey
-      const resQuest = await MysqlSlvSurvey.findAll(searchOpts);
+      const resQuest = await FileSlvSurvey.findAll(searchOpts);
       if (resQuest.length !== 0) {
         resultQuest = resQuest
-          .map((s) => s.dataValues)
           .filter((oa) => oa.ASSESSMENT_YEAR === 1000)
           .filter((cls) => cls.SME_CLASS !== 'LARGE ENTERPRISE' && cls.SME_CLASS !== 'N/A')
           .map((sv) => sv.COMPANY_ID);
       }
 
       // ELSA
-      const resElsa = await MysqlSlvELSAScorecard.findAll(searchOptsAll);
+      const resElsa = await FileSlvELSAScorecard.findAll(searchOptsAll);
       if (resElsa.length !== 0) {
         resultElsa = resElsa
-          .map((j) => j.dataValues)
           .filter((oa) => oa.ASSESSMENT_YEAR === 1000);
       }
 
@@ -100,7 +98,7 @@ module.exports = {
     }),
     oneElsa: isAuthenticatedResolver.createResolver(async (
       parent, { input }, {
-        connectors: { MysqlSlvAssessment, MysqlSlvELSAScorecard },
+        connectors: { FileSlvAssessment, FileSlvELSAScorecard },
         user: { mail, userRoleList },
       },
     ) => {
@@ -113,11 +111,11 @@ module.exports = {
         },
       };
 
-      const resScore = await MysqlSlvAssessment.findAll(searchOpts);
-      const resultScore = resScore.length !== 0 ? resScore.map((a) => a.dataValues) : resScore;
+      const resScore = await FileSlvAssessment.findAll(searchOpts);
+      const resultScore = resScore.length !== 0 ? resScore : resScore;
 
-      const resElsa = await MysqlSlvELSAScorecard.findAll(searchOpts);
-      const resultElsa = resElsa.length !== 0 ? resElsa.map((a) => a.dataValues) : resElsa;
+      const resElsa = await FileSlvELSAScorecard.findAll(searchOpts);
+      const resultElsa = resElsa.length !== 0 ? resElsa : resElsa;
 
       // calculate total score
       const totalFinalScore = getTotalScore(resultElsa);
@@ -141,8 +139,8 @@ module.exports = {
       {
         connectors:
         {
-          MysqlSlvCompanyProfile, MysqlSlvSurvey, MysqlSlvAssessment,
-          MysqlSlvMSIC, MysqlSlvELSAScorecard, MysqlSlvPrediction,
+          FileSlvCompanyProfile, FileSlvSurvey, FileSlvAssessment,
+          FileSlvMSIC, FileSlvELSAScorecard, FileSlvPrediction,
         },
         user: { mail, userRoleList },
       },
@@ -153,7 +151,7 @@ module.exports = {
       const searchOpts = { where: { COMPANY_ID: input.COMPANY_ID } };
       const searchOptsAll = { where: null };
 
-      const resultCompany = await MysqlSlvCompanyProfile.findById(input.COMPANY_ID);
+      const resultCompany = await FileSlvCompanyProfile.findById(input.COMPANY_ID);
 
       // no company, return null
       if (!resultCompany) {
@@ -169,33 +167,33 @@ module.exports = {
       }
 
       // survey
-      const resQuestPre = await MysqlSlvSurvey.findAll(searchOpts);
+      const resQuestPre = await FileSlvSurvey.findAll(searchOpts);
       const resQuest = resQuestPre.length !== 0
-        ? resQuestPre.map((s) => s.dataValues)
+        ? resQuestPre
         : resQuestPre;
 
       // assessment
-      const resScorePre = await MysqlSlvAssessment.findAll(searchOpts);
+      const resScorePre = await FileSlvAssessment.findAll(searchOpts);
       const resScore = resScorePre.length !== 0
-        ? resScorePre.map((a) => a.dataValues)
+        ? resScorePre
         : resScorePre;
 
       // ELSA
-      const resElsaPre = await MysqlSlvELSAScorecard.findAll(searchOpts);
-      const resElsa = resElsaPre.length !== 0 ? resElsaPre.map((a) => a.dataValues) : resElsaPre;
+      const resElsaPre = await FileSlvELSAScorecard.findAll(searchOpts);
+      const resElsa = resElsaPre.length !== 0 ? resElsaPre : resElsaPre;
 
       // MSIC
       const searchOpts2 = { where: { MSIC: resultCompany.MSIC } };
-      const resMSIC = await MysqlSlvMSIC.findOne(searchOpts2);
-      const resultMSIC = resMSIC ? resMSIC.dataValues : null;
+      const resMSIC = await FileSlvMSIC.findOne(searchOpts2);
+      const resultMSIC = resMSIC || null;
 
       // prediction
-      const resultPredict = await MysqlSlvPrediction.findAll(searchOptsAll);
+      const resultPredict = await FileSlvPrediction.findAll(searchOptsAll);
 
       // get all unique assessment year
-      const resElsaScoreAll = await MysqlSlvELSAScorecard.findAll(searchOpts);
+      const resElsaScoreAll = await FileSlvELSAScorecard.findAll(searchOpts);
       const yearOnly = resElsaScoreAll.length !== 0
-        ? resElsaScoreAll.map((e) => e.dataValues.ASSESSMENT_YEAR)
+        ? resElsaScoreAll.map((e) => e.ASSESSMENT_YEAR)
         : [input.ASSESSMENT_YEAR];
       const uniqueYear = yearOnly.filter((item, index) => yearOnly.indexOf(item) === index);
       const yearList = uniqueYear.includes(1000) ? uniqueYear : [...uniqueYear, 1000];
@@ -431,7 +429,7 @@ module.exports = {
         totalFinalScore = getTotalScore(scorecard);
 
         const result = {
-          company: resultCompany.dataValues,
+          company: resultCompany,
           assessment: resultScore,
           survey: resultQuest,
           msicDetails: resultMSIC,
@@ -472,11 +470,11 @@ module.exports = {
             ASSESSMENT_YEAR: input.ASSESSMENT_YEAR,
           },
         };
-        const resElsaScore = await MysqlSlvELSAScorecard.findAll(searchOptsElsa);
+        const resElsaScore = await FileSlvELSAScorecard.findAll(searchOptsElsa);
         if (resElsaScore && resElsaScore.length !== 0) {
-          await MysqlSlvELSAScorecard.delete(searchOptsElsa);
+          await FileSlvELSAScorecard.delete(searchOptsElsa);
         }
-        await MysqlSlvELSAScorecard.bulkCreate(dbStoreScoreCard);
+        await FileSlvELSAScorecard.bulkCreate(dbStoreScoreCard);
       }
 
       return finalResult;
@@ -485,7 +483,7 @@ module.exports = {
   Mutation: {
     createElsa: isAuthenticatedResolver.createResolver(async (
       parent, { input }, {
-        connectors: { MysqlSlvSurvey, MysqlSlvAssessment, MysqlSlvELSAScorecard },
+        connectors: { FileSlvSurvey, FileSlvAssessment, FileSlvELSAScorecard },
         user: { mail, userRoleList },
       },
     ) => {
@@ -493,8 +491,8 @@ module.exports = {
 
       // survey
       const searchOptsSurvey = { where: { COMPANY_ID: input.COMPANY_ID } };
-      const resSurvey = await MysqlSlvSurvey.findOne(searchOptsSurvey);
-      const surveyInput = resSurvey.dataValues;
+      const resSurvey = await FileSlvSurvey.findOne(searchOptsSurvey);
+      const surveyInput = resSurvey;
       const surveyHist = generateHistory(mail, 'CREATE');
       const finalSurvey = {
         ...surveyInput,
@@ -502,12 +500,12 @@ module.exports = {
         ASSESSMENT_YEAR: input.ASSESSMENT_YEAR,
         ID: generateId(),
       };
-      await MysqlSlvSurvey.create(finalSurvey);
+      await FileSlvSurvey.create(finalSurvey);
 
       // assessment
       const searchOptsAssess = { where: { COMPANY_ID: input.COMPANY_ID } };
-      const resAssess = await MysqlSlvAssessment.findOne(searchOptsAssess);
-      const assessInput = resAssess.dataValues;
+      const resAssess = await FileSlvAssessment.findOne(searchOptsAssess);
+      const assessInput = resAssess;
       const assessHist = generateHistory(mail, 'CREATE');
       const finalAssess = {
         ...assessInput,
@@ -515,7 +513,7 @@ module.exports = {
         ASSESSMENT_YEAR: input.ASSESSMENT_YEAR,
         ID: generateId(),
       };
-      await MysqlSlvAssessment.create(finalAssess);
+      await FileSlvAssessment.create(finalAssess);
 
       // scorecard
       const searchOptsElsa = {
@@ -524,9 +522,9 @@ module.exports = {
           ASSESSMENT_YEAR: 1000,
         },
       };
-      const resElsa = await MysqlSlvELSAScorecard.findAll(searchOptsElsa);
+      const resElsa = await FileSlvELSAScorecard.findAll(searchOptsElsa);
       const elsaInput = resElsa.map((b) => {
-        const preB = b.dataValues;
+        const preB = b;
         const history = generateHistory(mail, 'CREATE');
         const newB = {
           ...preB,
@@ -538,7 +536,7 @@ module.exports = {
         };
         return newB;
       });
-      await MysqlSlvELSAScorecard.bulkCreate(elsaInput);
+      await FileSlvELSAScorecard.bulkCreate(elsaInput);
 
       return input;
     }),

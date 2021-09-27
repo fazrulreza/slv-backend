@@ -13,7 +13,10 @@ module.exports = {
          */
     oneCompany: isAuthenticatedResolver.createResolver(async (
       parent, { ID }, {
-        connectors: { MysqlSlvCompanyProfile, MysqlSlvMSIC },
+        connectors: {
+          // MysqlSlvCompanyProfile, MysqlSlvMSIC
+          FileSlvCompanyProfile, FileSlvMSIC,
+        },
         user: { mail, userRoleList },
       },
     ) => {
@@ -23,10 +26,9 @@ module.exports = {
         where: null,
         order: [['MSIC']],
       };
-      const result = await MysqlSlvMSIC.findAll(searchOpts);
-      const result2 = result.map((x) => x.dataValues);
+      const result2 = await FileSlvMSIC.findAll(searchOpts);
 
-      const res = await MysqlSlvCompanyProfile.findById(ID);
+      const res = await FileSlvCompanyProfile.findById(ID);
       if (!res) {
         throw new Error(`No record found with id ${ID}`);
       }
@@ -44,7 +46,7 @@ module.exports = {
     allCompanies: isAuthenticatedResolver.createResolver(async (
       parent, param, {
         connectors: {
-          MysqlSlvCompanyProfile, MysqlSlvSurvey, MysqlSlvAssessment, MysqlGetxKPI,
+          FileSlvCompanyProfile, FileSlvSurvey, FileSlvAssessment, FileGetxKPI,
         },
         user: { mail, userRoleList },
       },
@@ -67,29 +69,25 @@ module.exports = {
         where,
         order: [['ENTITY_NAME']],
       };
-      const result = await MysqlSlvCompanyProfile.findAll(searchOpts);
-      const resultCompany = result.map((x) => x.dataValues);
+      const resultCompany = await FileSlvCompanyProfile.findAll(searchOpts);
 
       // survey + assessment
       const searchOpts2 = { where: null };
-      const resultQuest = await MysqlSlvSurvey.findAll(searchOpts2);
-      const resultScore = await MysqlSlvAssessment.findAll(searchOpts2);
-      const resultKPI = await MysqlGetxKPI.findAll(searchOpts2);
+      const resultQuest = await FileSlvSurvey.findAll(searchOpts2);
+      const resultScore = await FileSlvAssessment.findAll(searchOpts2);
+      const resultKPI = await FileGetxKPI.findAll(searchOpts2);
 
       // compile result
       const resultFinal = resultCompany.map((x) => {
         const resQ = resultQuest
-          .map((yy) => yy.dataValues)
           .filter((y) => y.COMPANY_ID === x.ID
           && y.ASSESSMENT_YEAR === 1000);
 
         const resS = resultScore
-          .map((zz) => zz.dataValues)
           .filter((z) => z.COMPANY_ID === x.ID
             && z.ASSESSMENT_YEAR === 1000);
 
         const resK = resultKPI
-          .map((aa) => aa.dataValues)
           .filter((a) => a.COMPANY_ID === x.ID
                 && a.ASSESSMENT_YEAR === 1000);
 
@@ -262,7 +260,7 @@ module.exports = {
   Mutation: {
     createCompany: isAuthenticatedResolver.createResolver(async (
       parent, { input }, {
-        connectors: { MysqlSlvCompanyProfile },
+        connectors: { FileSlvCompanyProfile },
         user: { mail, userRoleList },
       },
     ) => {
@@ -277,12 +275,12 @@ module.exports = {
         ...history,
       };
         //   console.log(newInput);
-      return MysqlSlvCompanyProfile.create(newInput);
+      return FileSlvCompanyProfile.create(newInput);
     }),
     deleteCompany: isAuthenticatedResolver.createResolver(async (
       parent, { ID }, {
         connectors: {
-          MysqlSlvCompanyProfile, MysqlSlvSurvey, MysqlSlvAssessment, MysqlSlvELSAScorecard,
+          FileSlvCompanyProfile, FileSlvSurvey, FileSlvAssessment, FileSlvELSAScorecard,
         },
         user: { mail, userRoleList },
       },
@@ -291,15 +289,15 @@ module.exports = {
 
       // remove company
       const searchOpts = { where: { ID } };
-      const result = await MysqlSlvCompanyProfile.delete(searchOpts);
+      const result = await FileSlvCompanyProfile.delete(searchOpts);
 
       // remove company from other tables
       const searchOpts2 = {
         where: { COMPANY_ID: ID },
       };
-      await MysqlSlvSurvey.delete(searchOpts2);
-      await MysqlSlvAssessment.delete(searchOpts2);
-      await MysqlSlvELSAScorecard.delete(searchOpts2);
+      await FileSlvSurvey.delete(searchOpts2);
+      await FileSlvAssessment.delete(searchOpts2);
+      await FileSlvELSAScorecard.delete(searchOpts2);
 
       const result2 = {
         ID,
@@ -310,7 +308,7 @@ module.exports = {
     }),
     updateCompany: isAuthenticatedResolver.createResolver(async (
       parent, { ID, input }, {
-        connectors: { MysqlSlvCompanyProfile },
+        connectors: { FileSlvCompanyProfile },
         user: { mail, userRoleList },
       },
     ) => {
@@ -325,7 +323,7 @@ module.exports = {
         },
         where: { ID },
       };
-      const result = await MysqlSlvCompanyProfile.update(searchOpts);
+      const result = await FileSlvCompanyProfile.update(searchOpts);
       const result2 = {
         ID,
         updated: result[0],
@@ -335,14 +333,14 @@ module.exports = {
     }),
     unlistCompany: isAuthenticatedResolver.createResolver(async (
       parent, { ID }, {
-        connectors: { MysqlSlvCompanyProfile },
+        connectors: { FileSlvCompanyProfile },
         user: { mail, userRoleList },
       },
     ) => {
       if (!checkPermission('GETX-DELETE', userRoleList)) throw new ForbiddenError();
 
       // search company
-      const res = await MysqlSlvCompanyProfile.findById(ID);
+      const res = await FileSlvCompanyProfile.findById(ID);
 
       // update flag to NO
       const history = generateHistory(mail, 'UPDATE', res.CREATED_AT);
@@ -354,7 +352,7 @@ module.exports = {
         },
         where: { ID },
       };
-      const result = await MysqlSlvCompanyProfile.update(searchOpts);
+      const result = await FileSlvCompanyProfile.update(searchOpts);
       const result2 = {
         ID,
         updated: result[0],

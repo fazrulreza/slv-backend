@@ -1,5 +1,6 @@
 /** Import mysql connectors */
 const mysqlConnectors = require('./mysql');
+const fileConnectors = require('./file');
 // /** Import elasticsearch connectors */
 // const esConnectors = require('./elasticsearch');
 
@@ -9,6 +10,7 @@ const mysqlConnectors = require('./mysql');
  */
 const connectors = {
   ...mysqlConnectors,
+  ...fileConnectors,
   // ...esConnectors,
 };
 

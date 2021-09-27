@@ -37,7 +37,7 @@ module.exports = {
          */
     allSurvey: isAuthenticatedResolver.createResolver(async (
       parent, { COMPANY_ID }, {
-        connectors: { MysqlSlvSurvey, MysqlSlvCompanyProfile },
+        connectors: { FileSlvSurvey, FileSlvCompanyProfile },
         user: { mail, userRoleList },
       },
     ) => {
@@ -45,15 +45,15 @@ module.exports = {
 
       let result = [];
       // company
-      const resCompany = await MysqlSlvCompanyProfile.findById(COMPANY_ID);
+      const resCompany = await FileSlvCompanyProfile.findById(COMPANY_ID);
 
       // survey
       const searchOpts = { where: { COMPANY_ID } };
-      const res = await MysqlSlvSurvey.findAll(searchOpts);
+      const res = await FileSlvSurvey.findAll(searchOpts);
 
       if (res.length !== 0) {
         result = res.map((svy) => {
-          const result2 = svy.dataValues;
+          const result2 = svy;
 
           // process result
           const processedResult = processSurveyResult(result2);
@@ -61,7 +61,7 @@ module.exports = {
           const newResult = {
             ...result2,
             ...processedResult,
-            SECTOR: resCompany.dataValues.SECTOR,
+            SECTOR: resCompany.SECTOR,
           };
 
           return newResult;
@@ -78,7 +78,7 @@ module.exports = {
     smeScatter: isAuthenticatedResolver.createResolver(async (
       parent, param,
       {
-        connectors: { MysqlSlvSurvey, MysqlSlvCompanyProfile, MysqlSlvAssessment },
+        connectors: { FileSlvSurvey, FileSlvCompanyProfile, FileSlvAssessment },
         user: { mail, userRoleList },
       },
     ) => {
@@ -100,26 +100,24 @@ module.exports = {
       const searchOpts = { where };
 
       // Assessment
-      const resScore = await MysqlSlvAssessment.findAll(searchOpts);
+      const resScore = await FileSlvAssessment.findAll(searchOpts);
       if (resScore.length !== 0) {
         resultScore = resScore
-          .map((a) => a.dataValues)
           .filter((oa) => oa.ASSESSMENT_YEAR === 1000);
       }
 
       // Survey
-      const resQuest = await MysqlSlvSurvey.findAll(searchOpts);
+      const resQuest = await FileSlvSurvey.findAll(searchOpts);
       if (resQuest.length !== 0) {
         resultQuest = resQuest
-          .map((s) => s.dataValues)
           .filter((oa) => oa.ASSESSMENT_YEAR === 1000);
       }
 
       // company
-      const resCompany = await MysqlSlvCompanyProfile.findAll(searchOpts);
+      const resCompany = await FileSlvCompanyProfile.findAll(searchOpts);
       resultCompany = resCompany
         .map((x) => {
-          const resC = x.dataValues;
+          const resC = x;
           const resQ = resultQuest.filter((y) => y.COMPANY_ID === resC.ID);
           const resS = resultScore.filter((z) => z.COMPANY_ID === resC.ID);
           return {
@@ -140,7 +138,7 @@ module.exports = {
   Mutation: {
     createSurvey: isAuthenticatedResolver.createResolver(async (
       parent, { input }, {
-        connectors: { MysqlSlvSurvey },
+        connectors: { FileSlvSurvey },
         user: { mail, userRoleList },
       },
     ) => {
@@ -158,12 +156,12 @@ module.exports = {
         MODULE: userRoleList.MODULE,
         ASSESSMENT_YEAR: 1000,
       };
-      const result = await MysqlSlvSurvey.create(newInput);
+      const result = await FileSlvSurvey.create(newInput);
       return result;
     }),
     updateSurvey: isAuthenticatedResolver.createResolver(async (
       parent, { input }, {
-        connectors: { MysqlSlvSurvey },
+        connectors: { FileSlvSurvey },
         user: { mail, userRoleList },
       },
     ) => {
@@ -183,7 +181,7 @@ module.exports = {
           ASSESSMENT_YEAR: 1000,
         },
       };
-      const result = await MysqlSlvSurvey.update(searchOpts);
+      const result = await FileSlvSurvey.update(searchOpts);
       const result2 = {
         ID: input.COMPANY_ID,
         updated: result[0],

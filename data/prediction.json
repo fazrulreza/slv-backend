@@ -1,0 +1,999 @@
+
+	[
+		{
+			"ID": 17,
+			"FACTOR": "IG_INDUSTRY_POTENTIAL",
+			"KEY": "GETTINGBETTERGETTINGBETTER",
+			"VALUE": 2
+		},
+		{
+			"ID": 18,
+			"FACTOR": "IG_INDUSTRY_POTENTIAL",
+			"KEY": "GETTINGBETTERGETTINGWORST",
+			"VALUE": 4
+		},
+		{
+			"ID": 19,
+			"FACTOR": "IG_INDUSTRY_POTENTIAL",
+			"KEY": "GETTINGBETTERNEUTRAL",
+			"VALUE": 4
+		},
+		{
+			"ID": 20,
+			"FACTOR": "IG_INDUSTRY_POTENTIAL",
+			"KEY": "GETTINGWORSTGETTINGWORST",
+			"VALUE": 6
+		},
+		{
+			"ID": 21,
+			"FACTOR": "IG_INDUSTRY_POTENTIAL",
+			"KEY": "GETTINGWORSTNEUTRAL",
+			"VALUE": 4
+		},
+		{
+			"ID": 22,
+			"FACTOR": "IG_INDUSTRY_POTENTIAL",
+			"KEY": "NEUTRALGETTINGBETTER",
+			"VALUE": 4
+		},
+		{
+			"ID": 23,
+			"FACTOR": "IG_INDUSTRY_POTENTIAL",
+			"KEY": "NEUTRALGETTINGWORST",
+			"VALUE": 4
+		},
+		{
+			"ID": 24,
+			"FACTOR": "IG_INDUSTRY_POTENTIAL",
+			"KEY": "NEUTRALNEUTRAL",
+			"VALUE": 3
+		},
+		{
+			"ID": 25,
+			"FACTOR": "BR_PRODUCT_LINE",
+			"KEY": "2-5PRODUCTS/SERVICESDECREASEDNATIONAL–ACROSSTHECOUNTRY",
+			"VALUE": 4
+		},
+		{
+			"ID": 26,
+			"FACTOR": "BR_PRODUCT_LINE",
+			"KEY": "2-5PRODUCTS/SERVICESDECREASEDWITHINOWNCITY/MUNICIPALITY",
+			"VALUE": 2
+		},
+		{
+			"ID": 27,
+			"FACTOR": "BR_PRODUCT_LINE",
+			"KEY": "2-5PRODUCTS/SERVICESDECREASEDWITHINPROVINCE/REGION",
+			"VALUE": 1
+		},
+		{
+			"ID": 28,
+			"FACTOR": "BR_PRODUCT_LINE",
+			"KEY": "2-5PRODUCTS/SERVICESINCREASEDEXPORT/FOREIGNMARKETS",
+			"VALUE": 3
+		},
+		{
+			"ID": 29,
+			"FACTOR": "BR_PRODUCT_LINE",
+			"KEY": "2-5PRODUCTS/SERVICESINCREASEDNATIONAL–ACROSSTHECOUNTRY",
+			"VALUE": 2
+		},
+		{
+			"ID": 30,
+			"FACTOR": "BR_PRODUCT_LINE",
+			"KEY": "2-5PRODUCTS/SERVICESINCREASEDWITHINOWNCITY/MUNICIPALITY",
+			"VALUE": 3
+		},
+		{
+			"ID": 31,
+			"FACTOR": "BR_PRODUCT_LINE",
+			"KEY": "2-5PRODUCTS/SERVICESINCREASEDWITHINPROVINCE/REGION",
+			"VALUE": 2
+		},
+		{
+			"ID": 32,
+			"FACTOR": "BR_PRODUCT_LINE",
+			"KEY": "2-5PRODUCTS/SERVICESSTAYEDTHESAMEEXPORT/FOREIGNMARKETS",
+			"VALUE": 3
+		},
+		{
+			"ID": 33,
+			"FACTOR": "BR_PRODUCT_LINE",
+			"KEY": "2-5PRODUCTS/SERVICESSTAYEDTHESAMENATIONAL–ACROSSTHECOUNTRY",
+			"VALUE": 4
+		},
+		{
+			"ID": 34,
+			"FACTOR": "BR_PRODUCT_LINE",
+			"KEY": "2-5PRODUCTS/SERVICESSTAYEDTHESAMEWITHINOWNCITY/MUNICIPALITY",
+			"VALUE": 2
+		},
+		{
+			"ID": 35,
+			"FACTOR": "BR_PRODUCT_LINE",
+			"KEY": "2-5PRODUCTS/SERVICESSTAYEDTHESAMEWITHINPROVINCE/REGION",
+			"VALUE": 2
+		},
+		{
+			"ID": 36,
+			"FACTOR": "BR_PRODUCT_LINE",
+			"KEY": "<2PRODUCTS/SERVICESDECREASEDWITHINOWNCITY/MUNICIPALITY",
+			"VALUE": 1
+		},
+		{
+			"ID": 37,
+			"FACTOR": "BR_PRODUCT_LINE",
+			"KEY": "<2PRODUCTS/SERVICESINCREASEDNATIONAL–ACROSSTHECOUNTRY",
+			"VALUE": 2
+		},
+		{
+			"ID": 38,
+			"FACTOR": "BR_PRODUCT_LINE",
+			"KEY": "<2PRODUCTS/SERVICESINCREASEDWITHINOWNCITY/MUNICIPALITY",
+			"VALUE": 3
+		},
+		{
+			"ID": 39,
+			"FACTOR": "BR_PRODUCT_LINE",
+			"KEY": "<2PRODUCTS/SERVICESINCREASEDWITHINPROVINCE/REGION",
+			"VALUE": 3
+		},
+		{
+			"ID": 40,
+			"FACTOR": "BR_PRODUCT_LINE",
+			"KEY": "<2PRODUCTS/SERVICESSTAYEDTHESAMENATIONAL–ACROSSTHECOUNTRY",
+			"VALUE": 4
+		},
+		{
+			"ID": 41,
+			"FACTOR": "BR_PRODUCT_LINE",
+			"KEY": "<2PRODUCTS/SERVICESSTAYEDTHESAMEWITHINOWNCITY/MUNICIPALITY",
+			"VALUE": 1
+		},
+		{
+			"ID": 42,
+			"FACTOR": "BR_PRODUCT_LINE",
+			"KEY": "<2PRODUCTS/SERVICESSTAYEDTHESAMEWITHINPROVINCE/REGION",
+			"VALUE": 1
+		},
+		{
+			"ID": 43,
+			"FACTOR": "BR_PRODUCT_LINE",
+			"KEY": ">5PRODUCTS/SERVICESDECREASEDEXPORT/FOREIGNMARKETS",
+			"VALUE": 6
+		},
+		{
+			"ID": 44,
+			"FACTOR": "BR_PRODUCT_LINE",
+			"KEY": ">5PRODUCTS/SERVICESDECREASEDNATIONAL–ACROSSTHECOUNTRY",
+			"VALUE": 2
+		},
+		{
+			"ID": 45,
+			"FACTOR": "BR_PRODUCT_LINE",
+			"KEY": ">5PRODUCTS/SERVICESDECREASEDWITHINOWNCITY/MUNICIPALITY",
+			"VALUE": 2
+		},
+		{
+			"ID": 46,
+			"FACTOR": "BR_PRODUCT_LINE",
+			"KEY": ">5PRODUCTS/SERVICESDECREASEDWITHINPROVINCE/REGION",
+			"VALUE": 4
+		},
+		{
+			"ID": 47,
+			"FACTOR": "BR_PRODUCT_LINE",
+			"KEY": ">5PRODUCTS/SERVICESINCREASEDEXPORT/FOREIGNMARKETS",
+			"VALUE": 3
+		},
+		{
+			"ID": 48,
+			"FACTOR": "BR_PRODUCT_LINE",
+			"KEY": ">5PRODUCTS/SERVICESINCREASEDNATIONAL–ACROSSTHECOUNTRY",
+			"VALUE": 2
+		},
+		{
+			"ID": 49,
+			"FACTOR": "BR_PRODUCT_LINE",
+			"KEY": ">5PRODUCTS/SERVICESINCREASEDWITHINOWNCITY/MUNICIPALITY",
+			"VALUE": 2
+		},
+		{
+			"ID": 50,
+			"FACTOR": "BR_PRODUCT_LINE",
+			"KEY": ">5PRODUCTS/SERVICESINCREASEDWITHINPROVINCE/REGION",
+			"VALUE": 2
+		},
+		{
+			"ID": 51,
+			"FACTOR": "BR_PRODUCT_LINE",
+			"KEY": ">5PRODUCTS/SERVICESSTAYEDTHESAMEEXPORT/FOREIGNMARKETS",
+			"VALUE": 3
+		},
+		{
+			"ID": 52,
+			"FACTOR": "BR_PRODUCT_LINE",
+			"KEY": ">5PRODUCTS/SERVICESSTAYEDTHESAMENATIONAL–ACROSSTHECOUNTRY",
+			"VALUE": 2
+		},
+		{
+			"ID": 53,
+			"FACTOR": "BR_PRODUCT_LINE",
+			"KEY": ">5PRODUCTS/SERVICESSTAYEDTHESAMEWITHINOWNCITY/MUNICIPALITY",
+			"VALUE": 2
+		},
+		{
+			"ID": 54,
+			"FACTOR": "BR_PRODUCT_LINE",
+			"KEY": ">5PRODUCTS/SERVICESSTAYEDTHESAMEWITHINPROVINCE/REGION",
+			"VALUE": 3
+		},
+		{
+			"ID": 55,
+			"FACTOR": "BR_PRODUCT_QUALITY",
+			"KEY": "NO",
+			"VALUE": 2
+		},
+		{
+			"ID": 56,
+			"FACTOR": "BR_PRODUCT_QUALITY",
+			"KEY": "YES",
+			"VALUE": 2
+		},
+		{
+			"ID": 57,
+			"FACTOR": "BR_TECHNOLOGY",
+			"KEY": "1",
+			"VALUE": 1
+		},
+		{
+			"ID": 58,
+			"FACTOR": "BR_TECHNOLOGY",
+			"KEY": "2",
+			"VALUE": 3
+		},
+		{
+			"ID": 59,
+			"FACTOR": "BR_TECHNOLOGY",
+			"KEY": "3",
+			"VALUE": 3
+		},
+		{
+			"ID": 60,
+			"FACTOR": "BR_TECHNOLOGY",
+			"KEY": "4",
+			"VALUE": 3
+		},
+		{
+			"ID": 61,
+			"FACTOR": "BR_TECHNOLOGY",
+			"KEY": "5",
+			"VALUE": 3
+		},
+		{
+			"ID": 62,
+			"FACTOR": "BR_TECHNOLOGY",
+			"KEY": "8",
+			"VALUE": 3
+		},
+		{
+			"ID": 63,
+			"FACTOR": "BR_DEVELOPMENT_CAPACITY",
+			"KEY": "[\"OFFLINEMARKETING\",\"ONLINEMARKETING\"]1",
+			"VALUE": 3
+		},
+		{
+			"ID": 64,
+			"FACTOR": "BR_DEVELOPMENT_CAPACITY",
+			"KEY": "[\"OFFLINEMARKETING\",\"ONLINEMARKETING\"]2",
+			"VALUE": 3
+		},
+		{
+			"ID": 65,
+			"FACTOR": "BR_DEVELOPMENT_CAPACITY",
+			"KEY": "[\"OFFLINEMARKETING\",\"ONLINEMARKETING\"]3",
+			"VALUE": 3
+		},
+		{
+			"ID": 66,
+			"FACTOR": "BR_DEVELOPMENT_CAPACITY",
+			"KEY": "[\"OFFLINEMARKETING\"]0",
+			"VALUE": 1
+		},
+		{
+			"ID": 67,
+			"FACTOR": "BR_DEVELOPMENT_CAPACITY",
+			"KEY": "[\"ONLINEMARKETING\",\"OFFLINEMARKETING\"]1",
+			"VALUE": 2
+		},
+		{
+			"ID": 68,
+			"FACTOR": "BR_DEVELOPMENT_CAPACITY",
+			"KEY": "[\"ONLINEMARKETING\",\"OFFLINEMARKETING\"]2",
+			"VALUE": 3
+		},
+		{
+			"ID": 69,
+			"FACTOR": "BR_DEVELOPMENT_CAPACITY",
+			"KEY": "[\"ONLINEMARKETING\",\"OFFLINEMARKETING\"]3",
+			"VALUE": 3
+		},
+		{
+			"ID": 70,
+			"FACTOR": "BR_DEVELOPMENT_CAPACITY",
+			"KEY": "[\"ONLINEMARKETING\",\"OFFLINEMARKETING\"]4",
+			"VALUE": 3
+		},
+		{
+			"ID": 71,
+			"FACTOR": "BR_DEVELOPMENT_CAPACITY",
+			"KEY": "[\"ONLINEMARKETING\"]1",
+			"VALUE": 5
+		},
+		{
+			"ID": 72,
+			"FACTOR": "BR_DEVELOPMENT_CAPACITY",
+			"KEY": "[\"ONLINEMARKETING\"]2",
+			"VALUE": 5
+		},
+		{
+			"ID": 73,
+			"FACTOR": "BR_DEVELOPMENT_CAPACITY",
+			"KEY": "[\"ONLINEMARKETING\"]3",
+			"VALUE": 5
+		},
+		{
+			"ID": 74,
+			"FACTOR": "LC_ORGANIZATION",
+			"KEY": "NONO3TO5EMPLOYEES",
+			"VALUE": 1
+		},
+		{
+			"ID": 75,
+			"FACTOR": "LC_ORGANIZATION",
+			"KEY": "NONO6TO30EMPLOYEES",
+			"VALUE": 2
+		},
+		{
+			"ID": 76,
+			"FACTOR": "LC_ORGANIZATION",
+			"KEY": "NOYES3TO5EMPLOYEES",
+			"VALUE": 2
+		},
+		{
+			"ID": 77,
+			"FACTOR": "LC_ORGANIZATION",
+			"KEY": "NOYES31TO75EMPLOYEES",
+			"VALUE": 3
+		},
+		{
+			"ID": 78,
+			"FACTOR": "LC_ORGANIZATION",
+			"KEY": "NOYES6TO30EMPLOYEES",
+			"VALUE": 3
+		},
+		{
+			"ID": 79,
+			"FACTOR": "LC_ORGANIZATION",
+			"KEY": "NOYESMORETHAN75EMPLOYEES",
+			"VALUE": 3
+		},
+		{
+			"ID": 80,
+			"FACTOR": "LC_ORGANIZATION",
+			"KEY": "YESNO0TO2EMPLOYEES",
+			"VALUE": 1
+		},
+		{
+			"ID": 81,
+			"FACTOR": "LC_ORGANIZATION",
+			"KEY": "YESNO3TO5EMPLOYEES",
+			"VALUE": 1
+		},
+		{
+			"ID": 82,
+			"FACTOR": "LC_ORGANIZATION",
+			"KEY": "YESNO31TO75EMPLOYEES",
+			"VALUE": 1
+		},
+		{
+			"ID": 83,
+			"FACTOR": "LC_ORGANIZATION",
+			"KEY": "YESNO6TO30EMPLOYEES",
+			"VALUE": 1
+		},
+		{
+			"ID": 84,
+			"FACTOR": "LC_ORGANIZATION",
+			"KEY": "YESNOMORETHAN75EMPLOYEES",
+			"VALUE": 1
+		},
+		{
+			"ID": 85,
+			"FACTOR": "LC_ORGANIZATION",
+			"KEY": "YESYES0TO2EMPLOYEES",
+			"VALUE": 1
+		},
+		{
+			"ID": 86,
+			"FACTOR": "LC_ORGANIZATION",
+			"KEY": "YESYES3TO5EMPLOYEES",
+			"VALUE": 1
+		},
+		{
+			"ID": 87,
+			"FACTOR": "LC_ORGANIZATION",
+			"KEY": "YESYES31TO75EMPLOYEES",
+			"VALUE": 3
+		},
+		{
+			"ID": 88,
+			"FACTOR": "LC_ORGANIZATION",
+			"KEY": "YESYES6TO30EMPLOYEES",
+			"VALUE": 1
+		},
+		{
+			"ID": 89,
+			"FACTOR": "LC_ORGANIZATION",
+			"KEY": "YESYESMORETHAN75EMPLOYEES",
+			"VALUE": 2
+		},
+		{
+			"ID": 90,
+			"FACTOR": "PR_STAFFING",
+			"KEY": "NONONODECREASED",
+			"VALUE": 1
+		},
+		{
+			"ID": 91,
+			"FACTOR": "PR_STAFFING",
+			"KEY": "NONONOINCREASED",
+			"VALUE": 5
+		},
+		{
+			"ID": 92,
+			"FACTOR": "PR_STAFFING",
+			"KEY": "NONONOSTAYEDTHESAME",
+			"VALUE": 1
+		},
+		{
+			"ID": 93,
+			"FACTOR": "PR_STAFFING",
+			"KEY": "NONOYESDECREASED",
+			"VALUE": 1
+		},
+		{
+			"ID": 94,
+			"FACTOR": "PR_STAFFING",
+			"KEY": "NONOYESINCREASED",
+			"VALUE": 5
+		},
+		{
+			"ID": 95,
+			"FACTOR": "PR_STAFFING",
+			"KEY": "NONOYESSTAYEDTHESAME",
+			"VALUE": 1
+		},
+		{
+			"ID": 96,
+			"FACTOR": "PR_STAFFING",
+			"KEY": "NOYESNOINCREASED",
+			"VALUE": 1
+		},
+		{
+			"ID": 97,
+			"FACTOR": "PR_STAFFING",
+			"KEY": "NOYESNOSTAYEDTHESAME",
+			"VALUE": 4
+		},
+		{
+			"ID": 98,
+			"FACTOR": "PR_STAFFING",
+			"KEY": "NOYESYESDECREASED",
+			"VALUE": 1
+		},
+		{
+			"ID": 99,
+			"FACTOR": "PR_STAFFING",
+			"KEY": "NOYESYESINCREASED",
+			"VALUE": 3
+		},
+		{
+			"ID": 100,
+			"FACTOR": "PR_STAFFING",
+			"KEY": "NOYESYESSTAYEDTHESAME",
+			"VALUE": 3
+		},
+		{
+			"ID": 101,
+			"FACTOR": "PR_STAFFING",
+			"KEY": "YESNONODECREASED",
+			"VALUE": 1
+		},
+		{
+			"ID": 102,
+			"FACTOR": "PR_STAFFING",
+			"KEY": "YESNONOINCREASED",
+			"VALUE": 1
+		},
+		{
+			"ID": 103,
+			"FACTOR": "PR_STAFFING",
+			"KEY": "YESNONOSTAYEDTHESAME",
+			"VALUE": 1
+		},
+		{
+			"ID": 104,
+			"FACTOR": "PR_STAFFING",
+			"KEY": "YESNOYESDECREASED",
+			"VALUE": 2
+		},
+		{
+			"ID": 105,
+			"FACTOR": "PR_STAFFING",
+			"KEY": "YESNOYESINCREASED",
+			"VALUE": 5
+		},
+		{
+			"ID": 106,
+			"FACTOR": "PR_STAFFING",
+			"KEY": "YESNOYESSTAYEDTHESAME",
+			"VALUE": 1
+		},
+		{
+			"ID": 107,
+			"FACTOR": "PR_STAFFING",
+			"KEY": "YESYESNODECREASED",
+			"VALUE": 6
+		},
+		{
+			"ID": 108,
+			"FACTOR": "PR_STAFFING",
+			"KEY": "YESYESNOINCREASED",
+			"VALUE": 1
+		},
+		{
+			"ID": 109,
+			"FACTOR": "PR_STAFFING",
+			"KEY": "YESYESNOSTAYEDTHESAME",
+			"VALUE": 3
+		},
+		{
+			"ID": 110,
+			"FACTOR": "PR_STAFFING",
+			"KEY": "YESYESYESDECREASED",
+			"VALUE": 3
+		},
+		{
+			"ID": 111,
+			"FACTOR": "PR_STAFFING",
+			"KEY": "YESYESYESINCREASED",
+			"VALUE": 3
+		},
+		{
+			"ID": 112,
+			"FACTOR": "PR_STAFFING",
+			"KEY": "YESYESYESSTAYEDTHESAME",
+			"VALUE": 3
+		},
+		{
+			"ID": 113,
+			"FACTOR": "PR_STAFF_PERFORMANCE",
+			"KEY": "NO",
+			"VALUE": 1
+		},
+		{
+			"ID": 114,
+			"FACTOR": "PR_STAFF_PERFORMANCE",
+			"KEY": "YES",
+			"VALUE": 3
+		},
+		{
+			"ID": 115,
+			"FACTOR": "SR_EXECUTION_CAPACITY",
+			"KEY": "NO",
+			"VALUE": 1
+		},
+		{
+			"ID": 116,
+			"FACTOR": "SR_EXECUTION_CAPACITY",
+			"KEY": "YES",
+			"VALUE": 3
+		},
+		{
+			"ID": 117,
+			"FACTOR": "SR_BUDGETTING",
+			"KEY": "NO1",
+			"VALUE": 1
+		},
+		{
+			"ID": 118,
+			"FACTOR": "SR_BUDGETTING",
+			"KEY": "NO2",
+			"VALUE": 2
+		},
+		{
+			"ID": 119,
+			"FACTOR": "SR_BUDGETTING",
+			"KEY": "NO3",
+			"VALUE": 2
+		},
+		{
+			"ID": 120,
+			"FACTOR": "SR_BUDGETTING",
+			"KEY": "NO4",
+			"VALUE": 2
+		},
+		{
+			"ID": 121,
+			"FACTOR": "SR_BUDGETTING",
+			"KEY": "NO5",
+			"VALUE": 6
+		},
+		{
+			"ID": 122,
+			"FACTOR": "SR_BUDGETTING",
+			"KEY": "NO6",
+			"VALUE": 2
+		},
+		{
+			"ID": 123,
+			"FACTOR": "SR_BUDGETTING",
+			"KEY": "YES1",
+			"VALUE": 3
+		},
+		{
+			"ID": 124,
+			"FACTOR": "SR_BUDGETTING",
+			"KEY": "YES2",
+			"VALUE": 3
+		},
+		{
+			"ID": 125,
+			"FACTOR": "SR_BUDGETTING",
+			"KEY": "YES3",
+			"VALUE": 2
+		},
+		{
+			"ID": 126,
+			"FACTOR": "SR_BUDGETTING",
+			"KEY": "YES4",
+			"VALUE": 3
+		},
+		{
+			"ID": 127,
+			"FACTOR": "SR_BUDGETTING",
+			"KEY": "YES5",
+			"VALUE": 3
+		},
+		{
+			"ID": 128,
+			"FACTOR": "SR_BUDGETTING",
+			"KEY": "YES6",
+			"VALUE": 3
+		},
+		{
+			"ID": 129,
+			"FACTOR": "SR_BUDGETTING",
+			"KEY": "YES7",
+			"VALUE": 3
+		},
+		{
+			"ID": 130,
+			"FACTOR": "SR_BUDGETTING",
+			"KEY": "YES8",
+			"VALUE": 3
+		},
+		{
+			"ID": 131,
+			"FACTOR": "SR_BUDGETTING",
+			"KEY": "YES10",
+			"VALUE": 6
+		},
+		{
+			"ID": 132,
+			"FACTOR": "FR_FINANCE",
+			"KEY": "NONOPROBLEM01",
+			"VALUE": 3
+		},
+		{
+			"ID": 133,
+			"FACTOR": "FR_FINANCE",
+			"KEY": "NONOPROBLEM02",
+			"VALUE": 4
+		},
+		{
+			"ID": 134,
+			"FACTOR": "FR_FINANCE",
+			"KEY": "NONOPROBLEM03",
+			"VALUE": 3
+		},
+		{
+			"ID": 135,
+			"FACTOR": "FR_FINANCE",
+			"KEY": "NONOTRELEVANT,ASDON’TPROVIDETHEMWITHCREDIT01",
+			"VALUE": 1
+		},
+		{
+			"ID": 136,
+			"FACTOR": "FR_FINANCE",
+			"KEY": "NONOTRELEVANT,ASDON’TPROVIDETHEMWITHCREDIT02",
+			"VALUE": 2
+		},
+		{
+			"ID": 137,
+			"FACTOR": "FR_FINANCE",
+			"KEY": "NOYES01",
+			"VALUE": 2
+		},
+		{
+			"ID": 138,
+			"FACTOR": "FR_FINANCE",
+			"KEY": "NOYES02",
+			"VALUE": 2
+		},
+		{
+			"ID": 139,
+			"FACTOR": "FR_FINANCE",
+			"KEY": "NOYES03",
+			"VALUE": 4
+		},
+		{
+			"ID": 140,
+			"FACTOR": "FR_FINANCE",
+			"KEY": "YESNOPROBLEM11",
+			"VALUE": 2
+		},
+		{
+			"ID": 141,
+			"FACTOR": "FR_FINANCE",
+			"KEY": "YESNOPROBLEM12",
+			"VALUE": 1
+		},
+		{
+			"ID": 142,
+			"FACTOR": "FR_FINANCE",
+			"KEY": "YESNOPROBLEM13",
+			"VALUE": 2
+		},
+		{
+			"ID": 143,
+			"FACTOR": "FR_FINANCE",
+			"KEY": "YESNOPROBLEM21",
+			"VALUE": 4
+		},
+		{
+			"ID": 144,
+			"FACTOR": "FR_FINANCE",
+			"KEY": "YESNOPROBLEM22",
+			"VALUE": 2
+		},
+		{
+			"ID": 145,
+			"FACTOR": "FR_FINANCE",
+			"KEY": "YESNOPROBLEM23",
+			"VALUE": 2
+		},
+		{
+			"ID": 146,
+			"FACTOR": "FR_FINANCE",
+			"KEY": "YESNOPROBLEM32",
+			"VALUE": 6
+		},
+		{
+			"ID": 147,
+			"FACTOR": "FR_FINANCE",
+			"KEY": "YESNOPROBLEM42",
+			"VALUE": 2
+		},
+		{
+			"ID": 148,
+			"FACTOR": "FR_FINANCE",
+			"KEY": "YESNOPROBLEM52",
+			"VALUE": 3
+		},
+		{
+			"ID": 149,
+			"FACTOR": "FR_FINANCE",
+			"KEY": "YESNOTRELEVANT,ASDON’TPROVIDETHEMWITHCREDIT11",
+			"VALUE": 2
+		},
+		{
+			"ID": 150,
+			"FACTOR": "FR_FINANCE",
+			"KEY": "YESNOTRELEVANT,ASDON’TPROVIDETHEMWITHCREDIT12",
+			"VALUE": 2
+		},
+		{
+			"ID": 151,
+			"FACTOR": "FR_FINANCE",
+			"KEY": "YESNOTRELEVANT,ASDON’TPROVIDETHEMWITHCREDIT13",
+			"VALUE": 2
+		},
+		{
+			"ID": 152,
+			"FACTOR": "FR_FINANCE",
+			"KEY": "YESNOTRELEVANT,ASDON’TPROVIDETHEMWITHCREDIT21",
+			"VALUE": 1
+		},
+		{
+			"ID": 153,
+			"FACTOR": "FR_FINANCE",
+			"KEY": "YESNOTRELEVANT,ASDON’TPROVIDETHEMWITHCREDIT22",
+			"VALUE": 1
+		},
+		{
+			"ID": 154,
+			"FACTOR": "FR_FINANCE",
+			"KEY": "YESNOTRELEVANT,ASDON’TPROVIDETHEMWITHCREDIT32",
+			"VALUE": 2
+		},
+		{
+			"ID": 155,
+			"FACTOR": "FR_FINANCE",
+			"KEY": "YESYES11",
+			"VALUE": 2
+		},
+		{
+			"ID": 156,
+			"FACTOR": "FR_FINANCE",
+			"KEY": "YESYES12",
+			"VALUE": 2
+		},
+		{
+			"ID": 157,
+			"FACTOR": "FR_FINANCE",
+			"KEY": "YESYES13",
+			"VALUE": 2
+		},
+		{
+			"ID": 158,
+			"FACTOR": "FR_FINANCE",
+			"KEY": "YESYES21",
+			"VALUE": 5
+		},
+		{
+			"ID": 159,
+			"FACTOR": "FR_FINANCE",
+			"KEY": "YESYES22",
+			"VALUE": 2
+		},
+		{
+			"ID": 160,
+			"FACTOR": "FR_FINANCE",
+			"KEY": "YESYES23",
+			"VALUE": 2
+		},
+		{
+			"ID": 161,
+			"FACTOR": "FR_FINANCE",
+			"KEY": "YESYES32",
+			"VALUE": 3
+		},
+		{
+			"ID": 162,
+			"FACTOR": "FR_FINANCIAL_SYSTEM",
+			"KEY": "NONONO",
+			"VALUE": 1
+		},
+		{
+			"ID": 163,
+			"FACTOR": "FR_FINANCIAL_SYSTEM",
+			"KEY": "YESNONO",
+			"VALUE": 1
+		},
+		{
+			"ID": 164,
+			"FACTOR": "FR_FINANCIAL_SYSTEM",
+			"KEY": "YESNOYES",
+			"VALUE": 2
+		},
+		{
+			"ID": 165,
+			"FACTOR": "FR_FINANCIAL_SYSTEM",
+			"KEY": "YESYESNO",
+			"VALUE": 2
+		},
+		{
+			"ID": 166,
+			"FACTOR": "FR_FINANCIAL_SYSTEM",
+			"KEY": "YESYESYES",
+			"VALUE": 3
+		},
+		{
+			"ID": 167,
+			"FACTOR": "LC_PLANNING",
+			"KEY": "MEDIUMENTERPRISE100%",
+			"VALUE": 3
+		},
+		{
+			"ID": 168,
+			"FACTOR": "LC_PLANNING",
+			"KEY": "MICROENTERPRISE100%",
+			"VALUE": 3
+		},
+		{
+			"ID": 169,
+			"FACTOR": "LC_PLANNING",
+			"KEY": "SMALLENTERPRISE100%",
+			"VALUE": 3
+		},
+		{
+			"ID": 170,
+			"FACTOR": "LC_PLANNING",
+			"KEY": "SOLETRADER100%",
+			"VALUE": 1
+		},
+		{
+			"ID": 171,
+			"FACTOR": "LC_PLANNING",
+			"KEY": "MEDIUMENTERPRISE25%",
+			"VALUE": 3
+		},
+		{
+			"ID": 172,
+			"FACTOR": "LC_PLANNING",
+			"KEY": "SMALLENTERPRISE25%",
+			"VALUE": 3
+		},
+		{
+			"ID": 173,
+			"FACTOR": "LC_PLANNING",
+			"KEY": "MEDIUMENTERPRISE50%",
+			"VALUE": 3
+		},
+		{
+			"ID": 174,
+			"FACTOR": "LC_PLANNING",
+			"KEY": "MICROENTERPRISE50%",
+			"VALUE": 2
+		},
+		{
+			"ID": 175,
+			"FACTOR": "LC_PLANNING",
+			"KEY": "SMALLENTERPRISE50%",
+			"VALUE": 3
+		},
+		{
+			"ID": 176,
+			"FACTOR": "LC_PLANNING",
+			"KEY": "MEDIUMENTERPRISE75%",
+			"VALUE": 3
+		},
+		{
+			"ID": 177,
+			"FACTOR": "LC_PLANNING",
+			"KEY": "MICROENTERPRISE75%",
+			"VALUE": 3
+		},
+		{
+			"ID": 178,
+			"FACTOR": "LC_PLANNING",
+			"KEY": "SMALLENTERPRISE75%",
+			"VALUE": 3
+		},
+		{
+			"ID": 179,
+			"FACTOR": "LC_PLANNING",
+			"KEY": "MICROENTERPRISE25%",
+			"VALUE": 3
+		},
+		{
+			"ID": 180,
+			"FACTOR": "LC_PLANNING",
+			"KEY": "SOLETRADER25%",
+			"VALUE": 3
+		},
+		{
+			"ID": 181,
+			"FACTOR": "LC_PLANNING",
+			"KEY": "SOLETRADER50%",
+			"VALUE": 3
+		},
+		{
+			"ID": 182,
+			"FACTOR": "LC_PLANNING",
+			"KEY": "SOLETRADER75%",
+			"VALUE": 3
+		}
+	]

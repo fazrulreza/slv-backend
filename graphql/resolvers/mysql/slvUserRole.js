@@ -28,7 +28,7 @@ module.exports = {
          */
     allUserRole: isAuthenticatedResolver.createResolver(async (
       parent, param, {
-        connectors: { MysqlSlvUserRole },
+        connectors: { FileSlvUserRole },
         user: { userRoleList },
       },
     ) => {
@@ -40,7 +40,7 @@ module.exports = {
         where,
         order: [['MODULE'], ['NAME']],
       };
-      const result = await MysqlSlvUserRole.findAll(searchOpts);
+      const result = await FileSlvUserRole.findAll(searchOpts);
       const result2 = result.map((x) => processUserRolesOutput(x));
 
       return result2;
@@ -52,7 +52,7 @@ module.exports = {
          */
     oneUserRole: isAuthenticatedResolver.createResolver(async (
       parent, { ID }, {
-        connectors: { MysqlSlvUserRole },
+        connectors: { FileSlvUserRole },
         user: { userRoleList },
       },
     ) => {
@@ -61,7 +61,7 @@ module.exports = {
       const searchOpts = {
         where: { ID },
       };
-      const result = await MysqlSlvUserRole.findOne(searchOpts);
+      const result = await FileSlvUserRole.findOne(searchOpts);
       const result2 = result ? processUserRolesOutput(result) : {};
 
       return result2;
@@ -70,7 +70,7 @@ module.exports = {
   Mutation: {
     createUserRole: isAuthenticatedResolver.createResolver(async (
       parent, { input }, {
-        connectors: { MysqlSlvUserRole },
+        connectors: { FileSlvUserRole },
         user: { mail, userRoleList },
       },
     ) => {
@@ -85,12 +85,12 @@ module.exports = {
         ...history,
       };
         // console.log(newInput);
-      const result = await MysqlSlvUserRole.create(newInput);
+      const result = await FileSlvUserRole.create(newInput);
       return result;
     }),
     updateUserRole: isAuthenticatedResolver.createResolver(async (
       parent, { ID, input }, {
-        connectors: { MysqlSlvUserRole },
+        connectors: { FileSlvUserRole },
         user: { mail, userRoleList },
       },
     ) => {
@@ -108,7 +108,7 @@ module.exports = {
           ID,
         },
       };
-      const result = await MysqlSlvUserRole.update(searchOpts);
+      const result = await FileSlvUserRole.update(searchOpts);
       const result2 = {
         ID,
         updated: result[0],
@@ -117,7 +117,7 @@ module.exports = {
     }),
     deleteUserRole: isAuthenticatedResolver.createResolver(async (
       parent, { ID }, {
-        connectors: { MysqlSlvUserRole },
+        connectors: { FileSlvUserRole },
         user: { mail, userRoleList },
       },
     ) => {
@@ -126,7 +126,7 @@ module.exports = {
       const searchOpts = {
         where: { ID },
       };
-      const result = await MysqlSlvUserRole.delete(searchOpts);
+      const result = await FileSlvUserRole.delete(searchOpts);
 
       const result2 = {
         ID,
