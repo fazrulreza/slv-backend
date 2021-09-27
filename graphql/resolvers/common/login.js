@@ -13,7 +13,7 @@ module.exports = {
       // Retrieve LDAP account
 
       const userType = 'PUBLIC';
-      const userData = jwt.verify(input, SECRET);
+      const userData = jwt.verify(input, SECRET, { algorithms: ['RS256'] });
 
       let userRoleList = {};
       let data = {};
@@ -100,14 +100,20 @@ module.exports = {
       const token = jwt.sign(
         { user: data },
         SECRET,
-        { expiresIn: '1y' },
+        {
+          expiresIn: '30m',
+          algorithm: 'RS256',
+        },
       );
 
       // Create mini token
       const minitoken = jwt.sign(
         mini,
         SECRET,
-        { expiresIn: '1y' },
+        {
+          expiresIn: '30m',
+          algorithm: 'RS256',
+        },
       );
 
       return {
