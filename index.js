@@ -1,8 +1,7 @@
 const express = require('express');
 const fs = require('fs');
 const https = require('https');
-const { ApolloServer, AuthenticationError } = require('apollo-server-express');
-const jwt = require('jsonwebtoken');
+const { ApolloServer } = require('apollo-server-express');
 /** import apollo-errors */
 const { formatError } = require('apollo-errors');
 /** import GraphQL resolvers */
@@ -11,9 +10,10 @@ const resolvers = require('./graphql/resolvers');
 const typeDefs = require('./graphql/types');
 /** import connectors */
 const connectors = require('./graphql/connectors');
+const { verifyToken } = require('./graphql/helper/common');
 
 const {
-  SECRET, GRAPHQL_INTROSPECTION, GRAPHQL_PLAYGROUND, GRAPHQL_PORT,
+  GRAPHQL_INTROSPECTION, GRAPHQL_PLAYGROUND, GRAPHQL_PORT,
 } = process.env;
 const introspection = GRAPHQL_INTROSPECTION === 'true';
 const playground = GRAPHQL_PLAYGROUND === 'true';
@@ -32,7 +32,7 @@ const apolloServer = new ApolloServer({
   context: ({ req }) => {
     const token = req.headers.authorization || '';
     const user = (token || req.body.operationName !== 'login')
-      ? jwt.verify(token, SECRET, { algorithms: ['RS256'] })
+      ? verifyToken(token)
       : '';
 
     // console.log(user);

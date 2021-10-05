@@ -45,6 +45,14 @@ const AuthenticationRequiredError = createError('AuthenticationRequiredError', {
   message: 'You must be logged in to do this',
 });
 
+const SessionExpiredError = createError('SessionExpiredError', {
+  message: 'Your session has expired, kindly log in again',
+});
+
+const JsonWebTokenError = createError('JsonWebTokenError', {
+  message: 'JsonWebTokenError',
+});
+
 const NotYourUserError = createError('NotYourUserError', {
   message: 'You cannot update the profile for other users',
 });
@@ -67,4 +75,6 @@ module.exports = {
   AuthenticationRequiredError,
   NotYourUserError,
   NotEnoughCreditError,
+  SessionExpiredError,
+  JsonWebTokenError,
 };

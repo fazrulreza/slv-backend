@@ -1,6 +1,13 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-return-assign */
+const jwt = require('jsonwebtoken');
+const { readFileSync } = require('fs');
+const path = require('path');
 const { profileGroup, tieredInterventionGroup } = require('./parameter');
+
+const SECRET = readFileSync(path.join(__dirname, process.env.SECRET));
+const SECRET_PUB = readFileSync(path.join(__dirname, process.env.SECRET_PUB));
+// console.log(path.join(__dirname, process.env.SECRET));
 
 // const getFilter = (size, state, sector, revenue, year, division, msic) => {
 //   let filter = '';
@@ -195,6 +202,30 @@ const checkPermission = (permission, userRoleList) => {
   return userRoleList[`${subModule}_MODULE`].includes(auth);
 };
 
+const verifyToken = (token) => {
+  let decodeData = {};
+  jwt.verify(token, SECRET_PUB, { algorithms: ['RS256'] }, (err, decoded) => {
+    if (err) {
+      decodeData = {
+        name: err.name,
+        message: err.message,
+      };
+    } else {
+      decodeData = decoded;
+    }
+  });
+  return decodeData;
+};
+
+const signToken = (token, expiresIn) => jwt.sign(
+  token,
+  SECRET,
+  {
+    expiresIn,
+    algorithm: 'RS256',
+  },
+);
+
 module.exports = {
   // getFilter,
   getDifference,
@@ -204,4 +235,6 @@ module.exports = {
   getTotalScore,
   processUserRolesOutput,
   checkPermission,
+  verifyToken,
+  signToken,
 };

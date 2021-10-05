@@ -1,8 +1,8 @@
-const jwt = require('jsonwebtoken');
 const Login = require('../../../packages/ldap');
-const { processUserRolesOutput } = require('../../helper/common');
+const { processUserRolesOutput, verifyToken, signToken } = require('../../helper/common');
+const { SessionExpiredError, JsonWebTokenError } = require('../../permissions/errors');
 
-const { SECRET, NODE_ENV } = process.env;
+const { NODE_ENV } = process.env;
 
 module.exports = {
   Mutation: {
@@ -13,7 +13,7 @@ module.exports = {
       // Retrieve LDAP account
 
       const userType = 'PUBLIC';
-      const userData = jwt.verify(input, SECRET, { algorithms: ['RS256'] });
+      const userData = verifyToken(input);
 
       let userRoleList = {};
       let data = {};
@@ -21,16 +21,22 @@ module.exports = {
 
       // login process
       switch (true) {
+        case userData.name === 'TokenExpiredError': {
+          throw new SessionExpiredError();
+        }
+        case userData.name === 'JsonWebTokenError': {
+          throw new JsonWebTokenError({ message: userData.message });
+        }
         case NODE_ENV === 'development': {
           // dev environment
           data = {
             username: userData.userName,
             mail: `${userData.username}@smebank.com.my`,
-            userType: 'ADMIN',
+            userType: 1,
           };
           mini = {
             mail: `${userData.username}@smebank.com.my`,
-            userType: 'ADMIN',
+            userType: 1,
           };
           break;
         }
@@ -96,25 +102,13 @@ module.exports = {
         userRoleList,
       };
 
+      const tData = { user: data };
+
       // Create token from user's info (id, username, user_type)
-      const token = jwt.sign(
-        { user: data },
-        SECRET,
-        {
-          expiresIn: '30m',
-          algorithm: 'RS256',
-        },
-      );
+      const token = signToken(tData, '30m');
 
       // Create mini token
-      const minitoken = jwt.sign(
-        mini,
-        SECRET,
-        {
-          expiresIn: '30m',
-          algorithm: 'RS256',
-        },
-      );
+      const minitoken = signToken(mini, '30m');
 
       return {
         token,
