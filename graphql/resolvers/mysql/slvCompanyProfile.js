@@ -254,7 +254,8 @@ module.exports = {
           ...y,
           COUNT_COLOR: countColor,
         };
-      });
+      })
+        .sort((curr, next) => next.COUNT - curr.COUNT);
 
       return stateStatsColor;
     }),
