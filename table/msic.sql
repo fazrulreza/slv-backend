@@ -1,17 +1,21 @@
-CREATE TABLE slv.`msic` (
-  `MSIC` varchar(10) DEFAULT NULL,
-  `description_malay_detail` varchar(255) DEFAULT NULL,
-  `section` varchar(10) DEFAULT NULL,
-  `division` varchar(10) DEFAULT NULL,
-  `group` varchar(10) DEFAULT NULL,
-  `Class` varchar(10) DEFAULT NULL,
-  `description_english_section` varchar(255) DEFAULT NULL,
-  `description_malay_section` varchar(255) DEFAULT NULL,
-  `description_english_division` varchar(255) DEFAULT NULL,
-  `description_malay_division` varchar(255) DEFAULT NULL,
-  `description_english_group` varchar(255) DEFAULT NULL,
-  `description_malay_group` varchar(255) DEFAULT NULL,
-  `description_english_class` varchar(255) DEFAULT NULL,
-  `description_malay_class` varchar(255) DEFAULT NULL,
-  `sector` varchar(30) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE TABLE `msic` (
+	`MSIC` VARCHAR(10) NOT NULL DEFAULT '0' COLLATE 'utf8mb4_0900_ai_ci',
+	`description_malay_detail` VARCHAR(255) NULL DEFAULT NULL COLLATE 'utf8mb4_0900_ai_ci',
+	`section` VARCHAR(10) NULL DEFAULT NULL COLLATE 'utf8mb4_0900_ai_ci',
+	`division` VARCHAR(10) NULL DEFAULT NULL COLLATE 'utf8mb4_0900_ai_ci',
+	`group` VARCHAR(10) NULL DEFAULT NULL COLLATE 'utf8mb4_0900_ai_ci',
+	`Class` VARCHAR(10) NULL DEFAULT NULL COLLATE 'utf8mb4_0900_ai_ci',
+	`description_english_section` VARCHAR(255) NULL DEFAULT NULL COLLATE 'utf8mb4_0900_ai_ci',
+	`description_malay_section` VARCHAR(255) NULL DEFAULT NULL COLLATE 'utf8mb4_0900_ai_ci',
+	`description_english_division` VARCHAR(255) NULL DEFAULT NULL COLLATE 'utf8mb4_0900_ai_ci',
+	`description_malay_division` VARCHAR(255) NULL DEFAULT NULL COLLATE 'utf8mb4_0900_ai_ci',
+	`description_english_group` VARCHAR(255) NULL DEFAULT NULL COLLATE 'utf8mb4_0900_ai_ci',
+	`description_malay_group` VARCHAR(255) NULL DEFAULT NULL COLLATE 'utf8mb4_0900_ai_ci',
+	`description_english_class` VARCHAR(255) NULL DEFAULT NULL COLLATE 'utf8mb4_0900_ai_ci',
+	`description_malay_class` VARCHAR(255) NULL DEFAULT NULL COLLATE 'utf8mb4_0900_ai_ci',
+	`sector` VARCHAR(30) NULL DEFAULT NULL COLLATE 'utf8mb4_0900_ai_ci',
+	PRIMARY KEY (`MSIC`) USING BTREE
+)
+COLLATE='utf8mb4_0900_ai_ci'
+ENGINE=InnoDB
+;
