@@ -1,4 +1,5 @@
 input CompanyProfileInput {
+    # data follows CompanyProfile type format and gone through JSON.stringify process
     data: String!
 }
 
@@ -9,9 +10,13 @@ type CompanyProfile {
   REGISTRATION_NO: String
   NEW_REGISTRATION_NO: String
   INCORPORATION_DATE: String
+  # Flag for Bumiputera status
   BUMI_STATUS: String
+  # Flag for Woman Owned Company
   WOMAN_OWNED: String
+  # Flag for eligibility for GETX program
   GETX_FLAG: String
+  # Indicates current record belongs to which module
   MODULE: String
   ENTITY_STATUS: String
   ENTITY_TYPE: String
@@ -21,6 +26,9 @@ type CompanyProfile {
   STATE: String
   PHONE: String
   EMAIL: String
+  FIN_AGENCY_1: String
+  FIN_AGENCY_2: String
+  FIN_AGENCY_3: String
   NATURE_OF_BUSINESS: String
   SECTOR: String
   DIVISION: String
@@ -28,14 +36,17 @@ type CompanyProfile {
   GROUP: String
   CLASS: String
   MSIC: String
+  SME_CLASS: String
+  # Flag for completion status of Survey
+  SURVEY_DONE: String
+  # Flag for completion status of Assessment
+  ASSESSMENT_DONE: String
+  # Flag for completion status of GETX KPI settings
+  KPI_DONE: String
   CREATED_AT: String
   CREATED_BY: String
   UPDATED_AT: String
   UPDATED_BY: String
-  SME_CLASS: String
-  SURVEY_DONE: String
-  ASSESSMENT_DONE: String
-  KPI_DONE: String
 }
 
 type CompanyProfileWithMSIC {
