@@ -1,6 +1,10 @@
 const Login = require('../../../packages/ldap');
-const { processUserRolesOutput, verifyToken, signToken } = require('../../helper/common');
-const { SessionExpiredError, JsonWebTokenError } = require('../../permissions/errors');
+const {
+  processUserRolesOutput, verifyToken, signToken, comparePasswordAsync,
+} = require('../../helper/common');
+const {
+  SessionExpiredError, JsonWebTokenError, NotFoundError, WrongPasswordError,
+} = require('../../permissions/errors');
 
 const { NODE_ENV } = process.env;
 
@@ -8,7 +12,7 @@ module.exports = {
   Mutation: {
     ldapLogin: async (
       parent, { input },
-      { connectors: { MysqlSlvUser, MysqlSlvUserRole } },
+      { connectors: { MysqlSlvUser, MysqlSlvUserRole, MysqlSlvUserPublic } },
     ) => {
       // Retrieve LDAP account
 
@@ -18,6 +22,7 @@ module.exports = {
       let userRoleList = {};
       let data = {};
       let mini = {};
+      let expire = '30m';
 
       // login process
       switch (true) {
@@ -38,6 +43,7 @@ module.exports = {
             mail: `${userData.username}@smebank.com.my`,
             userType: 1,
           };
+          expire = '1y';
           break;
         }
         case !userData.public: {
@@ -77,6 +83,35 @@ module.exports = {
         case userData.public:
         default: {
           // find from DB
+
+          let pass = false;
+
+          const searchOpts = {
+            where: { USER: userData.username },
+          };
+
+          const resUser = await MysqlSlvUserPublic.findOne(searchOpts);
+          if (!resUser) throw new NotFoundError({ message: 'No user found' });
+
+          const resultUser = resUser.dataValues;
+
+          pass = userData.source === 'GOOGLE' || userData.source === 'FACEBOOK'
+            ? true
+            : comparePasswordAsync(userData.password, resultUser.PWD);
+
+          if (!pass) throw WrongPasswordError();
+
+          data = {
+            username: resultUser.USER,
+            mail: resultUser.EMAIL,
+            mobile: resultUser.PHONE,
+            userType: 10,
+          };
+          mini = {
+            mail: resultUser.EMAIL,
+            userType: 10,
+          };
+          expire = '1y';
           break;
         }
       }
@@ -105,10 +140,10 @@ module.exports = {
       const tData = { user: data };
 
       // Create token from user's info (id, username, user_type)
-      const token = signToken(tData, '30m');
+      const token = signToken(tData, expire);
 
       // Create mini token
-      const minitoken = signToken(mini, '30m');
+      const minitoken = signToken(mini, expire);
 
       return {
         token,

@@ -11,8 +11,10 @@ const MSIC = 'msic';
 const PREDICTION = 'prediction';
 const ASSESSMENT = 'assessment';
 const USER = 'user';
+const USER_PUBLIC = 'user_public';
 const USER_ROLE = 'user_role';
 const ELSA_SCORECARD = 'elsa_scorecard';
+const ELSA_WEIGHTAGE = 'elsa_weightage';
 
 const GETX_KPI = 'getx_kpi';
 const GETX_SIGN = 'getx_sign';
@@ -27,10 +29,12 @@ module.exports = {
   ASSESSMENT,
   COMPANY_PROFILE,
   ELSA_SCORECARD,
+  ELSA_WEIGHTAGE,
   MSIC,
   PREDICTION,
   SURVEY,
   USER,
+  USER_PUBLIC,
   USER_ROLE,
   GETX_KPI,
   GETX_SIGN,

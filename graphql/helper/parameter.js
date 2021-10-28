@@ -1,78 +1,3 @@
-const classScore = {
-  BR_PRODUCT_LINE: {
-    'SOLE TRADER': 1,
-    'MICRO ENTERPRISE': 2,
-    'SMALL ENTERPRISE': 2,
-    'MEDIUM ENTERPRISE': 3,
-  },
-  BR_PRODUCT_QUALITY: {
-    'SOLE TRADER': 2,
-    'MICRO ENTERPRISE': 2,
-    'SMALL ENTERPRISE': 2,
-    'MEDIUM ENTERPRISE': 3,
-  },
-  BR_TECHNOLOGY: {
-    'SOLE TRADER': 2,
-    'MICRO ENTERPRISE': 2,
-    'SMALL ENTERPRISE': 3,
-    'MEDIUM ENTERPRISE': 3,
-  },
-  BR_DEVELOPMENT_CAPACITY: {
-    'SOLE TRADER': 1,
-    'MICRO ENTERPRISE': 1,
-    'SMALL ENTERPRISE': 2,
-    'MEDIUM ENTERPRISE': 3,
-  },
-  LC_ORGANIZATION: {
-    'SOLE TRADER': 'N/A',
-    'MICRO ENTERPRISE': 1,
-    'SMALL ENTERPRISE': 2,
-    'MEDIUM ENTERPRISE': 3,
-  },
-  LC_PLANNING: {
-    'SOLE TRADER': 'N/A',
-    'MICRO ENTERPRISE': 2,
-    'SMALL ENTERPRISE': 3,
-    'MEDIUM ENTERPRISE': 3,
-  },
-  PR_STAFFING: {
-    'SOLE TRADER': 'N/A',
-    'MICRO ENTERPRISE': 2,
-    'SMALL ENTERPRISE': 2,
-    'MEDIUM ENTERPRISE': 2,
-  },
-  PR_STAFF_PERFORMANCE: {
-    'SOLE TRADER': 'N/A',
-    'MICRO ENTERPRISE': 1,
-    'SMALL ENTERPRISE': 2,
-    'MEDIUM ENTERPRISE': 3,
-  },
-  SR_EXECUTION_CAPACITY: {
-    'SOLE TRADER': 'N/A',
-    'MICRO ENTERPRISE': 1,
-    'SMALL ENTERPRISE': 2,
-    'MEDIUM ENTERPRISE': 3,
-  },
-  SR_BUDGETTING: {
-    'SOLE TRADER': 'N/A',
-    'MICRO ENTERPRISE': 1,
-    'SMALL ENTERPRISE': 2,
-    'MEDIUM ENTERPRISE': 3,
-  },
-  FR_FINANCE: {
-    'SOLE TRADER': 1,
-    'MICRO ENTERPRISE': 2,
-    'SMALL ENTERPRISE': 3,
-    'MEDIUM ENTERPRISE': 3,
-  },
-  FR_FINANCIAL_SYSTEM: {
-    'SOLE TRADER': 1,
-    'MICRO ENTERPRISE': 2,
-    'SMALL ENTERPRISE': 2,
-    'MEDIUM ENTERPRISE': 3,
-  },
-};
-
 const profileGroup = {
   1: 'PRE-TAKEOFF',
   2: 'TAKEOFF',
@@ -111,7 +36,6 @@ const stateList = [
 
 module.exports = {
   profileGroup,
-  classScore,
   tieredInterventionGroup,
   stateList,
 };

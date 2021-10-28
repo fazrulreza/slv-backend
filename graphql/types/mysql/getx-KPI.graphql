@@ -1,5 +1,6 @@
 input GetXKPIInput {
     COMPANY_ID: String!
+    # data follows GetXKPI type format and gone through JSON.stringify process
     data: String!
 }
 
@@ -115,8 +116,11 @@ type GetXKPI {
     NG_Q3: String
     NG_Q4: String
     NG_COMMENT: String
+  # Refers to ID generated in CompanyProfile
     COMPANY_ID: String
+  # Indicates current record belongs to which module
     MODULE: String
+  # Indicates current record belongs to which assessment year. Current year value is 1000
     ASSESSMENT_YEAR: Int
     CREATED_AT: String
     CREATED_BY: String

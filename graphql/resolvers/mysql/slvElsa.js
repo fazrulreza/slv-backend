@@ -2,7 +2,7 @@ const { generateId, generateHistory } = require('../../../packages/mysql-model')
 const {
   processSurveyResult, calculateScores, getTotalScore, checkPermission,
 } = require('../../helper/common');
-const { classScore, profileGroup } = require('../../helper/parameter');
+const { profileGroup } = require('../../helper/parameter');
 const { isAuthenticatedResolver } = require('../../permissions/acl');
 const { ForbiddenError } = require('../../permissions/errors');
 
@@ -14,7 +14,9 @@ const getPrediction = (resultPredict, fields, factor) => {
   // filter key
   const keyDataPre = resultPredict
     .filter((x) => x.FACTOR === factor && x.KEY === keySearch);
-  const keyData = keyDataPre.length !== 0 ? keyDataPre[0].dataValues.VALUE : 1;
+  const keyData = keyDataPre.length !== 0 ? keyDataPre[0].VALUE : 2;
+  // console.log(factor, keySearch);
+  // console.log(keyData);
   return keyData;
 };
 
@@ -142,7 +144,7 @@ module.exports = {
         connectors:
         {
           MysqlSlvCompanyProfile, MysqlSlvSurvey, MysqlSlvAssessment,
-          MysqlSlvMSIC, MysqlSlvELSAScorecard, MysqlSlvPrediction,
+          MysqlSlvMSIC, MysqlSlvELSAScorecard, MysqlSlvPrediction, MysqlSlvELSAWeightage,
         },
         user: { mail, userRoleList },
       },
@@ -190,7 +192,12 @@ module.exports = {
       const resultMSIC = resMSIC ? resMSIC.dataValues : null;
 
       // prediction
-      const resultPredict = await MysqlSlvPrediction.findAll(searchOptsAll);
+      const resPredict = await MysqlSlvPrediction.findAll(searchOptsAll);
+      const resultPredict = resPredict.map((a) => a.dataValues);
+
+      // elsa weightage
+      const resElsaWeightage = await MysqlSlvELSAWeightage.findAll(searchOptsAll);
+      const resultElsaWeightage = resElsaWeightage.map((a) => a.dataValues);
 
       // get all unique assessment year
       const resElsaScoreAll = await MysqlSlvELSAScorecard.findAll(searchOpts);
@@ -259,9 +266,10 @@ module.exports = {
 
               const preBRDCheck1 = JSON.stringify(resultQuest.MARKETING_TYPE).includes('Online Marketing');
               const preBRDCheck2 = preBRDCheck1 ? resultQuest.ONLINE_MARKETING_TYPE.length : 0;
+
               const BR_DEVELOPMENT_CAPACITY = getPrediction(
                 resultPredict, [
-                  resultQuest.MARKETING_TYPE,
+                  JSON.stringify(resultQuest.MARKETING_TYPE),
                   preBRDCheck2,
                 ],
                 'BR_DEVELOPMENT_CAPACITY',
@@ -360,20 +368,25 @@ module.exports = {
               // calculate score
               const getClassScore = Object.keys(resultScore)
                 .map((y) => {
-                  const getUnitClassScore = (Number.isInteger(resultScore[y]) && classScore[y])
-                    ? classScore[y][resultQuest.SME_CLASS]
+                  const unitClassScorePre = resultElsaWeightage
+                    .filter((u) => u.SUBFACTOR === y && u.SIZE === resultQuest.SME_CLASS);
+
+                  const getUnitClassScore = unitClassScorePre.length !== 0
+                    ? unitClassScorePre[0].VALUE
                     : null;
+
                   const weightedScore = Number.isInteger(getUnitClassScore)
                     ? resultScore[y] * getUnitClassScore
                     : 'N/A';
+
                   const resClassScore = {
                     [y]: resultScore[y],
                     unitClassScore: getUnitClassScore,
                     weightedScore,
                   };
+
                   return resClassScore;
-                })
-                .filter((z) => classScore[Object.keys(z)[0]]);
+                });
 
               // console.log(getClassScore);
 

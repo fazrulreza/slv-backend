@@ -80,5 +80,5 @@ type Mutation {
   createCompany(input: CompanyProfileInput!): CompanyProfile!
   updateCompany(ID: String!, input: CompanyProfileInput!): UpdateResp
   deleteCompany(ID: String!): DeleteResp
-  unlistCompany(ID: String!): DeleteResp
+  unlistCompany(ID: String!): UpdateResp
 }

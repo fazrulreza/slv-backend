@@ -1,17 +1,21 @@
 input UserInput {
+    # data follows User type format and gone through JSON.stringify process
     data: String!
 }
 
 type User {
   USER: String
+  # Refers to ID generated in UserRole
   ROLE: Int
+  # Status of the current record. Active or inactive
   STATUS: String
-  USER_ROLE: String
-  MODULE: String
   CREATED_AT: String
   CREATED_BY: String
   UPDATED_AT: String
   UPDATED_BY: String
+  USER_ROLE: String
+  # Indicates current record belongs to which module
+  MODULE: String
 }
 
 type Query {

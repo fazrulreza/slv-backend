@@ -1,11 +1,15 @@
 input ELSAInput {
+  # Refers to ID generated in CompanyProfile
     COMPANY_ID: String!
+  # Indicates current record belongs to which assessment year. Current year value is 1000
     ASSESSMENT_YEAR: Int!
     PUBLIC: Boolean
 }
 
 type ELSAOutput {
+  # Refers to ID generated in CompanyProfile
     COMPANY_ID: String!
+  # Indicates current record belongs to which assessment year. Current year value is 1000
     ASSESSMENT_YEAR: Int!
 }
 
@@ -17,8 +21,11 @@ type ELSAGroup {
   NEXT_DESIRED_PROFILE: String
   PRIORITY_ACTION_TAKEN: String
   RECOMMENDED_TIERED_INTERVENTION: String
+  # Refers to ID generated in CompanyProfile
   COMPANY_ID: String
+  # Indicates current record belongs to which module
   MODULE: String
+  # Indicates current record belongs to which assessment year. Current year value is 1000
   ASSESSMENT_YEAR: Int
   CREATED_AT: String
   CREATED_BY: String
@@ -35,6 +42,7 @@ type ELSATotalOutput {
   POTENTIAL_COMMENT: String
   ELSA: [ELSAGroup]
   TOTAL_FINAL_SCORE: String
+  # Indicates current record belongs to which assessment year. Current year value is 1000
   ASSESSMENT_YEAR: Int
 }
 
@@ -42,6 +50,7 @@ type ELSAOneOutput {
   assessment: Assessment
   ELSA: [ELSAGroup]
   TOTAL_FINAL_SCORE: String
+  # Indicates current record belongs to which assessment year. Current year value is 1000
   ASSESSMENT_YEAR: Int
 }
 

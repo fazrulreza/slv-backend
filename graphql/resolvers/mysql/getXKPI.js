@@ -8,6 +8,7 @@ const { ForbiddenError } = require('../../permissions/errors');
 const processGetxData = (input, mail, modul, create = true) => {
   const parsedInput = JSON.parse(input.data);
 
+  // separate KPI and achievement fields
   const {
     // kpi
     BUS_OWNER_NAME,
@@ -46,10 +47,12 @@ const processGetxData = (input, mail, modul, create = true) => {
     ...others
   } = parsedInput;
 
+  // generate created updated fields
   const history = create
     ? generateHistory(mail, 'CREATE')
     : generateHistory(mail, 'UPDATE', parsedInput.CREATED_AT);
 
+  // base KPI
   const kpiInput = {
     ...others,
     ...history,
@@ -58,7 +61,7 @@ const processGetxData = (input, mail, modul, create = true) => {
     ASSESSMENT_YEAR: 1000,
   };
 
-  // kpi
+  // kpi sign
   const signKPIInput = {
     BUS_OWNER_NAME,
     BUS_OWNER_DATE,
@@ -76,7 +79,7 @@ const processGetxData = (input, mail, modul, create = true) => {
     ...history,
   };
 
-  // achievement
+  // achievement sign
   const signActualInput = {
     BUS_OWNER_NAME: BUS_OWNER_ACTUAL_NAME,
     BUS_OWNER_DATE: BUS_OWNER_ACTUAL_DATE,
@@ -123,6 +126,12 @@ const processGetxData = (input, mail, modul, create = true) => {
   };
 };
 
+/**
+ * Destructure invidiual KPI Score to an object
+ * @param {Object} data data containing scpres
+ * @param {string} type KPI factor
+ * @returns {Object} KPI Score object
+ */
 const getKPIscores = (data, type) => {
   const QUARTERS = Object.keys(data)
     .filter((v1) => v1.startsWith(type))
@@ -150,16 +159,28 @@ const getKPIscores = (data, type) => {
   };
 };
 
-const getKPIPoint = (data, abbr) => {
-  if (abbr === 'TECHNOLOGY' || abbr === 'DIVERSIFY' || abbr === 'NG') {
-    return parseInt(data[`${abbr}_PERCENT`], 10) >= 100 ? 1 : 0;
+/**
+ * Determine the point for a KPI factor
+ * @param {Object} data data containing scores
+ * @param {string} type KPI factor
+ * @returns {number} 1 point for >=100, 0 for vice versa
+ */
+const getKPIPoint = (data, type) => {
+  if (type === 'TECHNOLOGY' || type === 'DIVERSIFY' || type === 'NG') {
+    return parseInt(data[`${type}_PERCENT`], 10) >= 100 ? 1 : 0;
   }
   return (
-    (parseInt(data[`${abbr}_ACHIEVEMENT`], 10) >= parseInt(data[`${abbr}_TARGET`], 10))
-    && (parseInt(data[`${abbr}_ACHIEVEMENT`], 10) !== 0))
+    (parseInt(data[`${type}_ACHIEVEMENT`], 10) >= parseInt(data[`${type}_TARGET`], 10))
+    && (parseInt(data[`${type}_ACHIEVEMENT`], 10) !== 0))
     ? 1 : 0;
 };
 
+/**
+ * Calculate and generate total points based on KPI points
+ * @param {*} data main data
+ * @param {Boolean} [totalOnly=false] flag to determine return only total point or the whole data
+ * @returns {Object|number} whole data or only total points
+ */
 const getKPITotalPoint = (data, totalOnly = false) => {
   const SKILLED = getKPIPoint(data, 'SKILLED');
   const UNSKILLED = getKPIPoint(data, 'UNSKILLED');

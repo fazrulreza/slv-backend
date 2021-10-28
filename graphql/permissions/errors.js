@@ -7,11 +7,11 @@ const UnknownError = createError('UnknownError', {
 });
 
 const NotFoundError = createError('NotFoundError', {
-  message: 'No record found with the supplied args',
+  message: 'No record found',
 });
 
 const WrongPasswordError = createError('WrongPasswordError', {
-  message: 'Wrong password was specified',
+  message: 'Wrong password',
 });
 
 const UserExistsError = createError('UserExistsError', {

@@ -1,5 +1,7 @@
 input SurveyInput {
+  # Refers to ID generated in CompanyProfile
     COMPANY_ID: String!
+    # data follows Survey type format and gone through JSON.stringify process
     data: String!
 }
 
@@ -53,8 +55,11 @@ type Survey {
   SALES_TURNOVER: Int
   SME_CLASS: String
   ANNUAL_TURNOVER: Float
+  # Refers to ID generated in CompanyProfile
   COMPANY_ID: String
+  # Indicates current record belongs to which module
   MODULE: String
+  # Indicates current record belongs to which assessment year. Current year value is 1000
   ASSESSMENT_YEAR: Int
   CREATED_AT: String
   CREATED_BY: String
@@ -63,11 +68,13 @@ type Survey {
 }
 
 type smeScatterOutput {
+  # Refers to ID generated in CompanyProfile
   COMPANY_ID: String
   SECTOR: String
   ANNUAL_TURNOVER: Float
   FULLTIME_EMPLOYEE_COUNT: Int
   SME_CLASS: String
+  # Flag for completion status of Assessment
   ASSESSMENT_DONE: Int
 }
 

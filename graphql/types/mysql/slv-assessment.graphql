@@ -1,5 +1,6 @@
 input AssessmentInput {
     COMPANY_ID: String!
+    # data follows Assessment type format and gone through JSON.stringify process
     data: String!
 }
 
@@ -33,8 +34,11 @@ type Assessment {
   FR_FINANCE_COMMENT: String
   FR_FINANCIAL_SYSTEM: Int
   FR_FINANCIAL_SYSTEM_COMMENT: String
+  # Refers to ID generated in CompanyProfile
   COMPANY_ID: String
+  # Indicates current record belongs to which module
   MODULE: String
+  # Indicates current record belongs to which assessment year. Current year value is 1000
   ASSESSMENT_YEAR: Int
   CREATED_AT: String
   CREATED_BY: String

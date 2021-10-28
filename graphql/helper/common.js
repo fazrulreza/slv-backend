@@ -3,6 +3,7 @@
 const jwt = require('jsonwebtoken');
 const { readFileSync } = require('fs');
 const path = require('path');
+const bcrypt = require('bcrypt');
 const { profileGroup, tieredInterventionGroup } = require('./parameter');
 
 const SECRET = readFileSync(path.join(__dirname, process.env.SECRET));
@@ -41,10 +42,21 @@ const SECRET_PUB = readFileSync(path.join(__dirname, process.env.SECRET_PUB));
 //   return filter;
 // };
 
+/**
+ * Get difference between current and historical data
+ * @param {Object} curr current data
+ * @param {Object} hist historical data
+ * @returns {Object} difference
+ */
 const getDifference = (curr, hist) => Object.entries(hist)
   .filter(([key, val]) => curr[key] !== val && key in curr)
   .reduce((acc, [key, v]) => ({ ...acc, [key]: v }), {});
 
+/**
+ * Process survey data from DB to suit response
+ * @param {Object} result data from DB
+ * @returns {Object} processed data
+ */
 const processSurveyResult = (result) => {
   const AVAILABLE_SYSTEM = result.AVAILABLE_SYSTEM
     ? JSON.parse(result.AVAILABLE_SYSTEM)
@@ -92,6 +104,11 @@ const processSurveyResult = (result) => {
   };
 };
 
+/**
+ * Remove Empty entries in object
+ * @param {Object} obj Object to be processed
+ * @returns Object without empty entries
+ */
 const cleanEmpty = (obj) => {
   if (Array.isArray(obj)) {
     return obj
@@ -104,11 +121,18 @@ const cleanEmpty = (obj) => {
   // || Object.values(v).length === 0)
 };
 
+/**
+ * Calculate ELSA items
+ * @param {Object} getClassScore Object containing ELSA scores
+ * @param {string} initial type of data to be calculated
+ * @param {number} year assessment year
+ * @returns {Object} ELSA items
+ */
 const calculateScores = (getClassScore, initial, year) => {
   const tempGroup = getClassScore
     .filter((x) => Object.keys(x)[0].startsWith(initial))
     .reduce((acc, v) => {
-      if (v.unitClassScore === 'N/A') {
+      if (v.unitClassScore === 'N/A' || v.unitClassScore === 0) {
         return {
           totalUnitClassScore: 'N/A',
           totalWeightedScore: 'N/A',
@@ -133,7 +157,7 @@ const calculateScores = (getClassScore, initial, year) => {
   let priorityActionTaken = 'N/A';
   if (tempGroup.totalUnitClassScore !== 'N/A') {
     const finalScorePre = tempGroup.totalWeightedScore / tempGroup.totalUnitClassScore;
-    finalScore = (Math.round(finalScorePre * 10) / 10);
+    finalScore = (Math.round(finalScorePre * 100) / 100);
     finalScoreFloor = Math.floor(finalScorePre);
 
     // get next desired score
@@ -153,8 +177,7 @@ const calculateScores = (getClassScore, initial, year) => {
       ? 'N/A'
       : tieredInterventionGroup[finalScoreFloor];
     priorityActionTaken = (
-      nextDesiredScore !== 3 && (recommendedTieredIntervention === tieredInterventionGroup[1]
-      || recommendedTieredIntervention === tieredInterventionGroup[4]))
+      nextDesiredScore !== 3 && (finalScoreFloor === 1 || finalScoreFloor === 4))
       ? 'PRIORITY'
       : '';
   }
@@ -172,14 +195,30 @@ const calculateScores = (getClassScore, initial, year) => {
   return finalGroup;
 };
 
+/**
+ * Calculate KPI total score
+ * @param {Object} scorecard contains all the scores for KPI
+ * @returns {number} total scores of KPI
+ */
 const getTotalScore = (scorecard) => {
+  // console.log(scorecard);
+  // console.log(scorecard.map((y) => y.FINAL_SCORE));
   const sumScore = scorecard
     .reduce(((acc, v) => (v.FINAL_SCORE === 'N/A' ? acc : acc + parseFloat(v.FINAL_SCORE))), 0);
   const countScore = scorecard
     .reduce(((acc, v) => (v.FINAL_SCORE === 'N/A' ? acc : acc + 1)), 0);
-  return (Math.round((sumScore / countScore) * 10) / 10);
+  // console.log(sumScore);
+  // console.log(countScore);
+  // console.log(sumScore / countScore);
+  // console.log((Math.floor((sumScore / countScore) * 10) / 10));
+  return (Math.floor((sumScore / countScore) * 10) / 10);
 };
 
+/**
+ * Process DB data to be suited in response
+ * @param {Object} data DB data containing user Roles
+ * @returns {Object} processed DB data
+ */
 const processUserRolesOutput = (data) => {
   const preOutput = data.dataValues;
   const processedOutput = {
@@ -195,6 +234,12 @@ const processUserRolesOutput = (data) => {
   return processedOutput;
 };
 
+/**
+ * Check user access
+ * @param {string} permission Permission requested
+ * @param {Object} userRoleList Contains list of all available access right
+ * @returns {Boolean} has access or vice versa
+ */
 const checkPermission = (permission, userRoleList) => {
   const [subModule, auth] = permission.split('-');
 
@@ -202,6 +247,11 @@ const checkPermission = (permission, userRoleList) => {
   return userRoleList[`${subModule}_MODULE`].includes(auth);
 };
 
+/**
+ * Decrypt string using JWT
+ * @param {string} token token to be decrypted
+ * @returns {Object} decrypted object
+ */
 const verifyToken = (token) => {
   let decodeData = {};
   jwt.verify(token, SECRET_PUB, { algorithms: ['RS256'] }, (err, decoded) => {
@@ -217,6 +267,12 @@ const verifyToken = (token) => {
   return decodeData;
 };
 
+/**
+ * Encrypt token using JWT
+ * @param {Object} token object to be encrypted
+ * @param {string} expiresIn time before token expires
+ * @returns {string} JWT string
+ */
 const signToken = (token, expiresIn) => jwt.sign(
   token,
   SECRET,
@@ -225,6 +281,25 @@ const signToken = (token, expiresIn) => jwt.sign(
     algorithm: 'RS256',
   },
 );
+
+/**
+ * Hash password
+ * @param {string} password password to be hashed
+ * @returns {string} hashed password
+ */
+const hashPasswordAsync = async (password) => {
+  const salt = await bcrypt.genSalt();
+  const hash = await bcrypt.hash(password, salt);
+  return hash;
+};
+
+/**
+ * Compare text with its hashed counterpart
+ * @param {string} text text to be compared
+ * @param {string} hashed hashed counterpart
+ * @returns {boolean} true / false
+ */
+const comparePasswordAsync = async (text, hashed) => bcrypt.compare(text, hashed);
 
 module.exports = {
   // getFilter,
@@ -237,4 +312,6 @@ module.exports = {
   checkPermission,
   verifyToken,
   signToken,
+  hashPasswordAsync,
+  comparePasswordAsync,
 };

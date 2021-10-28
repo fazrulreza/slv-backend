@@ -290,10 +290,6 @@ module.exports = {
     ) => {
       if (!checkPermission('COMPANY-DELETE', userRoleList)) throw new ForbiddenError();
 
-      // remove company
-      const searchOpts = { where: { ID } };
-      const result = await MysqlSlvCompanyProfile.delete(searchOpts);
-
       // remove company from other tables
       const searchOpts2 = {
         where: { COMPANY_ID: ID },
@@ -301,6 +297,10 @@ module.exports = {
       await MysqlSlvSurvey.delete(searchOpts2);
       await MysqlSlvAssessment.delete(searchOpts2);
       await MysqlSlvELSAScorecard.delete(searchOpts2);
+
+      // remove company
+      const searchOpts = { where: { ID } };
+      const result = await MysqlSlvCompanyProfile.delete(searchOpts);
 
       const result2 = {
         ID,
