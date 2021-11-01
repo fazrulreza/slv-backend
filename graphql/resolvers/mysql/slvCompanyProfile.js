@@ -284,6 +284,7 @@ module.exports = {
       parent, { ID }, {
         connectors: {
           MysqlSlvCompanyProfile, MysqlSlvSurvey, MysqlSlvAssessment, MysqlSlvELSAScorecard,
+          MysqlGetxKPI, MysqlGetxSign, MysqlGetxAttachment,
         },
         user: { mail, userRoleList },
       },
@@ -294,9 +295,16 @@ module.exports = {
       const searchOpts2 = {
         where: { COMPANY_ID: ID },
       };
-      await MysqlSlvSurvey.delete(searchOpts2);
-      await MysqlSlvAssessment.delete(searchOpts2);
+
+      // getx
+      await MysqlGetxAttachment.delete(searchOpts2);
+      await MysqlGetxSign.delete(searchOpts2);
+      await MysqlGetxKPI.delete(searchOpts2);
+
+      // elsa
       await MysqlSlvELSAScorecard.delete(searchOpts2);
+      await MysqlSlvAssessment.delete(searchOpts2);
+      await MysqlSlvSurvey.delete(searchOpts2);
 
       // remove company
       const searchOpts = { where: { ID } };
