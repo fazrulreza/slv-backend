@@ -3,7 +3,7 @@
 const jwt = require('jsonwebtoken');
 const { readFileSync } = require('fs');
 const path = require('path');
-const bcrypt = require('bcrypt');
+// const bcrypt = require('bcrypt');
 const { profileGroup, tieredInterventionGroup } = require('./parameter');
 
 const SECRET = readFileSync(path.join(__dirname, process.env.SECRET));
@@ -282,24 +282,24 @@ const signToken = (token, expiresIn) => jwt.sign(
   },
 );
 
-/**
- * Hash password
- * @param {string} password password to be hashed
- * @returns {string} hashed password
- */
-const hashPasswordAsync = async (password) => {
-  const salt = await bcrypt.genSalt();
-  const hash = await bcrypt.hash(password, salt);
-  return hash;
-};
+// /**
+//  * Hash password
+//  * @param {string} password password to be hashed
+//  * @returns {string} hashed password
+//  */
+// const hashPasswordAsync = async (password) => {
+//   const salt = await bcrypt.genSalt();
+//   const hash = await bcrypt.hash(password, salt);
+//   return hash;
+// };
 
-/**
- * Compare text with its hashed counterpart
- * @param {string} text text to be compared
- * @param {string} hashed hashed counterpart
- * @returns {boolean} true / false
- */
-const comparePasswordAsync = async (text, hashed) => bcrypt.compare(text, hashed);
+// /**
+//  * Compare text with its hashed counterpart
+//  * @param {string} text text to be compared
+//  * @param {string} hashed hashed counterpart
+//  * @returns {boolean} true / false
+//  */
+// const comparePasswordAsync = async (text, hashed) => bcrypt.compare(text, hashed);
 
 module.exports = {
   // getFilter,
@@ -312,6 +312,6 @@ module.exports = {
   checkPermission,
   verifyToken,
   signToken,
-  hashPasswordAsync,
-  comparePasswordAsync,
+  // hashPasswordAsync,
+  // comparePasswordAsync,
 };
