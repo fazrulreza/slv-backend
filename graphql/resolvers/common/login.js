@@ -12,7 +12,7 @@ module.exports = {
   Mutation: {
     ldapLogin: async (
       parent, { input },
-      { connectors: { MysqlSlvUser, MysqlSlvUserRole, MysqlSlvUserPublic } },
+      { connectors: { MysqlSlvUser, MysqlSlvUserRole } },
     ) => {
       // Retrieve LDAP account
 
@@ -84,34 +84,34 @@ module.exports = {
         default: {
           // find from DB
 
-          let pass = false;
+          // let pass = false;
 
-          const searchOpts = {
-            where: { USER: userData.username },
-          };
+          // const searchOpts = {
+          //   where: { USER: userData.username },
+          // };
 
-          const resUser = await MysqlSlvUserPublic.findOne(searchOpts);
-          if (!resUser) throw new NotFoundError({ message: 'No user found' });
+          // const resUser = await MysqlSlvUserPublic.findOne(searchOpts);
+          // if (!resUser) throw new NotFoundError({ message: 'No user found' });
 
-          const resultUser = resUser.dataValues;
+          // const resultUser = resUser.dataValues;
 
-          pass = userData.source === 'GOOGLE' || userData.source === 'FACEBOOK'
-            ? true
-            : comparePasswordAsync(userData.password, resultUser.PWD);
+          // pass = userData.source === 'GOOGLE' || userData.source === 'FACEBOOK'
+          //   ? true
+          //   : comparePasswordAsync(userData.password, resultUser.PWD);
 
-          if (!pass) throw WrongPasswordError();
+          // if (!pass) throw WrongPasswordError();
 
-          data = {
-            username: resultUser.USER,
-            mail: resultUser.EMAIL,
-            mobile: resultUser.PHONE,
-            userType: 10,
-          };
-          mini = {
-            mail: resultUser.EMAIL,
-            userType: 10,
-          };
-          expire = '1y';
+          // data = {
+          //   username: resultUser.USER,
+          //   mail: resultUser.EMAIL,
+          //   mobile: resultUser.PHONE,
+          //   userType: 10,
+          // };
+          // mini = {
+          //   mail: resultUser.EMAIL,
+          //   userType: 10,
+          // };
+          // expire = '1y';
           break;
         }
       }
