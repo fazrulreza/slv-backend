@@ -156,7 +156,7 @@ const calculateScores = (getClassScore, initial, year) => {
   let nextDesiredProfile = 'N/A';
   let recommendedTieredIntervention = 'N/A';
   let priorityActionTaken = 'N/A';
-  if (initial === 'BR_')console.log(tempGroup);
+
   if (tempGroup.totalUnitClassScore !== 'N/A') {
     const finalScorePre = tempGroup.totalWeightedScore / tempGroup.totalUnitClassScore;
     finalScore = (Math.round(finalScorePre * 100) / 100);
