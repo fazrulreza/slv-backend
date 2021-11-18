@@ -130,7 +130,8 @@ const cleanEmpty = (obj) => {
  */
 const calculateScores = (getClassScore, initial, year) => {
   const tempGroup = getClassScore
-    .filter((x) => Object.keys(x)[0].startsWith(initial))
+    .filter((x) => Object.keys(x)[0].startsWith(initial)) // filter by initial
+    .filter((y) => !Object.keys(y)[0].endsWith('COMMENT')) // remove comment
     .reduce((acc, v) => {
       if (v.unitClassScore === 'N/A' || v.unitClassScore === 0) {
         return {
