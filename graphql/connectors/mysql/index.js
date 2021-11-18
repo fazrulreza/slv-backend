@@ -10,7 +10,7 @@ const MysqlGetxSign = require('./getx-sign');
 const MysqlGetxAttachment = require('./getx-attachment');
 const MysqlSlvPrediction = require('./slv-prediction');
 const MysqlSlvUserRole = require('./slv-user_role');
-// const MysqlSlvUserPublic = require('./slv-user_public');
+const MysqlSlvUserPublic = require('./slv-user_public');
 
 const mysqlConnectors = {
   // elsa
@@ -25,7 +25,7 @@ const mysqlConnectors = {
   // user
   MysqlSlvUser,
   MysqlSlvUserRole,
-  // MysqlSlvUserPublic,
+  MysqlSlvUserPublic,
 
   // getx
   MysqlGetxKPI,

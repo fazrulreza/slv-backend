@@ -1,0 +1,39 @@
+input UserPublicInput {
+    # data follows User type format and gone through JSON.stringify process
+    data: String!
+}
+
+type UserPublic {
+  EMAIL: String
+  # Refers to ID generated in UserRole
+  ROLE: Int
+  # Status of the current record. Active or inactive
+  STATUS: String
+  PHONE: String
+  GENDER: String
+  DOB: String
+  PWD: String
+  CREATED_AT: String
+  CREATED_BY: String
+  UPDATED_AT: String
+  UPDATED_BY: String
+  USER_ROLE: String
+  # Indicates current record belongs to which module
+  MODULE: String
+}
+
+type UserPublicWithRole {
+  userPublicOne: UserPublic
+  userRole: [UserRole!]!
+}
+
+type Query {
+  allUserPublic: [UserPublic!]!
+  oneUserPublic(email: String!): UserPublicWithRole
+}
+
+type Mutation {
+  createUserPublic(input: UserPublicInput!): UserPublic!
+  updateUserPublic(email: String!, input: UserPublicInput!): UpdateResp
+  deleteUserPublic(email: String!): DeleteResp
+}
