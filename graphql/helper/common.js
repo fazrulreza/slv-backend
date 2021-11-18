@@ -130,7 +130,8 @@ const cleanEmpty = (obj) => {
  */
 const calculateScores = (getClassScore, initial, year) => {
   const tempGroup = getClassScore
-    .filter((x) => Object.keys(x)[0].startsWith(initial))
+    .filter((x) => Object.keys(x)[0].startsWith(initial)) // filter by initial
+    .filter((y) => !Object.keys(y)[0].endsWith('COMMENT')) // remove comment
     .reduce((acc, v) => {
       if (v.unitClassScore === 'N/A' || v.unitClassScore === 0) {
         return {
@@ -155,6 +156,7 @@ const calculateScores = (getClassScore, initial, year) => {
   let nextDesiredProfile = 'N/A';
   let recommendedTieredIntervention = 'N/A';
   let priorityActionTaken = 'N/A';
+  if (initial === 'BR_')console.log(tempGroup);
   if (tempGroup.totalUnitClassScore !== 'N/A') {
     const finalScorePre = tempGroup.totalWeightedScore / tempGroup.totalUnitClassScore;
     finalScore = (Math.round(finalScorePre * 100) / 100);
