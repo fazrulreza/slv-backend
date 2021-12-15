@@ -9,6 +9,7 @@ const attributes = {
     primaryKey: true,
     type: Sequelize.STRING,
   },
+  AVATAR: Sequelize.STRING,
   ROLE: Sequelize.INTEGER,
   STATUS: Sequelize.STRING,
   PHONE: Sequelize.STRING,

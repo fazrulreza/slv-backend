@@ -2,6 +2,7 @@
 /* eslint-disable no-return-assign */
 const jwt = require('jsonwebtoken');
 const { readFileSync } = require('fs');
+const { Op } = require('sequelize');
 const path = require('path');
 const bcrypt = require('bcrypt');
 const { profileGroup, tieredInterventionGroup } = require('./parameter');
@@ -302,6 +303,25 @@ const hashPasswordAsync = async (password) => {
  */
 const comparePasswordAsync = async (text, hashed) => bcrypt.compare(text, hashed);
 
+/**
+ * Generate where part for sequelize find based on role
+ * @param {Object} userRoleList user Role List
+ * @param {string} mail user mail
+ * @returns {Object} where object to be used in sequelize find
+ */
+const getRoleWhere = (userRoleList, mail) => {
+  switch (true) {
+    case (userRoleList.DATA_VIEW === 'OWN'):
+      return { OWNER: mail };
+    case (userRoleList.DATA_VIEW === 'MODULE'):
+      return { MODULE: { [Op.substring]: userRoleList.MODULE } };
+    case (userRoleList.MODULE === 'ALL'):
+      return null;
+    default:
+      return { OWNER: mail };
+  }
+};
+
 module.exports = {
   // getFilter,
   getDifference,
@@ -315,4 +335,5 @@ module.exports = {
   signToken,
   hashPasswordAsync,
   comparePasswordAsync,
+  getRoleWhere,
 };

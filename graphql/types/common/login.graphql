@@ -1,9 +1,24 @@
 
 type LdapUser {
+    # main token containing all user data
     token: String
+    # mini token to be used for calling graphql API
     minitoken: String
 }
-
 type Mutation {
+"""
+  - input should follow the following type: JSON Object -> JSON Stringify -> Encrypted using RS256
+  - JSON object structure should follow:
+
+ {
+
+      username: String
+      password: String
+      public: Boolean
+      source: GOOGLE / FACEBOOK
+
+ }
+"""
   ldapLogin(input: String!): LdapUser!
+  tokenBlacklist(input: String!): String
 }

@@ -5,6 +5,7 @@ input CompanyProfileInput {
 
 type CompanyProfile {
   ID: String
+  LOGO: [FileType]
   ENTITY_NAME: String
   ENTRY_DATE: String
   REGISTRATION_NO: String
@@ -43,6 +44,7 @@ type CompanyProfile {
   ASSESSMENT_DONE: String
   # Flag for completion status of GETX KPI settings
   KPI_DONE: String
+  OWNER: String
   CREATED_AT: String
   CREATED_BY: String
   UPDATED_AT: String
@@ -77,6 +79,7 @@ type Query {
 }
 
 type Mutation {
+  checkCompany (NAME: String!): String
   createCompany(input: CompanyProfileInput!): CompanyProfile!
   updateCompany(ID: String!, input: CompanyProfileInput!): UpdateResp
   deleteCompany(ID: String!): DeleteResp

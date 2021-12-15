@@ -1,5 +1,5 @@
 const { generateId, generateHistory } = require('../../../packages/mysql-model');
-const { processSurveyResult, checkPermission } = require('../../helper/common');
+const { processSurveyResult, checkPermission, getRoleWhere } = require('../../helper/common');
 const { isAuthenticatedResolver } = require('../../permissions/acl');
 const { ForbiddenError } = require('../../permissions/errors');
 
@@ -84,19 +84,11 @@ module.exports = {
     ) => {
       if (!checkPermission('SURVEY-READ', userRoleList)) throw new ForbiddenError();
 
-      let where = { CREATED_BY: mail };
       let resultCompany = [];
       let resultQuest = [];
       let resultScore = [];
 
-      // check module admin
-      if (userRoleList.DATA_VIEW === 'MODULE') {
-        where = { MODULE: userRoleList.MODULE };
-      }
-      // check admin
-      if (userRoleList.MODULE === 'ALL') {
-        where = null;
-      }
+      const where = getRoleWhere(userRoleList, mail);
       const searchOpts = { where };
 
       // Assessment
@@ -155,7 +147,7 @@ module.exports = {
         ID: generateId(),
         ...history,
         COMPANY_ID: input.COMPANY_ID,
-        MODULE: userRoleList.MODULE,
+        MODULE: userRoleList.MODULE === 'ALL' ? 'SME' : userRoleList.MODULE,
         ASSESSMENT_YEAR: 1000,
       };
       const result = await MysqlSlvSurvey.create(newInput);

@@ -5,6 +5,7 @@ input UserPublicInput {
 
 type UserPublic {
   EMAIL: String
+  AVATAR: [FileType]
   # Refers to ID generated in UserRole
   ROLE: Int
   # Status of the current record. Active or inactive

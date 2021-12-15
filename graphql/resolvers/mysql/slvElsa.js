@@ -1,6 +1,6 @@
 const { generateId, generateHistory } = require('../../../packages/mysql-model');
 const {
-  processSurveyResult, calculateScores, getTotalScore, checkPermission,
+  processSurveyResult, calculateScores, getTotalScore, checkPermission, getRoleWhere,
 } = require('../../helper/common');
 const { profileGroup } = require('../../helper/parameter');
 const { isAuthenticatedResolver } = require('../../permissions/acl');
@@ -40,17 +40,8 @@ module.exports = {
       let resultCompany = [];
       let resultQuest = [];
       let resultElsa = [];
-      let where = { CREATED_BY: mail };
 
-      // check module admin
-      if (userRoleList.DATA_VIEW === 'MODULE') {
-        where = { MODULE: userRoleList.MODULE };
-      }
-      // check admin
-      if (userRoleList.MODULE === 'ALL') {
-        where = null;
-      }
-
+      const where = getRoleWhere(userRoleList, mail);
       const searchOpts = { where };
       const searchOptsAll = { where: null };
 
@@ -155,10 +146,10 @@ module.exports = {
       const searchOpts = { where: { COMPANY_ID: input.COMPANY_ID } };
       const searchOptsAll = { where: null };
 
-      const resultCompany = await MysqlSlvCompanyProfile.findById(input.COMPANY_ID);
+      const resCompany = await MysqlSlvCompanyProfile.findById(input.COMPANY_ID);
 
       // no company, return null
-      if (!resultCompany) {
+      if (!resCompany) {
         return [{
           company: null,
           assessment: null,
@@ -169,6 +160,11 @@ module.exports = {
           ASSESSMENT_YEAR: null,
         }];
       }
+
+      const resultCompany = {
+        ...resCompany.dataValues,
+        LOGO: JSON.parse(resCompany.dataValues.LOGO),
+      };
 
       // survey
       const resQuestPre = await MysqlSlvSurvey.findAll(searchOpts);
@@ -444,7 +440,7 @@ module.exports = {
         totalFinalScore = getTotalScore(scorecard);
 
         const result = {
-          company: resultCompany.dataValues,
+          company: resultCompany,
           assessment: resultScore,
           survey: resultQuest,
           msicDetails: resultMSIC,
@@ -473,7 +469,7 @@ module.exports = {
             ...history,
             ID: generateId(),
             COMPANY_ID: input.COMPANY_ID,
-            MODULE: userRoleList.MODULE,
+            MODULE: userRoleList.MODULE === 'ALL' ? 'SME' : userRoleList.MODULE,
           };
           return newB;
         });
@@ -547,7 +543,7 @@ module.exports = {
           ID: generateId(),
           ASSESSMENT_YEAR: input.ASSESSMENT_YEAR,
           COMPANY_ID: input.COMPANY_ID,
-          MODULE: userRoleList.MODULE,
+          MODULE: userRoleList.MODULE === 'ALL' ? 'SME' : userRoleList.MODULE,
         };
         return newB;
       });

@@ -33,6 +33,10 @@ const passwordStrengthError = createError('passwordStrengthError', {
 const UserLoginExistsError = createError('UserLoginExistsError', {
   message: 'User Login already exists',
 });
+
+const CompanyExistsError = createError('CompanyExistsError', {
+  message: 'Company already exists',
+});
 // ------------------
 
 // ------------------
@@ -77,4 +81,5 @@ module.exports = {
   NotEnoughCreditError,
   SessionExpiredError,
   JsonWebTokenError,
+  CompanyExistsError,
 };

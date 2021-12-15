@@ -290,7 +290,11 @@ module.exports = {
       const resKPI = await MysqlGetxKPI.findAll(searchOpts);
 
       // Company + MSIC
-      const resultCompany = await MysqlSlvCompanyProfile.findById(COMPANY_ID);
+      const resCompany = await MysqlSlvCompanyProfile.findById(COMPANY_ID);
+      const resultCompany = {
+        ...resCompany.dataValues,
+        LOGO: JSON.parse(resCompany.dataValues.LOGO),
+      };
       const searchOpts2 = { where: { MSIC: resultCompany.MSIC } };
       const resMSIC = await MysqlSlvMSIC.findOne(searchOpts2);
       const resultMSIC = resMSIC.dataValues;

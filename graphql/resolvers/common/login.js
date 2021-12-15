@@ -1,7 +1,9 @@
+const moment = require('moment');
 const Login = require('../../../packages/ldap');
 const {
   processUserRolesOutput, verifyToken, signToken, comparePasswordAsync,
 } = require('../../helper/common');
+const { isAuthenticatedResolver } = require('../../permissions/acl');
 const {
   SessionExpiredError, JsonWebTokenError, NotFoundError, WrongPasswordError,
 } = require('../../permissions/errors');
@@ -87,7 +89,7 @@ module.exports = {
           let pass = false;
 
           const searchOpts = {
-            where: { USER: userData.username },
+            where: { EMAIL: userData.username },
           };
 
           const resUser = await MysqlSlvUserPublic.findOne(searchOpts);
@@ -102,9 +104,9 @@ module.exports = {
           if (!pass) throw WrongPasswordError();
 
           data = {
-            username: resultUser.USER,
             mail: resultUser.EMAIL,
             mobile: resultUser.PHONE,
+            photo: resultUser.AVATAR,
             userType: 10,
           };
           mini = {
@@ -150,5 +152,18 @@ module.exports = {
         minitoken,
       };
     },
+    tokenBlacklist: isAuthenticatedResolver.createResolver(async (
+      parent, { input }, {
+        connectors: { MysqlSlvTokenBlacklist },
+      },
+    ) => {
+      const newInput = {
+        TOKEN: input,
+        CREATED_AT: moment().format('YYYY-MM-DD HH:mm:ss'),
+      };
+      const result = await MysqlSlvTokenBlacklist.create(newInput);
+      if (!result) return 'FAIL';
+      return 'SUCCESS';
+    }),
   },
 };

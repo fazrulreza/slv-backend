@@ -1,3 +1,4 @@
+const { Op } = require('sequelize');
 const { generateHistory } = require('../../../packages/mysql-model');
 const { processUserRolesOutput, checkPermission } = require('../../helper/common');
 const { isAuthenticatedResolver } = require('../../permissions/acl');
@@ -34,7 +35,13 @@ module.exports = {
     ) => {
       if (!checkPermission('ROLES-READ', userRoleList)) throw new ForbiddenError();
 
-      const where = userRoleList.MODULE === 'ALL' ? null : { MODULE: userRoleList.MODULE };
+      // default to module view
+      let where = { MODULE: { [Op.substring]: userRoleList.MODULE } };
+
+      // check admin
+      if (userRoleList.MODULE === 'ALL') {
+        where = null;
+      }
 
       const searchOpts = {
         where,

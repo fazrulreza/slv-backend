@@ -15,6 +15,7 @@ const USER_PUBLIC = 'user_public';
 const USER_ROLE = 'user_role';
 const ELSA_SCORECARD = 'elsa_scorecard';
 const ELSA_WEIGHTAGE = 'elsa_weightage';
+const TOKEN_BLACKLIST = 'token_blacklist';
 
 const GETX_KPI = 'getx_kpi';
 const GETX_SIGN = 'getx_sign';
@@ -36,6 +37,7 @@ module.exports = {
   USER,
   USER_PUBLIC,
   USER_ROLE,
+  TOKEN_BLACKLIST,
   GETX_KPI,
   GETX_SIGN,
   GETX_ATTACHMENT,
