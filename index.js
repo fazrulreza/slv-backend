@@ -11,6 +11,7 @@ const typeDefs = require('./graphql/types');
 /** import connectors */
 const connectors = require('./graphql/connectors');
 const { verifyToken } = require('./graphql/helper/common');
+const { ForbiddenError } = require('./graphql/permissions/errors');
 
 const {
   GRAPHQL_INTROSPECTION, GRAPHQL_PLAYGROUND, GRAPHQL_PORT,
@@ -29,11 +30,20 @@ const apolloServer = new ApolloServer({
   cors: true,
   playground,
   introspection,
-  context: ({ req }) => {
+  context: async ({ req }) => {
     const token = req.headers.authorization || '';
-    const user = (token || req.body.operationName !== 'login')
-      ? verifyToken(token)
-      : '';
+    let user = '';
+
+    if (token || req.body.operationName !== 'login') {
+      user = verifyToken(token);
+
+      // check token is blacklisted or not
+      const { MysqlSlvTokenBlacklist } = connectors;
+      const searchOpts = { where: { TOKEN: token } };
+
+      const resTokenBlack = await MysqlSlvTokenBlacklist.findOne(searchOpts);
+      if (resTokenBlack) throw new ForbiddenError();
+    }
 
     // console.log(user);
     // user.mail = 'rafidah.arif@smebank.com.my';

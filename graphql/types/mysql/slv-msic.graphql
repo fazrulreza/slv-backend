@@ -1,4 +1,8 @@
 
+"""
+    - available MSIC fields that can be queried. 
+    - Name reflects columns in DB
+"""
 type MSICResult {
   MSIC: String,
   description_malay_detail: String,
@@ -18,5 +22,9 @@ type MSICResult {
 }
 
 type Query {
+"""
+    - Retrieve all MSIC in database
+    - Used when creating a company
+"""
     allMSIC (MSIC: String): [MSICResult!]!
 }

@@ -71,7 +71,7 @@ module.exports = {
         ID: generateId(),
         ...history,
         COMPANY_ID: input.COMPANY_ID,
-        MODULE: userRoleList.MODULE,
+        MODULE: userRoleList.MODULE === 'ALL' ? 'SME' : userRoleList.MODULE,
         ASSESSMENT_YEAR: 1000,
       };
         // console.log(newInput);

@@ -1,10 +1,21 @@
+
+"""
+    - input format for Public User API
+"""
 input UserPublicInput {
     # data follows User type format and gone through JSON.stringify process
     data: String!
 }
 
+"""
+    - available public user fields that can be queried. 
+    - Name reflects columns in DB
+"""
 type UserPublic {
+  NAME: String
   EMAIL: String
+  SOURCE: String
+  AVATAR: [FileType]
   # Refers to ID generated in UserRole
   ROLE: Int
   # Status of the current record. Active or inactive
@@ -22,18 +33,37 @@ type UserPublic {
   MODULE: String
 }
 
+"""
+    - combined public user data with list of user roles 
+    - used for update data
+"""
 type UserPublicWithRole {
   userPublicOne: UserPublic
   userRole: [UserRole!]!
 }
 
 type Query {
+"""
+    - retrieve all public users
+"""
   allUserPublic: [UserPublic!]!
+"""
+    - retrieve one public user based on email together with roles
+"""
   oneUserPublic(email: String!): UserPublicWithRole
 }
 
 type Mutation {
+"""
+    - create a public user
+"""
   createUserPublic(input: UserPublicInput!): UserPublic!
+"""
+    - update a public user
+"""
   updateUserPublic(email: String!, input: UserPublicInput!): UpdateResp
+"""
+    - delete a public user
+"""
   deleteUserPublic(email: String!): DeleteResp
 }

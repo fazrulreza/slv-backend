@@ -36,6 +36,7 @@ module.exports = {
           const resU2 = resultUserRole.filter((z) => z.ID === resU1.ROLE)[0];
           return {
             ...resU1,
+            AVATAR: JSON.parse(resU1.AVATAR),
             USER_ROLE: resU2.NAME,
             MODULE: resU2.MODULE,
           };
@@ -63,7 +64,10 @@ module.exports = {
       // user
       const searchOpts = { where: { EMAIL: email } };
       const resUser = await MysqlSlvUserPublic.findOne(searchOpts);
-      const resultUser = resUser.dataValues;
+      const resultUser = {
+        ...resUser.dataValues,
+        AVATAR: JSON.parse(resUser.dataValues.AVATAR),
+      };
 
       // roles
       const searchOptsRole = { where: null };
@@ -91,6 +95,8 @@ module.exports = {
       const history = generateHistory(mail, 'CREATE');
       const newInput = {
         ...parsedInput,
+        AVATAR: JSON.stringify(parsedInput.AVATAR),
+        SOURCE: 'PORTAL',
         PWD: newPwd,
         ...history,
       };
@@ -115,6 +121,7 @@ module.exports = {
       const searchOpts = {
         object: {
           ...parsedInput,
+          AVATAR: JSON.stringify(parsedInput.AVATAR),
           PWD: newPwd,
           ...history,
         },

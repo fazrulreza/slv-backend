@@ -1,3 +1,7 @@
+
+"""
+    - input format for Survey API
+"""
 input SurveyInput {
   # Refers to ID generated in CompanyProfile
     COMPANY_ID: String!
@@ -5,16 +9,26 @@ input SurveyInput {
     data: String!
 }
 
+"""
+    - output format for Employee count
+"""
 type EmployeeCountDetail {
   FULLTIME: Int
   PARTTIME: Int
 }
 
+"""
+    - output format for Employee Details
+"""
 type EmployeeDetails {
     FULLTIME: Int
     OWNER_MANAGED_100: String
   },
 
+"""
+    - available survey fields that can be queried. 
+    - Name reflects columns in DB
+"""
 type Survey {
   ID: String
   OPERATING_HISTORY: String
@@ -67,6 +81,9 @@ type Survey {
   UPDATED_BY: String
 }
 
+"""
+    - simplified data for scatter plot
+"""
 type smeScatterOutput {
   # Refers to ID generated in CompanyProfile
   COMPANY_ID: String
@@ -79,11 +96,23 @@ type smeScatterOutput {
 }
 
 type Query {
+"""
+    - retrieve all surveys for a company
+"""
   allSurvey (COMPANY_ID: String!): [Survey]
+"""
+    - retrieve summarized data for scatter plot mapping
+"""
   smeScatter: [smeScatterOutput!]!
 }
 
 type Mutation {
+"""
+    - create survey data for a company
+"""
   createSurvey(input: SurveyInput!): Survey!
+"""
+    - update survey data for a company
+"""
   updateSurvey(input: SurveyInput!): UpdateResp
 }
