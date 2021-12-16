@@ -270,8 +270,8 @@ module.exports = {
     }),
     createCompany: isAuthenticatedResolver.createResolver(async (
       parent, { input }, {
-        connectors: { MysqlSlvCompanyProfile },
-        user: { mail, userRoleList },
+        connectors: { MysqlSlvCompanyProfile, MysqlSlvUserPublic },
+        user: { mail, userRoleList, userType },
       },
     ) => {
       if (!checkPermission('COMPANY-CREATE', userRoleList)) throw new ForbiddenError();
@@ -287,8 +287,35 @@ module.exports = {
         OWNER: mail,
         ...history,
       };
-        //   console.log(newInput);
-      return MysqlSlvCompanyProfile.create(newInput);
+
+      const resCompany = await MysqlSlvCompanyProfile.create(newInput);
+      const resultCompany = resCompany.dataValues;
+
+      // if public user, update company ID in profile
+      if (userType === 10) {
+        // find user ID
+        const searchOpts = {
+          where: { EMAIL: mail },
+        };
+        const resUser = await MysqlSlvUserPublic.findOne(searchOpts);
+        const resultUser = resUser.dataValues;
+
+        // update user
+        const historyUpdate = generateHistory(mail, 'UPDATE', resUser.dataValues.CREATED_AT);
+        const searchOptsUpdate = {
+          object: {
+            ...resultUser,
+            COMPANY_ID: resultCompany.ID,
+            ...historyUpdate,
+          },
+          where: {
+            EMAIL: mail,
+          },
+        };
+        await MysqlSlvUserPublic.update(searchOptsUpdate);
+      }
+
+      return resultCompany;
     }),
     deleteCompany: isAuthenticatedResolver.createResolver(async (
       parent, { ID }, {
