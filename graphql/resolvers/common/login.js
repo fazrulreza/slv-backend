@@ -1,5 +1,6 @@
 const moment = require('moment');
 const Login = require('../../../packages/ldap');
+const { generateHistory } = require('../../../packages/mysql-model');
 const {
   processUserRolesOutput, verifyToken, signToken, comparePasswordAsync,
 } = require('../../helper/common');
@@ -34,20 +35,20 @@ module.exports = {
         case userData.name === 'JsonWebTokenError': {
           throw new JsonWebTokenError({ message: userData.message });
         }
-        case NODE_ENV === 'development': {
-          // dev environment
-          data = {
-            username: userData.userName,
-            mail: `${userData.username}@smebank.com.my`,
-            userType: 1,
-          };
-          mini = {
-            mail: `${userData.username}@smebank.com.my`,
-            userType: 1,
-          };
-          expire = '1y';
-          break;
-        }
+        // case NODE_ENV === 'development': {
+        //   // dev environment
+        //   data = {
+        //     username: userData.userName,
+        //     mail: `${userData.username}@smebank.com.my`,
+        //     userType: 1,
+        //   };
+        //   mini = {
+        //     mail: `${userData.username}@smebank.com.my`,
+        //     userType: 1,
+        //   };
+        //   expire = '1y';
+        //   break;
+        // }
         case !userData.public: {
           // find from AD
           const userInfo = await Login(userData);
@@ -82,11 +83,35 @@ module.exports = {
           };
           break;
         }
+        case (userData.source === 'GOOGLE' || userData.source === 'FACEBOOK'): {
+          const history = generateHistory(userData.email, 'CREATE');
+          const newInput = {
+            EMAIL: userData.email,
+            NAME: userData.name,
+            AVATAR: userData.photo,
+            GENDER: userData.gender,
+            DOB: userData.dob,
+            PHONE: userData.phone,
+            ...history,
+          };
+          await MysqlSlvUserPublic.create(newInput);
+
+          data = {
+            mail: userData.email,
+            mobile: userData.phone,
+            photo: userData.photo,
+            userType: 10,
+          };
+          mini = {
+            mail: userData.email,
+            userType: 10,
+          };
+          expire = '1y';
+          break;
+        }
         case userData.public:
         default: {
           // find from DB
-
-          let pass = false;
 
           const searchOpts = {
             where: { EMAIL: userData.username },
@@ -94,13 +119,9 @@ module.exports = {
 
           const resUser = await MysqlSlvUserPublic.findOne(searchOpts);
           if (!resUser) throw new NotFoundError({ message: 'No user found' });
-
           const resultUser = resUser.dataValues;
 
-          pass = userData.source === 'GOOGLE' || userData.source === 'FACEBOOK'
-            ? true
-            : comparePasswordAsync(userData.password, resultUser.PWD);
-
+          const pass = comparePasswordAsync(userData.password, resultUser.PWD);
           if (!pass) throw WrongPasswordError();
 
           data = {

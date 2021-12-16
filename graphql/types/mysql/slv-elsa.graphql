@@ -1,3 +1,7 @@
+
+"""
+    - input format for ELSA API
+"""
 input ELSAInput {
   # Refers to ID generated in CompanyProfile
     COMPANY_ID: String!
@@ -6,6 +10,9 @@ input ELSAInput {
     PUBLIC: Boolean
 }
 
+"""
+    - output for create ELSA
+"""
 type ELSAOutput {
   # Refers to ID generated in CompanyProfile
     COMPANY_ID: String!
@@ -13,6 +20,10 @@ type ELSAOutput {
     ASSESSMENT_YEAR: Int!
 }
 
+"""
+    - available ELSA fields that can be queried. 
+    - Name reflects columns in DB
+"""
 type ELSAGroup {
   FACTOR: String
   FINAL_SCORE: String
@@ -33,6 +44,9 @@ type ELSAGroup {
   UPDATED_BY: String
 }
 
+"""
+    - combination of all data for ELSA output of a company
+"""
 type ELSATotalOutput {
   company: CompanyProfile
   assessment: Assessment
@@ -46,6 +60,9 @@ type ELSATotalOutput {
   ASSESSMENT_YEAR: Int
 }
 
+"""
+    - Specific ELSA-only output for a company.
+"""
 type ELSAOneOutput {
   assessment: Assessment
   ELSA: [ELSAGroup]
@@ -54,18 +71,39 @@ type ELSAOneOutput {
   ASSESSMENT_YEAR: Int
 }
 
+"""
+    - Summary of ELSA count by it stages
+    - only applicable to those that has filled up to assessment
+"""
 type ELSACount {
   stage: Int
   count: Int
 }
 
 type Query {
+"""
+    - Retrieve the full list of ELSA for report card display
+    - Main API for ELSA data retrieval
+"""
     oneAll (input: ELSAInput!): [ELSATotalOutput!]!
+"""
+    -  Summary of ELSA count by it stages
+"""
     fullElsaList: [ELSACount!]!
+"""
+    - Specific ELSA-only output for a company.
+"""
     oneElsa (input: ELSAInput!): ELSAOneOutput
 }
 
 type Mutation {
+"""
+    - create / finalize ELSA data for a company
+    - add a new record of ELSA and tag to input year
+"""
   createElsa(input: ELSAInput!): ELSAOutput!
+"""
+    - delete ELSA data for a company
+"""
   deleteElsa(input: ELSAInput!): DeleteResp
 }

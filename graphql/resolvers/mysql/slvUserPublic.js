@@ -96,6 +96,7 @@ module.exports = {
       const newInput = {
         ...parsedInput,
         AVATAR: JSON.stringify(parsedInput.AVATAR),
+        SOURCE: 'PORTAL',
         PWD: newPwd,
         ...history,
       };

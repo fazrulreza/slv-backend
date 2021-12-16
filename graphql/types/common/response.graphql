@@ -1,21 +1,34 @@
+
+"""
+    - generic response for delete process
+"""
 type DeleteResp {
     ID: String
     deleted: String
     error: String
 }
 
+"""
+    - generic response for update process
+"""
 type UpdateResp {
     ID: String
     updated: Int
     error: String
 }
 
+"""
+    - generic response for add / create process
+"""
 type AddResp {
     ID: String
     added: Int
     error: String
 }
 
+"""
+    - generic response for file type. Usually for attachment
+"""
 type FileType {
     name: String
     type: String

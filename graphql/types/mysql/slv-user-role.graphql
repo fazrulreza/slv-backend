@@ -1,8 +1,16 @@
+
+"""
+    - input format for User Role API
+"""
 input UserRoleInput {
     # data follows UserRole type format and gone through JSON.stringify process
     data: String!
 }
 
+"""
+    - available user role fields that can be queried. 
+    - Name reflects columns in DB
+"""
 type UserRole {
   ID: Int
   NAME: String
@@ -25,12 +33,27 @@ type UserRole {
 }
 
 type Query {
+"""
+    - retrieve user roles
+"""
   allUserRole: [UserRole!]!
+"""
+    - retrieve one user role based on its ID
+"""
   oneUserRole(ID: Int!): UserRole!
 }
 
 type Mutation {
+"""
+    - create a user role
+"""
   createUserRole(input: UserRoleInput!): UserRole!
+"""
+    - update a user role
+"""
   updateUserRole(ID: Int!, input: UserRoleInput!): UpdateResp
+"""
+    - delete a user role
+"""
   deleteUserRole(ID: Int!): DeleteResp
 }

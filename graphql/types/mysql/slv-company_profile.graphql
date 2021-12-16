@@ -1,8 +1,16 @@
+
+"""
+    - input format for Company profile API
+"""
 input CompanyProfileInput {
     # data follows CompanyProfile type format and gone through JSON.stringify process
     data: String!
 }
 
+"""
+    - available company fields that can be queried. 
+    - Name reflects columns in DB
+"""
 type CompanyProfile {
   ID: String
   LOGO: [FileType]
@@ -51,11 +59,18 @@ type CompanyProfile {
   UPDATED_BY: String
 }
 
+"""
+    - combine company profile with MSIC.
+    - used during company view / update
+"""
 type CompanyProfileWithMSIC {
   allMSIC: [MSICResult!]!,
   company: CompanyProfile!
 }
 
+"""
+    - summary of total profile, survey, and assessment made per user of all user
+"""
 type UserReportList {
   USER: String,
   ROLE_NAME: String,
@@ -65,6 +80,10 @@ type UserReportList {
   ASSESSMENT_COUNT: Int,
 }
 
+"""
+    - summary of company by state
+    - only applicable to those that has filled up to assessment
+"""
 type StateList {
   STATE: String,
   COUNT: Int,
@@ -72,16 +91,45 @@ type StateList {
 }
 
 type Query {
+"""
+    - retrieve company data for a single company
+    - usually used for view / update data
+"""
     oneCompany (ID: String!): CompanyProfileWithMSIC!
+"""
+    - retrieve all companies for company listing
+"""
     allCompanies: [CompanyProfile!]!
+"""
+    - retrieve summary of all user activities
+"""
     userReports: [UserReportList!]!
+"""
+    - retrieve summary of company by state
+"""
     stateReports: [StateList!]!
 }
 
 type Mutation {
+"""
+    - check if company exist in DB
+"""
   checkCompany (NAME: String!): String
+"""
+    - create company data
+"""
   createCompany(input: CompanyProfileInput!): CompanyProfile!
+"""
+    - update company data
+"""
   updateCompany(ID: String!, input: CompanyProfileInput!): UpdateResp
+"""
+    - delete company data
+    - deleting company data will automatically delete all data related to the company
+"""
   deleteCompany(ID: String!): DeleteResp
+"""
+    - unlist company from getx program
+"""
   unlistCompany(ID: String!): UpdateResp
 }

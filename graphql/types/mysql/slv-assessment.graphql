@@ -1,9 +1,17 @@
+
+"""
+    - input format for Assessment API
+"""
 input AssessmentInput {
     COMPANY_ID: String!
     # data follows Assessment type format and gone through JSON.stringify process
     data: String!
 }
 
+"""
+    - available assessment fields that can be queried. 
+    - Name reflects columns in DB
+"""
 type Assessment {
   ID: String
   OH_OPERATING_HISTORY: Int
@@ -46,16 +54,28 @@ type Assessment {
   UPDATED_BY: String
 }
 
+"""
+    - Combined data of assessment and survey
+"""
 type AssessmentSurvey {
   assessment: [Assessment]
   survey: [Survey]
 }
 
 type Query {
+"""
+    - retrieve all assessment data for a company
+"""
   allAssessment (COMPANY_ID: String!): AssessmentSurvey
 }
 
 type Mutation {
+"""
+    - create assessment data for a company
+"""
   createAssessment(input: AssessmentInput!): Assessment!
+"""
+    - update assessment data for a company
+"""
   updateAssessment(input: AssessmentInput!): UpdateResp
 }

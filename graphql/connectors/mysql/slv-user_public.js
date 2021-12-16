@@ -5,10 +5,12 @@ const { mysqlConnection, USER_PUBLIC } = require('../../../config');
 const connection = mysqlConnection;
 
 const attributes = {
+  NAME: Sequelize.STRING,
   EMAIL: {
     primaryKey: true,
     type: Sequelize.STRING,
   },
+  SOURCE: Sequelize.STRING,
   AVATAR: Sequelize.STRING,
   ROLE: Sequelize.INTEGER,
   STATUS: Sequelize.STRING,
