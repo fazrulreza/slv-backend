@@ -24,10 +24,9 @@ const getPrediction = (resultPredict, fields, factor) => {
 module.exports = {
   Query: {
     /**
-         * Retrieve one by ID
-         * @param {Object} param0 main input object
-         * @param {String} param0.id id
-         */
+     * Retrieve ELSA data grouped by lifecycle status
+     * @param {Object} param0 main input object
+     */
     fullElsaList: isAuthenticatedResolver.createResolver(async (
       parent, param,
       {
@@ -104,6 +103,11 @@ module.exports = {
       logger.info(`fullElsaList --> by ${mail} completed`);
       return result;
     }),
+    /**
+     * Retrieve one by Company ID and Assessment Year
+     * @param {Object} param0 main input object
+     * @param {String} param0.input contains company id and assessment year
+     */
     oneElsa: isAuthenticatedResolver.createResolver(async (
       parent, { input }, {
         connectors: { MysqlSlvAssessment, MysqlSlvELSAScorecard },
@@ -145,10 +149,10 @@ module.exports = {
       return result;
     }),
     /**
-         * Retrieve all company, survey, assessment by ID
-         * @param {Object} param0 main input object
-         * @param {String} param0.id id
-         */
+     * Retrieve all company, survey, assessment by ID
+     * @param {Object} param0 main input object
+     * @param {String} param0.id id
+     */
     oneAll: isAuthenticatedResolver.createResolver(async (
       parent, { input },
       {
@@ -491,12 +495,18 @@ module.exports = {
 
           // ELSA
           const resultElsa = resElsa.filter((e) => e.ASSESSMENT_YEAR === yr);
-          scorecard = resultElsa.map((d) => ({
-            ...d,
-            FINAL_SCORE: parseFloat(d.FINAL_SCORE),
-            FINAL_SCORE_ROUNDDOWN: parseFloat(d.FINAL_SCORE_ROUNDDOWN),
-            NEXT_DESIRED_SCORE: parseFloat(d.NEXT_DESIRED_SCORE),
-          }));
+          scorecard = resultElsa.map((d) => {
+            const nextDesiredScore = d.NEXT_DESIRED_SCORE === 'N/A'
+              ? d.NEXT_DESIRED_SCORE
+              : parseFloat(d.NEXT_DESIRED_SCORE);
+
+            return ({
+              ...d,
+              FINAL_SCORE: parseFloat(d.FINAL_SCORE),
+              FINAL_SCORE_ROUNDDOWN: parseFloat(d.FINAL_SCORE_ROUNDDOWN),
+              NEXT_DESIRED_SCORE: nextDesiredScore,
+            });
+          });
           logger.debug(`oneAll --> calculated ELSA scorecard: ${JSON.stringify(scorecard)}`);
         }
 
