@@ -35,7 +35,7 @@ module.exports = {
         user: { mail, userRoleList },
       },
     ) => {
-      logger.info('fullElsaList --> called with no input');
+      logger.info(`fullElsaList --> by ${mail} called with no input`);
 
       if (!checkPermission('ELSA-READ', userRoleList)) throw new ForbiddenError();
       logger.debug('fullElsaList --> Permission check passed');
@@ -101,7 +101,7 @@ module.exports = {
       }
 
       logger.debug(`fullElsaList --> output: ${JSON.stringify(result)}`);
-      logger.info('fullElsaList --> completed');
+      logger.info(`fullElsaList --> by ${mail} completed`);
       return result;
     }),
     oneElsa: isAuthenticatedResolver.createResolver(async (
@@ -110,7 +110,7 @@ module.exports = {
         user: { mail, userRoleList },
       },
     ) => {
-      logger.info(`oneElsa --> input: ${JSON.stringify(input)}`);
+      logger.info(`oneElsa --> by ${mail} input: ${JSON.stringify(input)}`);
 
       if (!checkPermission('ELSA-READ', userRoleList)) throw new ForbiddenError();
       logger.debug('oneElsa --> Permission check passed');
@@ -140,7 +140,7 @@ module.exports = {
         ASSESSMENT_YEAR: input.ASSESSMENT_YEAR,
       };
       logger.debug(`oneElsa --> output: ${JSON.stringify(result)}`);
-      logger.info('oneElsa --> completed');
+      logger.info(`oneElsa --> by ${mail} completed`);
 
       return result;
     }),
@@ -160,7 +160,7 @@ module.exports = {
         user: { mail, userRoleList },
       },
     ) => {
-      logger.info(`oneAll --> input: ${JSON.stringify(input)}`);
+      logger.info(`oneAll --> by ${mail} input: ${JSON.stringify(input)}`);
 
       if (!checkPermission('ELSA-READ', userRoleList)) throw new ForbiddenError();
       logger.debug('oneAll --> Permission check passed');
@@ -558,7 +558,7 @@ module.exports = {
       }
 
       logger.debug(`oneAll --> output: ${JSON.stringify(finalResult)}`);
-      logger.info('oneAll --> completed');
+      logger.info(`oneAll --> by ${mail} completed`);
       return finalResult;
     }),
   },
@@ -569,7 +569,7 @@ module.exports = {
         user: { mail, userRoleList },
       },
     ) => {
-      logger.info(`createElsa --> input: ${JSON.stringify(input)}`);
+      logger.info(`createElsa --> by ${mail} input: ${JSON.stringify(input)}`);
 
       if (!checkPermission('ELSA-CREATE', userRoleList)) throw new ForbiddenError();
       logger.debug('createElsa --> Permission check passed');
@@ -633,7 +633,7 @@ module.exports = {
       logger.debug(`createElsa --> ELSA scorecard created: ${JSON.stringify(resultCreateElsa)}`);
 
       logger.debug(`createElsa --> output: ${JSON.stringify(input)}`);
-      logger.info('createElsa --> completed');
+      logger.info(`createElsa --> by ${mail} completed`);
 
       return input;
     }),

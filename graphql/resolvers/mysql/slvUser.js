@@ -14,10 +14,10 @@ module.exports = {
     allUser: isAuthenticatedResolver.createResolver(async (
       parent, param, {
         connectors: { MysqlSlvUser, MysqlSlvUserRole },
-        user: { userRoleList },
+        user: { mail, userRoleList },
       },
     ) => {
-      logger.info('allUser --> called with no input');
+      logger.info(`allUser --> by ${mail} called with no input`);
 
       if (!checkPermission('USER-READ', userRoleList)) throw new ForbiddenError();
       logger.debug('allUser --> Permission check passed');
@@ -53,7 +53,7 @@ module.exports = {
         : resultPreUser.filter((w) => w.MODULE === userRoleList.MODULE);
 
       logger.debug(`allUser --> filtered users found: ${JSON.stringify(resultUser)}`);
-      logger.info('allUser --> completed');
+      logger.info(`allUser --> by ${mail} completed`);
 
       return resultUser;
     }),
@@ -62,7 +62,7 @@ module.exports = {
     createUser: isAuthenticatedResolver.createResolver(async (
       parent, { input }, { connectors: { MysqlSlvUser }, user: { mail, userRoleList } },
     ) => {
-      logger.info(`createUser --> input: ${JSON.stringify(input)}`);
+      logger.info(`createUser --> by ${mail} input: ${JSON.stringify(input)}`);
 
       if (!checkPermission('USER-CREATE', userRoleList)) throw new ForbiddenError();
       logger.debug('createUser --> Permission check passed');
@@ -79,7 +79,7 @@ module.exports = {
       const result = await MysqlSlvUser.create(newInput);
 
       logger.debug(`createUser --> output: ${JSON.stringify(result)}`);
-      logger.info('createUser --> completed');
+      logger.info(`createUser --> by ${mail} completed`);
 
       return result;
     }),
@@ -89,7 +89,7 @@ module.exports = {
         user: { mail, userRoleList },
       },
     ) => {
-      logger.info(`updateUser --> input for ${USER}: ${JSON.stringify(input)}`);
+      logger.info(`updateUser --> by ${mail} input for ${USER}: ${JSON.stringify(input)}`);
 
       if (!checkPermission('USER-UPDATE', userRoleList)) throw new ForbiddenError();
       logger.debug('updateUser --> Permission check passed');
@@ -112,7 +112,7 @@ module.exports = {
         updated: result[0],
       };
       logger.debug(`updateUser --> output: ${JSON.stringify(result2)}`);
-      logger.info('updateUser --> completed');
+      logger.info(`updateUser --> by ${mail} completed`);
 
       return result2;
     }),
@@ -122,7 +122,7 @@ module.exports = {
         user: { mail, userRoleList },
       },
     ) => {
-      logger.info(`deleteUser --> input: ${USER}`);
+      logger.info(`deleteUser --> by ${mail} input: ${USER}`);
 
       if (!checkPermission('USER-DELETE', userRoleList)) throw new ForbiddenError();
       logger.debug('deleteUser --> Permission check passed');
@@ -139,7 +139,7 @@ module.exports = {
       };
       // console.dir(result2, { depth: null, colorized: true });
       logger.debug(`deleteUser --> output: ${JSON.stringify(result2)}`);
-      logger.info('deleteUser --> completed');
+      logger.info(`deleteUser --> by ${mail} completed`);
 
       return result2;
     }),

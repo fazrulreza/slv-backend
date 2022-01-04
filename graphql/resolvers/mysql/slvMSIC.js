@@ -15,9 +15,9 @@ module.exports = {
          * @param {String} param0.msic msic
          */
     allMSIC: async (
-      parent, { msic }, { connectors: { MysqlSlvMSIC } },
+      parent, { msic }, { connectors: { MysqlSlvMSIC }, user: { mail } },
     ) => {
-      logger.info(`allMSIC --> input: ${msic}`);
+      logger.info(`allMSIC --> by ${mail} input: ${msic}`);
       const where = getWhere(msic);
 
       const searchOpts = {
@@ -27,8 +27,8 @@ module.exports = {
       const result = await MysqlSlvMSIC.findAll(searchOpts);
       const result2 = result.map((x) => x.dataValues);
 
-      logger.debug(`allMSIC --> output: ${JSON.stringify(result2)}`);
-      logger.info('allMSIC --> completed');
+      logger.debug(`allMSIC --> total MSIC found: ${result2.length}`);
+      logger.info(`allMSIC --> by ${mail} completed`);
 
       return result2;
     },

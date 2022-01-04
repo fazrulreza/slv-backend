@@ -14,10 +14,10 @@ module.exports = {
     allUserPublic: isAuthenticatedResolver.createResolver(async (
       parent, param, {
         connectors: { MysqlSlvUserPublic, MysqlSlvUserRole },
-        user: { userRoleList },
+        user: { mail, userRoleList },
       },
     ) => {
-      logger.info('allUserPublic --> called with no input');
+      logger.info(`allUserPublic --> by ${mail} called with no input`);
 
       if (!checkPermission('USER-READ', userRoleList)) throw new ForbiddenError();
       logger.debug('allUserPublic --> Permission check passed');
@@ -54,7 +54,7 @@ module.exports = {
         : resultPreUser.filter((w) => w.MODULE === userRoleList.MODULE);
 
       logger.debug(`allUserPublic --> filtered users found: ${JSON.stringify(resultUser)}`);
-      logger.info('allUserPublic --> completed');
+      logger.info(`allUserPublic --> by ${mail} completed`);
 
       return resultUser;
     }),
@@ -66,10 +66,10 @@ module.exports = {
     oneUserPublic: isAuthenticatedResolver.createResolver(async (
       parent, { email }, {
         connectors: { MysqlSlvUserPublic, MysqlSlvUserRole },
-        user: { userRoleList },
+        user: { mail, userRoleList },
       },
     ) => {
-      logger.info(`oneUserPublic --> input: ${email}`);
+      logger.info(`oneUserPublic --> by ${mail} input: ${email}`);
 
       if (!checkPermission('USER-READ', userRoleList)) throw new ForbiddenError();
       logger.debug('oneUserPublic --> Permission check passed');
@@ -95,7 +95,7 @@ module.exports = {
       };
 
       logger.debug(`oneUserPublic --> output: ${JSON.stringify(finalResult)}`);
-      logger.info('oneUserPublic --> completed');
+      logger.info(`oneUserPublic --> by ${mail} completed`);
 
       return finalResult;
     }),
@@ -104,7 +104,7 @@ module.exports = {
     createUserPublic: isAuthenticatedResolver.createResolver(async (
       parent, { input }, { connectors: { MysqlSlvUserPublic }, user: { mail, userRoleList } },
     ) => {
-      logger.info(`createUserPublic --> input: ${JSON.stringify(input)}`);
+      logger.info(`createUserPublic --> by ${mail} input: ${JSON.stringify(input)}`);
 
       if (!checkPermission('USER-CREATE', userRoleList)) throw new ForbiddenError();
       logger.debug('createUserPublic --> Permission check passed');
@@ -125,7 +125,7 @@ module.exports = {
       const result = await MysqlSlvUserPublic.create(newInput);
 
       logger.debug(`createUserPublic --> output: ${JSON.stringify(newInput)}`);
-      logger.info('createUserPublic --> completed');
+      logger.info(`createUserPublic --> by ${mail} completed`);
 
       return result;
     }),
@@ -135,7 +135,7 @@ module.exports = {
         user: { mail, userRoleList },
       },
     ) => {
-      logger.info(`updateUserPublic --> input for ${email}: ${JSON.stringify(input)}`);
+      logger.info(`updateUserPublic --> by ${mail} input for ${email}: ${JSON.stringify(input)}`);
 
       if (!checkPermission('USER-UPDATE', userRoleList)) throw new ForbiddenError();
       logger.debug('updateUserPublic --> Permission check passed');
@@ -166,7 +166,7 @@ module.exports = {
         updated: result[0],
       };
       logger.debug(`updateUserPublic --> output: ${JSON.stringify(result2)}`);
-      logger.info('updateUserPublic --> completed');
+      logger.info(`updateUserPublic --> by ${mail} completed`);
 
       return result2;
     }),
@@ -176,7 +176,7 @@ module.exports = {
         user: { mail, userRoleList },
       },
     ) => {
-      logger.info(`deleteUserPublic --> input: ${email}`);
+      logger.info(`deleteUserPublic --> by ${mail} input: ${email}`);
 
       if (!checkPermission('USER-DELETE', userRoleList)) throw new ForbiddenError();
       logger.debug('deleteUserPublic --> Permission check passed');
@@ -193,7 +193,7 @@ module.exports = {
       };
       // console.dir(result2, { depth: null, colorized: true });
       logger.debug(`deleteUserPublic --> output: ${JSON.stringify(result2)}`);
-      logger.info('deleteUserPublic --> completed');
+      logger.info(`deleteUserPublic --> by ${mail} completed`);
 
       return result2;
     }),

@@ -4,6 +4,7 @@ const { generateId, generateHistory } = require('../../../packages/mysql-model')
 const { getTotalScore, checkPermission } = require('../../helper/common');
 const { isAuthenticatedResolver } = require('../../permissions/acl');
 const { ForbiddenError } = require('../../permissions/errors');
+const logger = require('../../../packages/logger');
 
 const processGetxData = (input, mail, modul, create = true) => {
   const parsedInput = JSON.parse(input.data);
@@ -222,7 +223,10 @@ module.exports = {
         user: { mail, userRoleList },
       },
     ) => {
+      logger.info(`dashboardKPI --> by ${mail} called with no input`);
+
       if (!checkPermission('GETX-READ', userRoleList)) throw new ForbiddenError();
+      logger.debug('dashboardKPI --> Permission check passed');
 
       // user list
       const searchOptsUser = {
@@ -231,12 +235,13 @@ module.exports = {
       };
       const resUser = await MysqlSlvUser.findAll(searchOptsUser);
       const resultUser = resUser.map((x) => x.dataValues.USER);
-      // .filter(x2 => x2 === 'fazrul.reza@smebank.com.my');
+      logger.debug(`dashboardKPI --> User found: ${JSON.stringify(resultUser)}`);
 
       // all KPI
       const searchOptsKPI = { where: null };
       const resKPI = await MysqlGetxKPI.findAll(searchOptsKPI);
       const resultKPI = resKPI.map((x) => x.dataValues);
+      logger.debug(`dashboardKPI --> Total KPI found: ${resultKPI.length}`);
 
       const result1 = resultUser.map((u) => {
         const userKPI = resultKPI.filter((k) => k.CREATED_BY === u);
@@ -270,6 +275,9 @@ module.exports = {
 
       const result2 = flatten(result1);
 
+      logger.debug(`dashboardKPI --> output: ${JSON.stringify(result2)}`);
+      logger.info(`dashboardKPI --> by ${mail} completed`);
+
       return result2;
     }),
     /**
@@ -281,13 +289,17 @@ module.exports = {
         user: { mail, userRoleList },
       },
     ) => {
+      logger.info(`scorecardKPI --> by ${mail} input: ${COMPANY_ID}`);
+
       if (!checkPermission('GETX-READ', userRoleList)) throw new ForbiddenError();
+      logger.debug('scorecardKPI --> Permission check passed');
 
       let resultKPI = [];
       const searchOpts = { where: { COMPANY_ID } };
 
       // KPI
       const resKPI = await MysqlGetxKPI.findAll(searchOpts);
+      logger.debug(`scorecardKPI --> total KPI found: ${resKPI.length}`);
 
       // Company + MSIC
       const resCompany = await MysqlSlvCompanyProfile.findById(COMPANY_ID);
@@ -295,9 +307,12 @@ module.exports = {
         ...resCompany.dataValues,
         LOGO: JSON.parse(resCompany.dataValues.LOGO),
       };
+      logger.debug(`scorecardKPI --> total company found: ${resCompany.length}`);
+
       const searchOpts2 = { where: { MSIC: resultCompany.MSIC } };
       const resMSIC = await MysqlSlvMSIC.findOne(searchOpts2);
       const resultMSIC = resMSIC.dataValues;
+      logger.debug(`scorecardKPI --> total MSIC found: ${resultMSIC.length}`);
 
       if (resKPI.length !== 0) {
         resultKPI = resKPI.map((k) => {
@@ -332,12 +347,15 @@ module.exports = {
           };
         });
       }
+      logger.debug(`scorecardKPI --> KPI result: ${JSON.stringify(resKPI)}`);
 
       const finalResult = {
         company: resultCompany,
         msicDetails: resultMSIC,
         KPIGroup: resultKPI,
       };
+      logger.debug(`scorecardKPI --> output: ${JSON.stringify(finalResult)}`);
+      logger.info(`scorecardKPI --> by ${mail} completed`);
 
       return finalResult;
     }),
@@ -355,7 +373,10 @@ module.exports = {
         user: { mail, userRoleList },
       },
     ) => {
+      logger.info(`allGetXKPI --> by ${mail} input: ${COMPANY_ID}`);
+
       if (!checkPermission('GETX-READ', userRoleList)) throw new ForbiddenError();
+      logger.debug('allGetXKPI --> Permission check passed');
 
       let result = [];
       let newResult = [];
@@ -363,19 +384,28 @@ module.exports = {
 
       // KPI
       const resKPI = await MysqlGetxKPI.findAll(searchOpts);
+      logger.debug(`allGetXKPI --> KPI found: ${JSON.stringify(resKPI)}`);
+
       const resSign = await MysqlGetxSign.findAll(searchOpts);
+      logger.debug(`allGetXKPI --> KPI Signature found: ${JSON.stringify(resSign)}`);
+
       const resAttachment = await MysqlGetxAttachment.findAll(searchOpts);
+      logger.debug(`allGetXKPI --> KPI Attachment found: ${JSON.stringify(resAttachment)}`);
 
       // Elsa
       const resElsa = await MysqlSlvELSAScorecard.findAll(searchOpts);
+      logger.debug(`allGetXKPI --> ELSA scorecard found: ${JSON.stringify(resElsa)}`);
 
       // Assessment
       const resScore = await MysqlSlvAssessment.findAll(searchOpts);
+      logger.debug(`allGetXKPI --> Assessment found: ${JSON.stringify(resScore)}`);
 
       // Survey
       const resQuest = await MysqlSlvSurvey.findAll(searchOpts);
+      logger.debug(`allGetXKPI --> Survey found: ${JSON.stringify(resQuest)}`);
 
       if (resKPI.length !== 0) {
+        logger.debug(`allGetXKPI --> total KPI found: ${resKPI.length}`);
         result = resKPI.map((kpi) => {
           const result2 = kpi.dataValues;
           let resSignKPI2 = {};
@@ -388,12 +418,14 @@ module.exports = {
             .filter((k2) => k2.GETX_ID === result2.ID
             && k2.ASSESSMENT_YEAR === result2.ASSESSMENT_YEAR)
             .filter((k3) => k3.GETX_TYPE === 'KPI');
+          logger.debug(`allGetXKPI --> filtered KPI signature found: ${JSON.stringify(resSignKPI)}`);
 
           const resSignActual = resSign
             .map((a1) => a1.dataValues)
             .filter((a2) => a2.GETX_ID === result2.ID
             && a2.ASSESSMENT_YEAR === result2.ASSESSMENT_YEAR)
             .filter((a3) => a3.GETX_TYPE === 'ACHIEVEMENT');
+          logger.debug(`allGetXKPI --> filtered Achievement signature found: ${JSON.stringify(resSignActual)}`);
 
           // attachment
           const resAttachment2 = resAttachment
@@ -401,27 +433,33 @@ module.exports = {
             .filter((at2) => at2.GETX_ID === result2.ID
           && at2.ASSESSMENT_YEAR === result2.ASSESSMENT_YEAR)
             .filter((at3) => at3.GETX_TYPE === 'ACHIEVEMENT');
+          logger.debug(`allGetXKPI --> filtered KPI attachment found: ${JSON.stringify(resAttachment2)}`);
 
           // elsa
           const resElsa2 = resElsa
             .map((e1) => e1.dataValues)
             .filter((e2) => e2.COMPANY_ID === result2.COMPANY_ID
               && e2.ASSESSMENT_YEAR === result2.ASSESSMENT_YEAR);
+          logger.debug(`allGetXKPI --> filtered ELSA found: ${JSON.stringify(resElsa2)}`);
 
           // assessment
           const resScore2 = resScore
             .map((s1) => s1.dataValues)
             .filter((s2) => s2.COMPANY_ID === result2.COMPANY_ID
               && s2.ASSESSMENT_YEAR === result2.ASSESSMENT_YEAR);
+          logger.debug(`allGetXKPI --> filtered Assessment found: ${JSON.stringify(resScore2)}`);
 
           // assessment
           const resQuest2 = resQuest
             .map((q1) => q1.dataValues)
             .filter((q2) => q2.COMPANY_ID === result2.COMPANY_ID
               && q2.ASSESSMENT_YEAR === result2.ASSESSMENT_YEAR);
+          logger.debug(`allGetXKPI --> filtered Survey found: ${JSON.stringify(resQuest2)}`);
 
           // kpi
           if (resSignKPI.length !== 0) {
+            logger.debug(`allGetXKPI --> total KPI Signature found: ${resSignKPI.length}`);
+
             const { ID, ...others } = resSignKPI[0];
             resSignKPI2 = {
               ...others,
@@ -430,6 +468,8 @@ module.exports = {
           }
           // achievement
           if (resSignActual.length !== 0) {
+            logger.debug(`allGetXKPI --> total Achievement Signature found: ${resSignActual.length}`);
+
             const { ID, ...others } = resSignActual[0];
             resSignActual2 = {
               SIGN_ACTUAL_ID: ID,
@@ -447,6 +487,8 @@ module.exports = {
 
           // attachment
           if (resAttachment2.length !== 0) {
+            logger.debug(`allGetXKPI --> total KPI Attachment found: ${resAttachment2.length}`);
+
             const { ID, ...others } = resAttachment2[0];
             resAttachment3 = {
               ATTACHMENT_ID: ID,
@@ -519,6 +561,9 @@ module.exports = {
         };
         // console.log(newResult);
 
+        logger.debug(`allGetXKPI --> output: ${JSON.stringify(newResult)}`);
+        logger.info(`allGetXKPI --> by ${mail} completed`);
+
         return [newResult];
       }
       return result;
@@ -531,7 +576,10 @@ module.exports = {
         user: { mail, userRoleList },
       },
     ) => {
+      logger.info(`createGetXKPI --> by ${mail} input: ${JSON.stringify(input)}`);
+
       if (!checkPermission('GETX-CREATE', userRoleList)) throw new ForbiddenError();
+      logger.debug('createGetXKPI --> Permission check passed');
 
       // process input
       const {
@@ -544,6 +592,7 @@ module.exports = {
         ID: generateId(),
       };
       const resultKPI = await MysqlGetxKPI.create(getXKPIInput);
+      logger.info(`createGetXKPI --> KPI created: ${JSON.stringify(resultKPI)}`);
 
       // KPI sign
       const getXSignKPIInput = {
@@ -551,7 +600,8 @@ module.exports = {
         ID: generateId(),
         GETX_ID: getXKPIInput.ID,
       };
-      await MysqlGetxSign.create(getXSignKPIInput);
+      const resultKPISign = await MysqlGetxSign.create(getXSignKPIInput);
+      logger.info(`createGetXKPI --> KPI signature created: ${JSON.stringify(resultKPISign)}`);
 
       // Actual KPI Sign
       const getXSignActualInput = {
@@ -559,7 +609,8 @@ module.exports = {
         ID: generateId(),
         GETX_ID: getXKPIInput.ID,
       };
-      await MysqlGetxSign.create(getXSignActualInput);
+      const resultKPIActual = await MysqlGetxSign.create(getXSignActualInput);
+      logger.info(`createGetXKPI --> Achievement created: ${JSON.stringify(resultKPIActual)}`);
 
       // Attachment
       const getXAttachmentInput = {
@@ -567,7 +618,11 @@ module.exports = {
         ID: generateId(),
         GETX_ID: getXKPIInput.ID,
       };
-      await MysqlGetxAttachment.create(getXAttachmentInput);
+      const resultKPIAttachment = await MysqlGetxAttachment.create(getXAttachmentInput);
+      logger.info(`createGetXKPI --> Attachment created: ${JSON.stringify(resultKPIAttachment)}`);
+
+      logger.debug(`createGetXKPI --> output: ${JSON.stringify(resultKPI)}`);
+      logger.info(`createGetXKPI --> by ${mail} completed`);
 
       return resultKPI;
     }),
@@ -578,7 +633,10 @@ module.exports = {
         user: { mail, userRoleList },
       },
     ) => {
+      logger.info(`updateGetXKPI --> by ${mail} input: ${JSON.stringify(input)}`);
+
       if (!checkPermission('GETX-UPDATE', userRoleList)) throw new ForbiddenError();
+      logger.debug('updateGetXKPI --> Permission check passed');
 
       // process input
       const {
@@ -597,6 +655,7 @@ module.exports = {
         },
       };
       const resultKPI = await MysqlGetxKPI.update(searchOptsKPI);
+      logger.info(`updateGetXKPI --> KPI updated: ${JSON.stringify(resultKPI)}`);
 
       // Sign
       if (SIGN_KPI_ID) {
@@ -612,7 +671,8 @@ module.exports = {
             ID: SIGN_KPI_ID,
           },
         };
-        await MysqlGetxSign.update(searchOptsSignKPI);
+        const resultKPISignU = await MysqlGetxSign.update(searchOptsSignKPI);
+        logger.info(`updateGetXKPI --> KPI signature updated: ${JSON.stringify(resultKPISignU)}`);
       } else {
         const getXSignKPIInput = {
           ...signKPIInput,
@@ -620,7 +680,8 @@ module.exports = {
           ID: generateId(),
           GETX_ID: kpiInput.ID,
         };
-        await MysqlGetxSign.create(getXSignKPIInput);
+        const resultKPISignC = await MysqlGetxSign.create(getXSignKPIInput);
+        logger.info(`updateGetXKPI --> KPI signature created: ${JSON.stringify(resultKPISignC)}`);
       }
 
       // Achievement
@@ -637,7 +698,8 @@ module.exports = {
             ID: SIGN_ACTUAL_ID,
           },
         };
-        await MysqlGetxSign.update(searchOptsSignActual);
+        const resultKPISignActualU = await MysqlGetxSign.update(searchOptsSignActual);
+        logger.info(`updateGetXKPI --> Achievement signature updated: ${JSON.stringify(resultKPISignActualU)}`);
       } else {
         const getXSignActualInput = {
           ...signActualInput,
@@ -645,7 +707,8 @@ module.exports = {
           ID: generateId(),
           GETX_ID: kpiInput.ID,
         };
-        await MysqlGetxSign.create(getXSignActualInput);
+        const resultKPISignActualC = await MysqlGetxSign.create(getXSignActualInput);
+        logger.info(`updateGetXKPI --> Achievement signature created: ${JSON.stringify(resultKPISignActualC)}`);
       }
 
       // attachment
@@ -662,7 +725,8 @@ module.exports = {
             ID: ATTACHMENT_ID,
           },
         };
-        await MysqlGetxAttachment.update(searchOptsAttachment);
+        const resultKPIAttachmentU = await MysqlGetxAttachment.update(searchOptsAttachment);
+        logger.info(`updateGetXKPI --> KPI Attachment updated: ${JSON.stringify(resultKPIAttachmentU)}`);
       } else {
         const getXAttachmentInput = {
           ...attachmentInput,
@@ -670,7 +734,8 @@ module.exports = {
           ID: generateId(),
           GETX_ID: kpiInput.ID,
         };
-        await MysqlGetxAttachment.create(getXAttachmentInput);
+        const resultKPIAttachmentC = await MysqlGetxAttachment.create(getXAttachmentInput);
+        logger.info(`updateGetXKPI --> KPI Attachment created: ${JSON.stringify(resultKPIAttachmentC)}`);
       }
 
       // result
@@ -679,6 +744,9 @@ module.exports = {
         updated: resultKPI[0],
       };
       // console.dir(result2, { depth: null, colorized: true });
+      logger.debug(`updateGetXKPI --> output: ${JSON.stringify(result2)}`);
+      logger.info(`updateGetXKPI --> by ${mail} completed`);
+
       return result2;
     }),
     finalizeKPI: isAuthenticatedResolver.createResolver(async (
@@ -687,7 +755,10 @@ module.exports = {
         user: { mail, userRoleList },
       },
     ) => {
+      logger.info(`finalizeKPI --> by ${mail} input: ${JSON.stringify(input)}`);
+
       if (!checkPermission('GETX-CREATE', userRoleList)) throw new ForbiddenError();
+      logger.debug('finalizeKPI --> Permission check passed');
 
       // kpi
       const searchOptsKPI = { where: { COMPANY_ID: input.COMPANY_ID } };
@@ -703,7 +774,8 @@ module.exports = {
         ASSESSMENT_YEAR: input.ASSESSMENT_YEAR,
         ID: generateId(),
       };
-      await MysqlGetxKPI.create(finalKPI);
+      const resFinalKPI = await MysqlGetxKPI.create(finalKPI);
+      logger.info(`finalizeKPI --> KPI created: ${JSON.stringify(resFinalKPI)}`);
 
       // attachment
       const searchOptsAtt = { where: { COMPANY_ID: input.COMPANY_ID } };
@@ -719,7 +791,8 @@ module.exports = {
         ID: generateId(),
         GETX_ID: finalKPI.ID,
       };
-      await MysqlGetxAttachment.create(finalAtt);
+      const resFinalKPIAttachment = await MysqlGetxAttachment.create(finalAtt);
+      logger.info(`finalizeKPI --> KPI attachment created: ${JSON.stringify(resFinalKPIAttachment)}`);
 
       // scorecard
       const searchOptsSign = {
@@ -746,7 +819,11 @@ module.exports = {
         };
         return newSign;
       });
-      await MysqlGetxSign.bulkCreate(signInput);
+      const resFinalKPISign = await MysqlGetxSign.bulkCreate(signInput);
+      logger.info(`finalizeKPI --> KPI Signature created: ${JSON.stringify(resFinalKPISign)}`);
+
+      logger.debug(`finalizeKPI --> output: ${JSON.stringify(input)}`);
+      logger.info(`finalizeKPI --> by ${mail} completed`);
 
       return input;
     }),

@@ -17,7 +17,7 @@ module.exports = {
         user: { mail, userRoleList },
       },
     ) => {
-      logger.info(`allAssessment --> input: ${COMPANY_ID}`);
+      logger.info(`allAssessment --> by ${mail} input: ${COMPANY_ID}`);
 
       if (!checkPermission('ASSESSMENT-READ', userRoleList)) throw new ForbiddenError();
       logger.debug('allAssessment --> Permission check passed');
@@ -58,8 +58,9 @@ module.exports = {
         survey: resultQuest,
       };
 
-      logger.debug(`allAssessment --> output: ${result}`);
-      logger.info('allAssessment --> completed');
+      logger.debug(`allAssessment --> output: ${JSON.stringify(result)}`);
+      logger.info(`allAssessment --> by ${mail} completed`);
+
       return result;
     }),
   },
@@ -70,7 +71,7 @@ module.exports = {
         user: { mail, userRoleList },
       },
     ) => {
-      logger.info(`createAssessment --> input: ${JSON.stringify(input)}`);
+      logger.info(`createAssessment --> by ${mail} input: ${JSON.stringify(input)}`);
 
       if (!checkPermission('ASSESSMENT-CREATE', userRoleList)) throw new ForbiddenError();
       logger.debug('createAssessment --> Permission check passed');
@@ -91,7 +92,7 @@ module.exports = {
       const result = await MysqlSlvAssessment.create(newInput);
 
       logger.debug(`createAssessment --> output: ${JSON.stringify(result)}`);
-      logger.info('createAssessment --> completed');
+      logger.info(`createAssessment --> by ${mail} completed`);
       return result;
     }),
     updateAssessment: isAuthenticatedResolver.createResolver(async (
@@ -100,7 +101,7 @@ module.exports = {
         user: { mail, userRoleList },
       },
     ) => {
-      logger.info(`updateAssessment --> input: ${JSON.stringify(input)}`);
+      logger.info(`updateAssessment --> by ${mail} input: ${JSON.stringify(input)}`);
 
       if (!checkPermission('ASSESSMENT-UPDATE', userRoleList)) throw new ForbiddenError();
       logger.debug('updateAssessment --> Permission check passed');
@@ -126,7 +127,7 @@ module.exports = {
       };
 
       logger.debug(`updateAssessment --> output: ${JSON.stringify(result2)}`);
-      logger.info('updateAssessment --> completed');
+      logger.info(`updateAssessment --> by ${mail} completed`);
       // console.dir(result2, { depth: null, colorized: true });
       return result2;
     }),

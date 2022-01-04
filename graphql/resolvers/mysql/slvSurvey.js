@@ -42,7 +42,7 @@ module.exports = {
         user: { mail, userRoleList },
       },
     ) => {
-      logger.info(`allSurvey --> input: ${COMPANY_ID}`);
+      logger.info(`allSurvey --> by ${mail} input: ${COMPANY_ID}`);
 
       if (!checkPermission('SURVEY-READ', userRoleList)) throw new ForbiddenError();
       logger.debug('allSurvey --> Permission check passed');
@@ -75,7 +75,7 @@ module.exports = {
       }
 
       logger.debug(`allSurvey --> output: ${JSON.stringify(result)}`);
-      logger.info('allSurvey --> completed');
+      logger.info(`allSurvey --> by ${mail} completed`);
 
       return result;
     }),
@@ -91,7 +91,7 @@ module.exports = {
         user: { mail, userRoleList },
       },
     ) => {
-      logger.info('smeScatter --> called with no input');
+      logger.info(`smeScatter --> by ${mail} called with no input`);
 
       if (!checkPermission('SURVEY-READ', userRoleList)) throw new ForbiddenError();
       logger.debug('smeScatter --> Permission check passed');
@@ -142,7 +142,7 @@ module.exports = {
         .filter(((as) => as.ASSESSMENT_DONE !== 0));
 
       logger.debug(`smeScatter --> output: ${JSON.stringify(resultCompany)}`);
-      logger.info('smeScatter --> completed');
+      logger.info(`smeScatter --> by ${mail} completed`);
 
       return resultCompany;
     }),
@@ -154,7 +154,7 @@ module.exports = {
         user: { mail, userRoleList },
       },
     ) => {
-      logger.info(`createSurvey --> input: ${JSON.stringify(input)}`);
+      logger.info(`createSurvey --> by ${mail} input: ${JSON.stringify(input)}`);
 
       if (!checkPermission('SURVEY-CREATE', userRoleList)) throw new ForbiddenError();
       logger.debug('createSurvey --> Permission check passed');
@@ -174,7 +174,7 @@ module.exports = {
       const result = await MysqlSlvSurvey.create(newInput);
 
       logger.debug(`createSurvey --> output: ${JSON.stringify(result)}`);
-      logger.info('createSurvey --> completed');
+      logger.info(`createSurvey --> by ${mail} completed`);
 
       return result;
     }),
@@ -184,7 +184,7 @@ module.exports = {
         user: { mail, userRoleList },
       },
     ) => {
-      logger.info(`updateSurvey --> input: ${JSON.stringify(input)}`);
+      logger.info(`updateSurvey --> by ${mail} input: ${JSON.stringify(input)}`);
 
       if (!checkPermission('SURVEY-UPDATE', userRoleList)) throw new ForbiddenError();
       logger.debug('updateSurvey --> Permission check passed');
@@ -213,7 +213,7 @@ module.exports = {
       // console.dir(result2, { depth: null, colorized: true });
 
       logger.debug(`updateSurvey --> output: ${JSON.stringify(result2)}`);
-      logger.info('updateSurvey --> completed');
+      logger.info(`updateSurvey --> by ${mail} completed`);
 
       return result2;
     }),

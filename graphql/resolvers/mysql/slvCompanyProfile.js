@@ -18,7 +18,7 @@ module.exports = {
         user: { mail, userRoleList },
       },
     ) => {
-      logger.info(`oneCompany --> input: ${ID}`);
+      logger.info(`oneCompany --> by ${mail} input: ${ID}`);
 
       if (!checkPermission('COMPANY-READ', userRoleList)) throw new ForbiddenError();
       logger.debug('oneCompany --> Permission check passed');
@@ -47,7 +47,7 @@ module.exports = {
         company: newCompany,
       };
       logger.debug(`oneCompany --> output: ${JSON.stringify(finalResult)}`);
-      logger.info('oneCompany --> completed');
+      logger.info(`oneCompany --> by ${mail} completed`);
       return finalResult;
     }),
     /**
@@ -63,7 +63,7 @@ module.exports = {
         user: { mail, userRoleList },
       },
     ) => {
-      logger.info('allCompanies --> called with no input');
+      logger.info(`allCompanies --> by ${mail} called with no input`);
 
       if (!checkPermission('COMPANY-READ', userRoleList)) throw new ForbiddenError();
       logger.debug('allCompanies --> Permission check passed');
@@ -132,7 +132,7 @@ module.exports = {
       });
       // console.dir(resultQuest, { depth: null, colorized: true });
       logger.debug(`allCompanies --> output total: ${resultCompany.length}`);
-      logger.info('allCompanies --> completed');
+      logger.info(`allCompanies --> by ${mail} completed`);
       return resultFinal;
     }),
     /**
@@ -148,7 +148,7 @@ module.exports = {
         user: { mail, userRoleList },
       },
     ) => {
-      logger.info('userReports --> called with no input');
+      logger.info(`userReports --> by ${mail} called with no input`);
       if (!checkPermission('COMPANY-READ', userRoleList)) throw new ForbiddenError();
       logger.debug('userReports --> Permission check passed');
 
@@ -207,7 +207,8 @@ module.exports = {
       });
       // console.dir(resultFinal, { depth: null, colorized: true });
       logger.debug(`userReports --> output: ${JSON.stringify(resultFinal)}`);
-      logger.info('userReports --> completed');
+      logger.info(`userReports --> by ${mail} completed`);
+
       return resultFinal;
     }),
     stateReports: isAuthenticatedResolver.createResolver(async (
@@ -216,7 +217,7 @@ module.exports = {
         user: { mail, userRoleList },
       },
     ) => {
-      logger.info('stateReports --> called with no input');
+      logger.info(`stateReports --> by ${mail} called with no input`);
 
       if (!checkPermission('COMPANY-READ', userRoleList)) throw new ForbiddenError();
       logger.debug('stateReports --> Permission check passed');
@@ -291,7 +292,7 @@ module.exports = {
         .sort((curr, next) => next.COUNT - curr.COUNT);
 
       logger.debug(`stateReports --> output: ${JSON.stringify(stateStatsColor)}`);
-      logger.info('stateReports --> completed');
+      logger.info(`stateReports --> by ${mail} completed`);
       return stateStatsColor;
     }),
   },
@@ -302,9 +303,9 @@ module.exports = {
      * @param {String} param0.NAME company name
      */
     checkCompany: isAuthenticatedResolver.createResolver(async (
-      parent, { NAME }, { connectors: { MysqlSlvCompanyProfile }, user: { userRoleList } },
+      parent, { NAME }, { connectors: { MysqlSlvCompanyProfile }, user: { mail, userRoleList } },
     ) => {
-      logger.info(`checkCompany --> input: ${NAME}`);
+      logger.info(`checkCompany --> by ${mail} input: ${NAME}`);
 
       if (!checkPermission('COMPANY-READ', userRoleList)) throw new ForbiddenError();
       logger.debug('checkCompany --> Permission check passed');
@@ -315,7 +316,10 @@ module.exports = {
 
       const res = await MysqlSlvCompanyProfile.findOne(searchExistOpts);
       const result = res ? res.dataValues.ENTITY_NAME : 'N/A';
-      logger.info(`checkCompany --> input: ${result}`);
+
+      logger.debug(`checkCompany --> input: ${result}`);
+      logger.info(`checkCompany --> by ${mail} completed`);
+
       return result;
     }),
     createCompany: isAuthenticatedResolver.createResolver(async (
@@ -324,7 +328,7 @@ module.exports = {
         user: { mail, userRoleList, userType },
       },
     ) => {
-      logger.info(`createCompany --> input: ${input}`);
+      logger.info(`createCompany --> by ${mail} input: ${input}`);
 
       if (!checkPermission('COMPANY-CREATE', userRoleList)) throw new ForbiddenError();
       logger.debug('createCompany --> Permission check passed');
@@ -369,7 +373,7 @@ module.exports = {
         await MysqlSlvUserPublic.update(searchOptsUpdate);
       }
       logger.debug(`createCompany --> output: ${JSON.stringify(resultCompany)}`);
-      logger.info('createCompany --> completed');
+      logger.info(`createCompany --> by ${mail} completed`);
 
       return resultCompany;
     }),
@@ -382,7 +386,7 @@ module.exports = {
         user: { mail, userRoleList },
       },
     ) => {
-      logger.info(`deleteCompany --> input: ${ID}`);
+      logger.info(`deleteCompany --> by ${mail} input: ${ID}`);
       if (!checkPermission('COMPANY-DELETE', userRoleList)) throw new ForbiddenError();
       logger.debug('deleteCompany --> Permission check passed');
 
@@ -422,7 +426,8 @@ module.exports = {
       };
       // console.dir(result2, { depth: null, colorized: true });
       logger.debug(`deleteCompany --> output: ${JSON.stringify(result2)}`);
-      logger.info('deleteCompany --> completed');
+      logger.info(`deleteCompany --> by ${mail} completed`);
+
       return result2;
     }),
     updateCompany: isAuthenticatedResolver.createResolver(async (
@@ -431,7 +436,8 @@ module.exports = {
         user: { mail, userRoleList },
       },
     ) => {
-      logger.info(`updateCompany --> input ${ID}: ${input}`);
+      logger.info(`updateCompany --> by ${mail} input ${ID}: ${input}`);
+
       if (!checkPermission('COMPANY-UPDATE', userRoleList)) throw new ForbiddenError();
       logger.debug('updateCompany --> Permission check passed');
 
@@ -452,7 +458,8 @@ module.exports = {
       };
       // console.dir(result2, { depth: null, colorized: true });
       logger.debug(`updateCompany --> output: ${JSON.stringify(result2)}`);
-      logger.info('updateCompany --> completed');
+      logger.info(`updateCompany --> by ${mail} completed`);
+
       return result2;
     }),
     unlistCompany: isAuthenticatedResolver.createResolver(async (
@@ -461,7 +468,8 @@ module.exports = {
         user: { mail, userRoleList },
       },
     ) => {
-      logger.info(`unlistCompany --> input: ${ID}`);
+      logger.info(`unlistCompany --> by ${mail} input: ${ID}`);
+
       if (!checkPermission('GETX-DELETE', userRoleList)) throw new ForbiddenError();
       logger.debug('unlistCompany --> Permission check passed');
 
@@ -486,7 +494,8 @@ module.exports = {
       };
       // console.dir(result2, { depth: null, colorized: true });
       logger.debug(`unlistCompany --> output: ${JSON.stringify(result2)}`);
-      logger.info('unlistCompany --> completed');
+      logger.info(`unlistCompany --> by ${mail} completed`);
+
       return result2;
     }),
   },
