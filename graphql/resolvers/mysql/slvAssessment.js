@@ -2,6 +2,7 @@ const { generateId, generateHistory } = require('../../../packages/mysql-model')
 const { processSurveyResult, checkPermission } = require('../../helper/common');
 const { isAuthenticatedResolver } = require('../../permissions/acl');
 const { ForbiddenError } = require('../../permissions/errors');
+const logger = require('../../../packages/logger');
 
 module.exports = {
   Query: {
@@ -16,7 +17,10 @@ module.exports = {
         user: { mail, userRoleList },
       },
     ) => {
+      logger.info(`allAssessment --> input: ${COMPANY_ID}`);
+
       if (!checkPermission('ASSESSMENT-READ', userRoleList)) throw new ForbiddenError();
+      logger.debug('allAssessment --> Permission check passed');
 
       let resultQuest = [];
       let resultScore = [];
@@ -26,6 +30,7 @@ module.exports = {
       // survey
       const resQuest = await MysqlSlvSurvey.findAll(searchOpts);
       if (resQuest.length !== 0) {
+        logger.debug(`allAssessment --> Survey data found for ${COMPANY_ID}`);
         resultQuest = resQuest.map((svy) => {
           const result2 = svy.dataValues;
 
@@ -43,13 +48,18 @@ module.exports = {
 
       // assessment
       const resScore = await MysqlSlvAssessment.findAll(searchOpts);
-      if (resScore.length !== 0)resultScore = resScore.map((asmt) => asmt.dataValues);
+      if (resScore.length !== 0) {
+        resultScore = resScore.map((asmt) => asmt.dataValues);
+        logger.debug(`allAssessment --> Assessment data found for ${COMPANY_ID}`);
+      }
 
       const result = {
         assessment: resultScore,
         survey: resultQuest,
       };
 
+      logger.debug(`allAssessment --> output: ${result}`);
+      logger.info('allAssessment --> completed');
       return result;
     }),
   },
@@ -60,7 +70,10 @@ module.exports = {
         user: { mail, userRoleList },
       },
     ) => {
+      logger.info(`createAssessment --> input: ${JSON.stringify(input)}`);
+
       if (!checkPermission('ASSESSMENT-CREATE', userRoleList)) throw new ForbiddenError();
+      logger.debug('createAssessment --> Permission check passed');
 
       // process input
       const parsedInput = JSON.parse(input.data);
@@ -76,6 +89,9 @@ module.exports = {
       };
         // console.log(newInput);
       const result = await MysqlSlvAssessment.create(newInput);
+
+      logger.debug(`createAssessment --> output: ${JSON.stringify(result)}`);
+      logger.info('createAssessment --> completed');
       return result;
     }),
     updateAssessment: isAuthenticatedResolver.createResolver(async (
@@ -84,7 +100,10 @@ module.exports = {
         user: { mail, userRoleList },
       },
     ) => {
+      logger.info(`updateAssessment --> input: ${JSON.stringify(input)}`);
+
       if (!checkPermission('ASSESSMENT-UPDATE', userRoleList)) throw new ForbiddenError();
+      logger.debug('updateAssessment --> Permission check passed');
 
       const parsedInput = JSON.parse(input.data);
 
@@ -105,6 +124,9 @@ module.exports = {
         ID: input.COMPANY_ID,
         updated: result[0],
       };
+
+      logger.debug(`updateAssessment --> output: ${JSON.stringify(result2)}`);
+      logger.info('updateAssessment --> completed');
       // console.dir(result2, { depth: null, colorized: true });
       return result2;
     }),

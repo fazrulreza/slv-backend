@@ -3,6 +3,7 @@ const { generateHistory } = require('../../../packages/mysql-model');
 const { processUserRolesOutput, checkPermission } = require('../../helper/common');
 const { isAuthenticatedResolver } = require('../../permissions/acl');
 const { ForbiddenError } = require('../../permissions/errors');
+const logger = require('../../../packages/logger');
 
 const processInput = (data) => {
   const parsedInput = JSON.parse(data);
@@ -33,7 +34,10 @@ module.exports = {
         user: { userRoleList },
       },
     ) => {
+      logger.info('allUserRole --> called with no input');
+
       if (!checkPermission('ROLES-READ', userRoleList)) throw new ForbiddenError();
+      logger.debug('allUserRole --> Permission check passed');
 
       // default to module view
       let where = { MODULE: { [Op.substring]: userRoleList.MODULE } };
@@ -50,6 +54,9 @@ module.exports = {
       const result = await MysqlSlvUserRole.findAll(searchOpts);
       const result2 = result.map((x) => processUserRolesOutput(x));
 
+      logger.debug(`allUserRole --> output: ${JSON.stringify(result2)}`);
+      logger.info('allUserRole --> completed');
+
       return result2;
     }),
     /**
@@ -63,7 +70,10 @@ module.exports = {
         user: { userRoleList },
       },
     ) => {
+      logger.info(`oneUserRole --> input: ${ID}`);
+
       if (!checkPermission('ROLES-READ', userRoleList)) throw new ForbiddenError();
+      logger.debug('oneUserRole --> Permission check passed');
 
       const searchOpts = {
         where: { ID },
@@ -71,6 +81,8 @@ module.exports = {
       const result = await MysqlSlvUserRole.findOne(searchOpts);
       const result2 = result ? processUserRolesOutput(result) : {};
 
+      logger.debug(`oneUserRole --> output: ${JSON.stringify(result2)}`);
+      logger.info('oneUserRole --> completed');
       return result2;
     }),
   },
@@ -81,7 +93,10 @@ module.exports = {
         user: { mail, userRoleList },
       },
     ) => {
+      logger.info(`createUserRole --> input: ${JSON.stringify(input)}`);
+
       if (!checkPermission('ROLES-CREATE', userRoleList)) throw new ForbiddenError();
+      logger.debug('createUserRole --> Permission check passed');
 
       // process input
       const processedInput = processInput(input.data);
@@ -93,6 +108,10 @@ module.exports = {
       };
         // console.log(newInput);
       const result = await MysqlSlvUserRole.create(newInput);
+
+      logger.debug(`createUserRole --> output: ${JSON.stringify(result)}`);
+      logger.info('createUserRole --> completed');
+
       return result;
     }),
     updateUserRole: isAuthenticatedResolver.createResolver(async (
@@ -101,7 +120,10 @@ module.exports = {
         user: { mail, userRoleList },
       },
     ) => {
+      logger.info(`updateUserRole --> input for ${ID}: ${JSON.stringify(input)}`);
+
       if (!checkPermission('ROLES-UPDATE', userRoleList)) throw new ForbiddenError();
+      logger.debug('updateUserRole --> Permission check passed');
 
       const processedInput = processInput(input.data);
 
@@ -120,6 +142,9 @@ module.exports = {
         ID,
         updated: result[0],
       };
+
+      logger.debug(`updateUserRole --> output: ${JSON.stringify(result2)}`);
+      logger.info('updateUserRole --> completed');
       return result2;
     }),
     deleteUserRole: isAuthenticatedResolver.createResolver(async (
@@ -128,7 +153,10 @@ module.exports = {
         user: { mail, userRoleList },
       },
     ) => {
+      logger.info(`deleteUserRole --> input: ${ID}`);
       if (!checkPermission('ROLES-DELETE', userRoleList)) throw new ForbiddenError();
+      logger.debug('deleteUserRole --> Permission check passed');
+
       // remove user
       const searchOpts = {
         where: { ID },
@@ -140,6 +168,8 @@ module.exports = {
         deleted: result,
       };
       // console.dir(result2, { depth: null, colorized: true });
+      logger.debug(`deleteUserRole --> output: ${JSON.stringify(result2)}`);
+      logger.info('deleteUserRole --> completed');
       return result2;
     }),
   },

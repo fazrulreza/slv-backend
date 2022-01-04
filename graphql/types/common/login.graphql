@@ -15,7 +15,7 @@ type Mutation {
 
       username: String // this should be the user email
       password: String
-      public: Boolean
+      public: Boolean // for mobile app, this should be TRUE
       source: GOOGLE / FACEBOOK
       email: String
       name: String

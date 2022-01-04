@@ -8,8 +8,7 @@ const { isAuthenticatedResolver } = require('../../permissions/acl');
 const {
   SessionExpiredError, JsonWebTokenError, NotFoundError, WrongPasswordError,
 } = require('../../permissions/errors');
-
-const { NODE_ENV } = process.env;
+const logger = require('../../../packages/logger');
 
 module.exports = {
   Mutation: {
@@ -19,6 +18,7 @@ module.exports = {
     ) => {
       // Retrieve LDAP account
 
+      logger.info(`ldapLogin --> input: ${input}`);
       const userType = 'PUBLIC';
       const userData = verifyToken(input);
 
@@ -30,12 +30,14 @@ module.exports = {
       // login process
       switch (true) {
         case userData.name === 'TokenExpiredError': {
+          logger.debug('ldapLogin --> TokenExpiredError');
           throw new SessionExpiredError();
         }
         case userData.name === 'JsonWebTokenError': {
+          logger.debug(`ldapLogin --> JsonWebTokenError --> error: ${userData.message}`);
           throw new JsonWebTokenError({ message: userData.message });
         }
-        // case NODE_ENV === 'development': {
+        // case process.env.NODE_ENV === 'development': {
         //   // dev environment
         //   data = {
         //     username: userData.userName,
@@ -50,8 +52,11 @@ module.exports = {
         //   break;
         // }
         case !userData.public: {
+          logger.debug('ldapLogin --> Not Public, checking in AD');
           // find from AD
           const userInfo = await Login(userData);
+          logger.debug(`ldapLogin --> User Info from AD: ${JSON.stringify(userInfo)}`);
+
           const {
             cn, mail, thumbnailPhoto, telephoneNumber, department, mobile,
           } = userInfo;
@@ -63,6 +68,7 @@ module.exports = {
           };
           const resUser = await MysqlSlvUser.findOne(searchOpts);
           const uRole = resUser ? resUser.dataValues.ROLE : userType;
+          logger.debug(`ldapLogin --> User Role from DB: ${uRole}`);
 
           // return data structure
           data = {
@@ -81,47 +87,84 @@ module.exports = {
             mail,
             userType: uRole,
           };
+
+          logger.debug(`ldapLogin --> data result: ${JSON.stringify(data)}`);
+          logger.debug(`ldapLogin --> mini result: ${JSON.stringify(mini)}`);
+
           break;
         }
         case (userData.source === 'GOOGLE' || userData.source === 'FACEBOOK'): {
-          const history = generateHistory(userData.email, 'CREATE');
-          const newInput = {
-            EMAIL: userData.email,
-            NAME: userData.name,
-            AVATAR: userData.photo,
-            GENDER: userData.gender,
-            DOB: userData.dob,
-            PHONE: userData.phone,
-            ...history,
+          logger.debug('ldapLogin --> Login from public using GOOGLE / FACEBOOK');
+          const searchOpts = {
+            where: { EMAIL: userData.email },
           };
-          await MysqlSlvUserPublic.create(newInput);
 
-          data = {
-            mail: userData.email,
-            mobile: userData.phone,
-            photo: userData.photo,
-            userType: 10,
-          };
-          mini = {
-            mail: userData.email,
-            userType: 10,
-          };
+          const resUser = await MysqlSlvUserPublic.findOne(searchOpts);
+          if (!resUser) {
+            logger.debug('ldapLogin --> No data found in DB. Creating...');
+            const history = generateHistory(userData.email, 'CREATE');
+            const newInput = {
+              EMAIL: userData.email,
+              NAME: userData.name,
+              AVATAR: userData.photo,
+              GENDER: userData.gender,
+              DOB: userData.dob,
+              PHONE: userData.phone,
+              ...history,
+            };
+            await MysqlSlvUserPublic.create(newInput);
+
+            data = {
+              mail: userData.email,
+              mobile: userData.phone,
+              photo: userData.photo,
+              userType: 10,
+            };
+            mini = {
+              mail: userData.email,
+              userType: 10,
+            };
+
+            logger.debug(`ldapLogin --> data result: ${JSON.stringify(data)}`);
+            logger.debug(`ldapLogin --> mini result: ${JSON.stringify(mini)}`);
+          } else {
+            logger.debug('ldapLogin --> User found in DB');
+            const resultUser = resUser.dataValues;
+
+            data = {
+              mail: resultUser.EMAIL,
+              mobile: resultUser.PHONE,
+              photo: resultUser.AVATAR,
+              userType: 10,
+            };
+            mini = {
+              mail: resultUser.EMAIL,
+              userType: 10,
+            };
+
+            logger.debug(`ldapLogin --> data result: ${JSON.stringify(data)}`);
+            logger.debug(`ldapLogin --> mini result: ${JSON.stringify(mini)}`);
+          }
           expire = '1y';
           break;
         }
         case userData.public:
         default: {
-          // find from DB
-
+          logger.debug('ldapLogin --> Login from Public but not from Google / Facebook');
           const searchOpts = {
-            where: { EMAIL: userData.username },
+            where: { EMAIL: userData.email },
           };
 
           const resUser = await MysqlSlvUserPublic.findOne(searchOpts);
-          if (!resUser) throw new NotFoundError({ message: 'No user found' });
+          if (!resUser) {
+            logger.debug('ldapLogin --> No user found');
+            throw new NotFoundError({ message: 'No user found' });
+          }
           const resultUser = resUser.dataValues;
+          logger.debug(`ldapLogin --> User data from DB: ${JSON.stringify(resultUser)}`);
 
           const pass = comparePasswordAsync(userData.password, resultUser.PWD);
+          logger.debug(`ldapLogin --> Password match : ${pass}`);
           if (!pass) throw WrongPasswordError();
 
           data = {
@@ -135,6 +178,9 @@ module.exports = {
             userType: 10,
           };
           expire = '1y';
+
+          logger.debug(`ldapLogin --> data result: ${JSON.stringify(data)}`);
+          logger.debug(`ldapLogin --> mini result: ${JSON.stringify(mini)}`);
           break;
         }
       }
@@ -160,6 +206,9 @@ module.exports = {
         userRoleList,
       };
 
+      logger.debug(`ldapLogin --> final data result: ${JSON.stringify(data)}`);
+      logger.debug(`ldapLogin --> final mini result: ${JSON.stringify(mini)}`);
+
       const tData = { user: data };
 
       // Create token from user's info (id, username, user_type)
@@ -168,23 +217,32 @@ module.exports = {
       // Create mini token
       const minitoken = signToken(mini, expire);
 
-      return {
+      const finalResult = {
         token,
         minitoken,
       };
+
+      logger.debug(`ldapLogin --> output: ${JSON.stringify(finalResult)}`);
+      logger.info('ldapLogin --> completed');
+
+      return finalResult;
     },
     tokenBlacklist: isAuthenticatedResolver.createResolver(async (
       parent, { input }, {
         connectors: { MysqlSlvTokenBlacklist },
       },
     ) => {
+      logger.info(`tokenBlacklist --> input: ${input}`);
       const newInput = {
         TOKEN: input,
         CREATED_AT: moment().format('YYYY-MM-DD HH:mm:ss'),
       };
       const result = await MysqlSlvTokenBlacklist.create(newInput);
-      if (!result) return 'FAIL';
-      return 'SUCCESS';
+      const finalResult = !result ? 'FAIL' : 'SUCCESS';
+      logger.debug(`tokenBlacklist --> output: ${finalResult}`);
+      logger.info('tokenBlacklist --> completed');
+
+      return finalResult;
     }),
   },
 };

@@ -29,7 +29,7 @@ const logger = createLogger({
   ),
   transports: [
     new transports.Console(),
-    // , new (winston.transports.File)({ filename: 'log/result.log' })
+    // , new transports.File({ filename: 'log/result.log' })
   ],
 });
 

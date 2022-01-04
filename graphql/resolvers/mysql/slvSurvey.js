@@ -2,6 +2,7 @@ const { generateId, generateHistory } = require('../../../packages/mysql-model')
 const { processSurveyResult, checkPermission, getRoleWhere } = require('../../helper/common');
 const { isAuthenticatedResolver } = require('../../permissions/acl');
 const { ForbiddenError } = require('../../permissions/errors');
+const logger = require('../../../packages/logger');
 
 const processInput = (input) => {
   const parsedInput = JSON.parse(input.data);
@@ -41,15 +42,20 @@ module.exports = {
         user: { mail, userRoleList },
       },
     ) => {
+      logger.info(`allSurvey --> input: ${COMPANY_ID}`);
+
       if (!checkPermission('SURVEY-READ', userRoleList)) throw new ForbiddenError();
+      logger.debug('allSurvey --> Permission check passed');
 
       let result = [];
       // company
       const resCompany = await MysqlSlvCompanyProfile.findById(COMPANY_ID);
+      logger.debug(`allSurvey --> company found: ${JSON.stringify(resCompany)}`);
 
       // survey
       const searchOpts = { where: { COMPANY_ID } };
       const res = await MysqlSlvSurvey.findAll(searchOpts);
+      logger.debug(`allSurvey --> survey found: ${JSON.stringify(res)}`);
 
       if (res.length !== 0) {
         result = res.map((svy) => {
@@ -68,6 +74,9 @@ module.exports = {
         });
       }
 
+      logger.debug(`allSurvey --> output: ${JSON.stringify(result)}`);
+      logger.info('allSurvey --> completed');
+
       return result;
     }),
     /**
@@ -82,7 +91,10 @@ module.exports = {
         user: { mail, userRoleList },
       },
     ) => {
+      logger.info('smeScatter --> called with no input');
+
       if (!checkPermission('SURVEY-READ', userRoleList)) throw new ForbiddenError();
+      logger.debug('smeScatter --> Permission check passed');
 
       let resultCompany = [];
       let resultQuest = [];
@@ -93,6 +105,7 @@ module.exports = {
 
       // Assessment
       const resScore = await MysqlSlvAssessment.findAll(searchOpts);
+      logger.debug(`smeScatter --> assessment found: ${JSON.stringify(resScore)}`);
       if (resScore.length !== 0) {
         resultScore = resScore
           .map((a) => a.dataValues)
@@ -101,6 +114,7 @@ module.exports = {
 
       // Survey
       const resQuest = await MysqlSlvSurvey.findAll(searchOpts);
+      logger.debug(`smeScatter --> survey found: ${JSON.stringify(resQuest)}`);
       if (resQuest.length !== 0) {
         resultQuest = resQuest
           .map((s) => s.dataValues)
@@ -109,6 +123,7 @@ module.exports = {
 
       // company
       const resCompany = await MysqlSlvCompanyProfile.findAll(searchOpts);
+      logger.debug(`smeScatter --> company found: ${JSON.stringify(resCompany)}`);
       resultCompany = resCompany
         .map((x) => {
           const resC = x.dataValues;
@@ -126,6 +141,9 @@ module.exports = {
         .filter((cls) => cls.SME_CLASS !== 'LARGE ENTERPRISE' && cls.SME_CLASS !== 'N/A')
         .filter(((as) => as.ASSESSMENT_DONE !== 0));
 
+      logger.debug(`smeScatter --> output: ${JSON.stringify(resultCompany)}`);
+      logger.info('smeScatter --> completed');
+
       return resultCompany;
     }),
   },
@@ -136,7 +154,10 @@ module.exports = {
         user: { mail, userRoleList },
       },
     ) => {
+      logger.info(`createSurvey --> input: ${JSON.stringify(input)}`);
+
       if (!checkPermission('SURVEY-CREATE', userRoleList)) throw new ForbiddenError();
+      logger.debug('createSurvey --> Permission check passed');
 
       // process input
       const postInput = processInput(input);
@@ -151,6 +172,10 @@ module.exports = {
         ASSESSMENT_YEAR: 1000,
       };
       const result = await MysqlSlvSurvey.create(newInput);
+
+      logger.debug(`createSurvey --> output: ${JSON.stringify(result)}`);
+      logger.info('createSurvey --> completed');
+
       return result;
     }),
     updateSurvey: isAuthenticatedResolver.createResolver(async (
@@ -159,7 +184,10 @@ module.exports = {
         user: { mail, userRoleList },
       },
     ) => {
+      logger.info(`updateSurvey --> input: ${JSON.stringify(input)}`);
+
       if (!checkPermission('SURVEY-UPDATE', userRoleList)) throw new ForbiddenError();
+      logger.debug('updateSurvey --> Permission check passed');
 
       const postInput = processInput(input);
 
@@ -176,11 +204,17 @@ module.exports = {
         },
       };
       const result = await MysqlSlvSurvey.update(searchOpts);
+      logger.debug(`updateSurvey --> survey found: ${JSON.stringify(result)}`);
+
       const result2 = {
         ID: input.COMPANY_ID,
         updated: result[0],
       };
       // console.dir(result2, { depth: null, colorized: true });
+
+      logger.debug(`updateSurvey --> output: ${JSON.stringify(result2)}`);
+      logger.info('updateSurvey --> completed');
+
       return result2;
     }),
   },
