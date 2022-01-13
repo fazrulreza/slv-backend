@@ -19,7 +19,10 @@ module.exports = {
     ) => {
       logger.info(`allUser --> by ${mail} called with no input`);
 
-      if (!checkPermission('USER-READ', userRoleList)) throw new ForbiddenError();
+      if (!checkPermission('USER-READ', userRoleList)) {
+        logger.error('allUser --> Permission check failed');
+        throw new ForbiddenError();
+      }
       logger.debug('allUser --> Permission check passed');
 
       // user
@@ -64,7 +67,10 @@ module.exports = {
     ) => {
       logger.info(`createUser --> by ${mail} input: ${JSON.stringify(input)}`);
 
-      if (!checkPermission('USER-CREATE', userRoleList)) throw new ForbiddenError();
+      if (!checkPermission('USER-CREATE', userRoleList)) {
+        logger.error('createUser --> Permission check failed');
+        throw new ForbiddenError();
+      }
       logger.debug('createUser --> Permission check passed');
 
       // process input
@@ -91,7 +97,10 @@ module.exports = {
     ) => {
       logger.info(`updateUser --> by ${mail} input for ${USER}: ${JSON.stringify(input)}`);
 
-      if (!checkPermission('USER-UPDATE', userRoleList)) throw new ForbiddenError();
+      if (!checkPermission('USER-UPDATE', userRoleList)) {
+        logger.error('updateUser --> Permission check failed');
+        throw new ForbiddenError();
+      }
       logger.debug('updateUser --> Permission check passed');
 
       const parsedInput = JSON.parse(input.data);
@@ -124,7 +133,10 @@ module.exports = {
     ) => {
       logger.info(`deleteUser --> by ${mail} input: ${USER}`);
 
-      if (!checkPermission('USER-DELETE', userRoleList)) throw new ForbiddenError();
+      if (!checkPermission('USER-DELETE', userRoleList)) {
+        logger.error('deleteUser --> Permission check failed');
+        throw new ForbiddenError();
+      }
       logger.debug('deleteUser --> Permission check passed');
 
       // remove user

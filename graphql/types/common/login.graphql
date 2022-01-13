@@ -13,13 +13,13 @@ type Mutation {
 
  {
 
-      username: String // this should be the user email
-      password: String
-      public: Boolean // for mobile app, this should be TRUE
+      username: String! // this should be the user email
+      password: String // have source? -> no need
+      public: Boolean // mobile app? -> TRUE
       source: GOOGLE / FACEBOOK
-      email: String
+      email: String!
       name: String
-      photo: String (base64)
+      photo: String
       gender: String
       dob: String
       phone: String

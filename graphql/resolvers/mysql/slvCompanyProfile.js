@@ -20,7 +20,10 @@ module.exports = {
     ) => {
       logger.info(`oneCompany --> by ${mail} input: ${ID}`);
 
-      if (!checkPermission('COMPANY-READ', userRoleList)) throw new ForbiddenError();
+      if (!checkPermission('COMPANY-READ', userRoleList)) {
+        logger.error('oneCompany --> Permission check failed');
+        throw new ForbiddenError();
+      }
       logger.debug('oneCompany --> Permission check passed');
 
       const searchOpts = {
@@ -33,8 +36,8 @@ module.exports = {
 
       const res = await MysqlSlvCompanyProfile.findById(ID);
       if (!res) {
-        logger.debug(`oneCompany --> No company with ${ID} found`);
-        throw new Error(`No record found with id ${ID}`);
+        logger.error(`oneCompany --> No record found for ${ID}`);
+        throw new Error(`No record found with for ${ID}`);
       }
       const newCompany = {
         ...res.dataValues,
@@ -65,7 +68,10 @@ module.exports = {
     ) => {
       logger.info(`allCompanies --> by ${mail} called with no input`);
 
-      if (!checkPermission('COMPANY-READ', userRoleList)) throw new ForbiddenError();
+      if (!checkPermission('COMPANY-READ', userRoleList)) {
+        logger.error('allCompanies --> Permission check failed');
+        throw new ForbiddenError();
+      }
       logger.debug('allCompanies --> Permission check passed');
 
       const where = getRoleWhere(userRoleList, mail);
@@ -149,7 +155,10 @@ module.exports = {
       },
     ) => {
       logger.info(`userReports --> by ${mail} called with no input`);
-      if (!checkPermission('COMPANY-READ', userRoleList)) throw new ForbiddenError();
+      if (!checkPermission('COMPANY-READ', userRoleList)) {
+        logger.error('userReports --> Permission check failed');
+        throw new ForbiddenError();
+      }
       logger.debug('userReports --> Permission check passed');
 
       const where = getRoleWhere(userRoleList, mail);
@@ -219,7 +228,10 @@ module.exports = {
     ) => {
       logger.info(`stateReports --> by ${mail} called with no input`);
 
-      if (!checkPermission('COMPANY-READ', userRoleList)) throw new ForbiddenError();
+      if (!checkPermission('COMPANY-READ', userRoleList)) {
+        logger.error('stateReports --> Permission check failed');
+        throw new ForbiddenError();
+      }
       logger.debug('stateReports --> Permission check passed');
 
       let resultCompany = [];
@@ -307,7 +319,10 @@ module.exports = {
     ) => {
       logger.info(`checkCompany --> by ${mail} input: ${NAME}`);
 
-      if (!checkPermission('COMPANY-READ', userRoleList)) throw new ForbiddenError();
+      if (!checkPermission('COMPANY-READ', userRoleList)) {
+        logger.error('checkCompany --> Permission check failed');
+        throw new ForbiddenError();
+      }
       logger.debug('checkCompany --> Permission check passed');
 
       const searchExistOpts = {
@@ -330,7 +345,10 @@ module.exports = {
     ) => {
       logger.info(`createCompany --> by ${mail} input: ${input}`);
 
-      if (!checkPermission('COMPANY-CREATE', userRoleList)) throw new ForbiddenError();
+      if (!checkPermission('COMPANY-CREATE', userRoleList)) {
+        logger.error('createCompany --> Permission check failed');
+        throw new ForbiddenError();
+      }
       logger.debug('createCompany --> Permission check passed');
 
       const parsedInput = JSON.parse(input.data);
@@ -387,7 +405,11 @@ module.exports = {
       },
     ) => {
       logger.info(`deleteCompany --> by ${mail} input: ${ID}`);
-      if (!checkPermission('COMPANY-DELETE', userRoleList)) throw new ForbiddenError();
+
+      if (!checkPermission('COMPANY-DELETE', userRoleList)) {
+        logger.error('deleteCompany --> Permission check failed');
+        throw new ForbiddenError();
+      }
       logger.debug('deleteCompany --> Permission check passed');
 
       // remove company from other tables
@@ -438,7 +460,10 @@ module.exports = {
     ) => {
       logger.info(`updateCompany --> by ${mail} input ${ID}: ${input}`);
 
-      if (!checkPermission('COMPANY-UPDATE', userRoleList)) throw new ForbiddenError();
+      if (!checkPermission('COMPANY-UPDATE', userRoleList)) {
+        logger.error('updateCompany --> Permission check failed');
+        throw new ForbiddenError();
+      }
       logger.debug('updateCompany --> Permission check passed');
 
       const parsedInput = JSON.parse(input.data);
@@ -470,7 +495,10 @@ module.exports = {
     ) => {
       logger.info(`unlistCompany --> by ${mail} input: ${ID}`);
 
-      if (!checkPermission('GETX-DELETE', userRoleList)) throw new ForbiddenError();
+      if (!checkPermission('GETX-DELETE', userRoleList)) {
+        logger.error('unlistCompany --> Permission check failed');
+        throw new ForbiddenError();
+      }
       logger.debug('unlistCompany --> Permission check passed');
 
       // search company

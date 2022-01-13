@@ -44,7 +44,10 @@ module.exports = {
     ) => {
       logger.info(`allSurvey --> by ${mail} input: ${COMPANY_ID}`);
 
-      if (!checkPermission('SURVEY-READ', userRoleList)) throw new ForbiddenError();
+      if (!checkPermission('SURVEY-READ', userRoleList)) {
+        logger.error('allSurvey --> Permission check failed');
+        throw new ForbiddenError();
+      }
       logger.debug('allSurvey --> Permission check passed');
 
       let result = [];
@@ -93,7 +96,10 @@ module.exports = {
     ) => {
       logger.info(`smeScatter --> by ${mail} called with no input`);
 
-      if (!checkPermission('SURVEY-READ', userRoleList)) throw new ForbiddenError();
+      if (!checkPermission('SURVEY-READ', userRoleList)) {
+        logger.error('smeScatter --> Permission check failed');
+        throw new ForbiddenError();
+      }
       logger.debug('smeScatter --> Permission check passed');
 
       let resultCompany = [];
@@ -156,7 +162,10 @@ module.exports = {
     ) => {
       logger.info(`createSurvey --> by ${mail} input: ${JSON.stringify(input)}`);
 
-      if (!checkPermission('SURVEY-CREATE', userRoleList)) throw new ForbiddenError();
+      if (!checkPermission('SURVEY-CREATE', userRoleList)) {
+        logger.error('createSurvey --> Permission check failed');
+        throw new ForbiddenError();
+      }
       logger.debug('createSurvey --> Permission check passed');
 
       // process input
@@ -186,7 +195,10 @@ module.exports = {
     ) => {
       logger.info(`updateSurvey --> by ${mail} input: ${JSON.stringify(input)}`);
 
-      if (!checkPermission('SURVEY-UPDATE', userRoleList)) throw new ForbiddenError();
+      if (!checkPermission('SURVEY-UPDATE', userRoleList)) {
+        logger.error('updateSurvey --> Permission check failed');
+        throw new ForbiddenError();
+      }
       logger.debug('updateSurvey --> Permission check passed');
 
       const postInput = processInput(input);

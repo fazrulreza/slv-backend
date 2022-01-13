@@ -130,9 +130,13 @@ type GetXKPI {
     MODULE: String
   # Indicates current record belongs to which assessment year. Current year value is 1000
     ASSESSMENT_YEAR: Int
+  # Created timestamp. Auto generated in database. Not needed for create / update mutation
     CREATED_AT: String
+  # Creator. Auto generated in database. Not needed for create / update mutation
     CREATED_BY: String
+  # Updated timestamp. Auto generated in database. Not needed for create / update mutation
     UPDATED_AT: String
+  # Updater. Auto generated in database. Not needed for create / update mutation
     UPDATED_BY: String
     SIGN_KPI_ID: String
     SIGN_ACTUAL_ID: String
@@ -195,10 +199,14 @@ type KPIGroup {
   NG: KPIActual
   KPI_POINTS: DashboardOutput
   ASSESSMENT_YEAR: Int
+  # Created timestamp. Auto generated in database. Not needed for create / update mutation
   CREATED_AT: String
+  # Creator. Auto generated in database. Not needed for create / update mutation
   CREATED_BY: String
-  UPDATED_BY: String
+  # Updated timestamp. Auto generated in database. Not needed for create / update mutation
   UPDATED_AT: String
+  # Updater. Auto generated in database. Not needed for create / update mutation
+  UPDATED_BY: String
 }
 
 """

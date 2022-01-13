@@ -225,7 +225,10 @@ module.exports = {
     ) => {
       logger.info(`dashboardKPI --> by ${mail} called with no input`);
 
-      if (!checkPermission('GETX-READ', userRoleList)) throw new ForbiddenError();
+      if (!checkPermission('GETX-READ', userRoleList)) {
+        logger.error('dashboardKPI --> Permission check failed');
+        throw new ForbiddenError();
+      }
       logger.debug('dashboardKPI --> Permission check passed');
 
       // user list
@@ -291,7 +294,10 @@ module.exports = {
     ) => {
       logger.info(`scorecardKPI --> by ${mail} input: ${COMPANY_ID}`);
 
-      if (!checkPermission('GETX-READ', userRoleList)) throw new ForbiddenError();
+      if (!checkPermission('GETX-READ', userRoleList)) {
+        logger.error('scorecardKPI --> Permission check failed');
+        throw new ForbiddenError();
+      }
       logger.debug('scorecardKPI --> Permission check passed');
 
       let resultKPI = [];
@@ -375,7 +381,10 @@ module.exports = {
     ) => {
       logger.info(`allGetXKPI --> by ${mail} input: ${COMPANY_ID}`);
 
-      if (!checkPermission('GETX-READ', userRoleList)) throw new ForbiddenError();
+      if (!checkPermission('GETX-READ', userRoleList)) {
+        logger.error('allGetXKPI --> Permission check failed');
+        throw new ForbiddenError();
+      }
       logger.debug('allGetXKPI --> Permission check passed');
 
       let result = [];
@@ -578,7 +587,10 @@ module.exports = {
     ) => {
       logger.info(`createGetXKPI --> by ${mail} input: ${JSON.stringify(input)}`);
 
-      if (!checkPermission('GETX-CREATE', userRoleList)) throw new ForbiddenError();
+      if (!checkPermission('GETX-CREATE', userRoleList)) {
+        logger.error('createGetXKPI --> Permission check failed');
+        throw new ForbiddenError();
+      }
       logger.debug('createGetXKPI --> Permission check passed');
 
       // process input
@@ -635,7 +647,10 @@ module.exports = {
     ) => {
       logger.info(`updateGetXKPI --> by ${mail} input: ${JSON.stringify(input)}`);
 
-      if (!checkPermission('GETX-UPDATE', userRoleList)) throw new ForbiddenError();
+      if (!checkPermission('GETX-UPDATE', userRoleList)) {
+        logger.error('updateGetXKPI --> Permission check failed');
+        throw new ForbiddenError();
+      }
       logger.debug('updateGetXKPI --> Permission check passed');
 
       // process input
@@ -757,7 +772,10 @@ module.exports = {
     ) => {
       logger.info(`finalizeKPI --> by ${mail} input: ${JSON.stringify(input)}`);
 
-      if (!checkPermission('GETX-CREATE', userRoleList)) throw new ForbiddenError();
+      if (!checkPermission('GETX-CREATE', userRoleList)) {
+        logger.error('finalizeKPI --> Permission check failed');
+        throw new ForbiddenError();
+      }
       logger.debug('finalizeKPI --> Permission check passed');
 
       // kpi

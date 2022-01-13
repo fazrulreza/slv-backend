@@ -19,7 +19,10 @@ module.exports = {
     ) => {
       logger.info(`allAssessment --> by ${mail} input: ${COMPANY_ID}`);
 
-      if (!checkPermission('ASSESSMENT-READ', userRoleList)) throw new ForbiddenError();
+      if (!checkPermission('ASSESSMENT-READ', userRoleList)) {
+        logger.error('allAssessment --> Permission check failed');
+        throw new ForbiddenError();
+      }
       logger.debug('allAssessment --> Permission check passed');
 
       let resultQuest = [];
@@ -73,7 +76,10 @@ module.exports = {
     ) => {
       logger.info(`createAssessment --> by ${mail} input: ${JSON.stringify(input)}`);
 
-      if (!checkPermission('ASSESSMENT-CREATE', userRoleList)) throw new ForbiddenError();
+      if (!checkPermission('ASSESSMENT-CREATE', userRoleList)) {
+        logger.error('createAssessment --> Permission check failed');
+        throw new ForbiddenError();
+      }
       logger.debug('createAssessment --> Permission check passed');
 
       // process input
@@ -103,7 +109,10 @@ module.exports = {
     ) => {
       logger.info(`updateAssessment --> by ${mail} input: ${JSON.stringify(input)}`);
 
-      if (!checkPermission('ASSESSMENT-UPDATE', userRoleList)) throw new ForbiddenError();
+      if (!checkPermission('ASSESSMENT-UPDATE', userRoleList)) {
+        logger.error('updateAssessment --> Permission check failed');
+        throw new ForbiddenError();
+      }
       logger.debug('updateAssessment --> Permission check passed');
 
       const parsedInput = JSON.parse(input.data);

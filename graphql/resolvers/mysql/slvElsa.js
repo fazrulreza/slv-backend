@@ -36,7 +36,10 @@ module.exports = {
     ) => {
       logger.info(`fullElsaList --> by ${mail} called with no input`);
 
-      if (!checkPermission('ELSA-READ', userRoleList)) throw new ForbiddenError();
+      if (!checkPermission('ELSA-READ', userRoleList)) {
+        logger.error('fullElsaList --> Permission check failed');
+        throw new ForbiddenError();
+      }
       logger.debug('fullElsaList --> Permission check passed');
 
       let result = [];
@@ -116,7 +119,10 @@ module.exports = {
     ) => {
       logger.info(`oneElsa --> by ${mail} input: ${JSON.stringify(input)}`);
 
-      if (!checkPermission('ELSA-READ', userRoleList)) throw new ForbiddenError();
+      if (!checkPermission('ELSA-READ', userRoleList)) {
+        logger.error('oneElsa --> Permission check failed');
+        throw new ForbiddenError();
+      }
       logger.debug('oneElsa --> Permission check passed');
 
       const searchOpts = {
@@ -166,7 +172,10 @@ module.exports = {
     ) => {
       logger.info(`oneAll --> by ${mail} input: ${JSON.stringify(input)}`);
 
-      if (!checkPermission('ELSA-READ', userRoleList)) throw new ForbiddenError();
+      if (!checkPermission('ELSA-READ', userRoleList)) {
+        logger.error('oneAll --> Permission check failed');
+        throw new ForbiddenError();
+      }
       logger.debug('oneAll --> Permission check passed');
 
       // company
@@ -581,7 +590,10 @@ module.exports = {
     ) => {
       logger.info(`createElsa --> by ${mail} input: ${JSON.stringify(input)}`);
 
-      if (!checkPermission('ELSA-CREATE', userRoleList)) throw new ForbiddenError();
+      if (!checkPermission('ELSA-CREATE', userRoleList)) {
+        logger.error('createElsa --> Permission check failed');
+        throw new ForbiddenError();
+      }
       logger.debug('createElsa --> Permission check passed');
 
       // survey

@@ -30,11 +30,11 @@ module.exports = {
       // login process
       switch (true) {
         case userData.name === 'TokenExpiredError': {
-          logger.debug('ldapLogin --> TokenExpiredError');
+          logger.error('ldapLogin --> TokenExpiredError');
           throw new SessionExpiredError();
         }
         case userData.name === 'JsonWebTokenError': {
-          logger.debug(`ldapLogin --> JsonWebTokenError --> error: ${userData.message}`);
+          logger.error(`ldapLogin --> JsonWebTokenError --> error: ${userData.message}`);
           throw new JsonWebTokenError({ message: userData.message });
         }
         // case process.env.NODE_ENV === 'development': {
@@ -157,7 +157,7 @@ module.exports = {
 
           const resUser = await MysqlSlvUserPublic.findOne(searchOpts);
           if (!resUser) {
-            logger.debug('ldapLogin --> No user found');
+            logger.error('ldapLogin --> No user found');
             throw new NotFoundError({ message: 'No user found' });
           }
           const resultUser = resUser.dataValues;
@@ -165,7 +165,11 @@ module.exports = {
 
           const pass = comparePasswordAsync(userData.password, resultUser.PWD);
           logger.debug(`ldapLogin --> Password match : ${pass}`);
-          if (!pass) throw WrongPasswordError();
+
+          if (!pass) {
+            logger.error(`ldapLogin --> Password match = ${pass}`);
+            throw WrongPasswordError();
+          }
 
           data = {
             mail: resultUser.EMAIL,

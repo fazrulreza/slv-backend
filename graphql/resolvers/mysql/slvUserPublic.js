@@ -19,7 +19,10 @@ module.exports = {
     ) => {
       logger.info(`allUserPublic --> by ${mail} called with no input`);
 
-      if (!checkPermission('USER-READ', userRoleList)) throw new ForbiddenError();
+      if (!checkPermission('USER-READ', userRoleList)) {
+        logger.error('allUserPublic --> Permission check failed');
+        throw new ForbiddenError();
+      }
       logger.debug('allUserPublic --> Permission check passed');
 
       // user
@@ -71,7 +74,10 @@ module.exports = {
     ) => {
       logger.info(`oneUserPublic --> by ${mail} input: ${email}`);
 
-      if (!checkPermission('USER-READ', userRoleList)) throw new ForbiddenError();
+      if (!checkPermission('USER-READ', userRoleList)) {
+        logger.error('oneUserPublic --> Permission check failed');
+        throw new ForbiddenError();
+      }
       logger.debug('oneUserPublic --> Permission check passed');
 
       // user
@@ -106,7 +112,10 @@ module.exports = {
     ) => {
       logger.info(`createUserPublic --> by ${mail} input: ${JSON.stringify(input)}`);
 
-      if (!checkPermission('USER-CREATE', userRoleList)) throw new ForbiddenError();
+      if (!checkPermission('USER-CREATE', userRoleList)) {
+        logger.error('createUserPublic --> Permission check failed');
+        throw new ForbiddenError();
+      }
       logger.debug('createUserPublic --> Permission check passed');
 
       // process input
@@ -137,7 +146,10 @@ module.exports = {
     ) => {
       logger.info(`updateUserPublic --> by ${mail} input for ${email}: ${JSON.stringify(input)}`);
 
-      if (!checkPermission('USER-UPDATE', userRoleList)) throw new ForbiddenError();
+      if (!checkPermission('USER-UPDATE', userRoleList)) {
+        logger.error('updateUserPublic --> Permission check failed');
+        throw new ForbiddenError();
+      }
       logger.debug('updateUserPublic --> Permission check passed');
 
       const parsedInput = JSON.parse(input.data);
@@ -178,7 +190,10 @@ module.exports = {
     ) => {
       logger.info(`deleteUserPublic --> by ${mail} input: ${email}`);
 
-      if (!checkPermission('USER-DELETE', userRoleList)) throw new ForbiddenError();
+      if (!checkPermission('USER-DELETE', userRoleList)) {
+        logger.error('deleteUserPublic --> Permission check failed');
+        throw new ForbiddenError();
+      }
       logger.debug('deleteUserPublic --> Permission check passed');
 
       // remove user

@@ -36,7 +36,10 @@ module.exports = {
     ) => {
       logger.info(`allUserRole --> by ${mail} called with no input`);
 
-      if (!checkPermission('ROLES-READ', userRoleList)) throw new ForbiddenError();
+      if (!checkPermission('ROLES-READ', userRoleList)) {
+        logger.error('allUserRole --> Permission check failed');
+        throw new ForbiddenError();
+      }
       logger.debug('allUserRole --> Permission check passed');
 
       // default to module view
@@ -72,7 +75,10 @@ module.exports = {
     ) => {
       logger.info(`oneUserRole --> by ${mail} input: ${ID}`);
 
-      if (!checkPermission('ROLES-READ', userRoleList)) throw new ForbiddenError();
+      if (!checkPermission('ROLES-READ', userRoleList)) {
+        logger.error('oneUserRole --> Permission check failed');
+        throw new ForbiddenError();
+      }
       logger.debug('oneUserRole --> Permission check passed');
 
       const searchOpts = {
@@ -95,7 +101,10 @@ module.exports = {
     ) => {
       logger.info(`createUserRole --> by ${mail} input: ${JSON.stringify(input)}`);
 
-      if (!checkPermission('ROLES-CREATE', userRoleList)) throw new ForbiddenError();
+      if (!checkPermission('ROLES-CREATE', userRoleList)) {
+        logger.error('createUserRole --> Permission check failed');
+        throw new ForbiddenError();
+      }
       logger.debug('createUserRole --> Permission check passed');
 
       // process input
@@ -122,7 +131,10 @@ module.exports = {
     ) => {
       logger.info(`updateUserRole --> by ${mail} input for ${ID}: ${JSON.stringify(input)}`);
 
-      if (!checkPermission('ROLES-UPDATE', userRoleList)) throw new ForbiddenError();
+      if (!checkPermission('ROLES-UPDATE', userRoleList)) {
+        logger.error('updateUserRole --> Permission check failed');
+        throw new ForbiddenError();
+      }
       logger.debug('updateUserRole --> Permission check passed');
 
       const processedInput = processInput(input.data);
@@ -156,7 +168,10 @@ module.exports = {
     ) => {
       logger.info(`deleteUserRole --> by ${mail} input: ${ID}`);
 
-      if (!checkPermission('ROLES-DELETE', userRoleList)) throw new ForbiddenError();
+      if (!checkPermission('ROLES-DELETE', userRoleList)) {
+        logger.error('deleteUserRole --> Permission check failed');
+        throw new ForbiddenError();
+      }
       logger.debug('deleteUserRole --> Permission check passed');
 
       // remove user

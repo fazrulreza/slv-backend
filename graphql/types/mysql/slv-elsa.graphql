@@ -38,9 +38,13 @@ type ELSAGroup {
   MODULE: String
   # Indicates current record belongs to which assessment year. Current year value is 1000
   ASSESSMENT_YEAR: Int
+  # Created timestamp. Auto generated in database. Not needed for create / update mutation
   CREATED_AT: String
+  # Creator. Auto generated in database. Not needed for create / update mutation
   CREATED_BY: String
+  # Updated timestamp. Auto generated in database. Not needed for create / update mutation
   UPDATED_AT: String
+  # Updater. Auto generated in database. Not needed for create / update mutation
   UPDATED_BY: String
 }
 

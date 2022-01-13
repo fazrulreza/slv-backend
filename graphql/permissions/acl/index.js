@@ -4,6 +4,7 @@ const { isInstance } = require('apollo-errors');
 const {
   UnknownError, AuthenticationRequiredError, SessionExpiredError, JsonWebTokenError,
 } = require('../errors');
+const logger = require('../../../packages/logger');
 
 const baseResolver = createResolver(null, (root, args, context, error) => (
   isInstance(error)
@@ -13,9 +14,18 @@ const baseResolver = createResolver(null, (root, args, context, error) => (
     })));
 
 const isAuthenticatedResolver = baseResolver.createResolver((root, args, { user }) => {
-  if (!user) throw new AuthenticationRequiredError();
-  if (user.name === 'TokenExpiredError') throw new SessionExpiredError();
-  if (user.name === 'JsonWebTokenError') throw new JsonWebTokenError({ message: user.message });
+  if (!user) {
+    logger.error('authentication --> invalid user');
+    throw new AuthenticationRequiredError();
+  }
+  if (user.name === 'TokenExpiredError') {
+    logger.error(`authentication --> ${user.name}`);
+    throw new SessionExpiredError();
+  }
+  if (user.name === 'JsonWebTokenError') {
+    logger.error(`authentication --> ${user.name}`);
+    throw new JsonWebTokenError({ message: user.message });
+  }
 });
 
 module.exports = {

@@ -12,6 +12,7 @@ const typeDefs = require('./graphql/types');
 const connectors = require('./graphql/connectors');
 const { verifyToken } = require('./graphql/helper/common');
 const { ForbiddenError } = require('./graphql/permissions/errors');
+const logger = require('./packages/logger');
 
 const {
   GRAPHQL_INTROSPECTION, GRAPHQL_PLAYGROUND, GRAPHQL_PORT,
@@ -42,7 +43,10 @@ const apolloServer = new ApolloServer({
       const searchOpts = { where: { TOKEN: token } };
 
       const resTokenBlack = await MysqlSlvTokenBlacklist.findOne(searchOpts);
-      if (resTokenBlack) throw new ForbiddenError();
+      if (resTokenBlack) {
+        logger.error(`token --> by ${user.mail} returned blacklisted`);
+        throw new ForbiddenError();
+      }
     }
 
     // console.log(user);
