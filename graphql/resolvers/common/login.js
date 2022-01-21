@@ -37,20 +37,6 @@ module.exports = {
           logger.error(`ldapLogin --> JsonWebTokenError --> error: ${userData.message}`);
           throw new JsonWebTokenError({ message: userData.message });
         }
-        // case process.env.NODE_ENV === 'development': {
-        //   // dev environment
-        //   data = {
-        //     username: userData.userName,
-        //     mail: `${userData.username}@smebank.com.my`,
-        //     userType: 1,
-        //   };
-        //   mini = {
-        //     mail: `${userData.username}@smebank.com.my`,
-        //     userType: 1,
-        //   };
-        //   expire = '1y';
-        //   break;
-        // }
         case !userData.public: {
           logger.debug('ldapLogin --> Not Public, checking in AD');
           // find from AD
@@ -152,7 +138,7 @@ module.exports = {
         default: {
           logger.debug('ldapLogin --> Login from Public but not from Google / Facebook');
           const searchOpts = {
-            where: { EMAIL: userData.email },
+            where: { EMAIL: userData.username },
           };
 
           const resUser = await MysqlSlvUserPublic.findOne(searchOpts);
