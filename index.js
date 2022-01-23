@@ -13,6 +13,7 @@ const connectors = require('./graphql/connectors');
 const { verifyToken } = require('./graphql/helper/common');
 const { ForbiddenError } = require('./graphql/permissions/errors');
 const logger = require('./packages/logger');
+const { whiteListOperation } = require('./config');
 
 const {
   GRAPHQL_INTROSPECTION, GRAPHQL_PLAYGROUND, GRAPHQL_PORT,
@@ -35,7 +36,7 @@ const apolloServer = new ApolloServer({
     const token = req.headers.authorization || '';
     let user = '';
 
-    if (token || req.body.operationName !== 'login') {
+    if (token || !whiteListOperation.includes(req.body.operationName)) {
       user = verifyToken(token);
 
       // check token is blacklisted or not

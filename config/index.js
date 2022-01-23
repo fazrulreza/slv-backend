@@ -25,6 +25,12 @@ const ADMIN = 'ADMIN';
 const BC = 'BC';
 const PUBLIC = 'PUBLIC';
 
+const whiteListOperation = [
+  'registerUserPublic',
+  'login',
+  'checkUserPublic',
+];
+
 module.exports = {
   mysqlConnection,
   ASSESSMENT,
@@ -44,4 +50,5 @@ module.exports = {
   ADMIN,
   BC,
   PUBLIC,
+  whiteListOperation,
 };

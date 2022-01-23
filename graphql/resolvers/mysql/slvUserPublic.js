@@ -107,6 +107,33 @@ module.exports = {
     }),
   },
   Mutation: {
+    /**
+     * Retrieve one by name
+     * @param {Object} param0 main input object
+     * @param {String} param0.NAME company name
+     */
+    checkUserPublic: async (
+      parent, { EMAIL }, { connectors: { MysqlSlvUserPublic } },
+    ) => {
+      logger.info(`checkUserPublic --> by public with input: ${EMAIL}`);
+
+      const searchExistOpts = {
+        where: { EMAIL },
+      };
+
+      const res = await MysqlSlvUserPublic.findOne(searchExistOpts);
+      const result = res ? res.dataValues.EMAIL : 'N/A';
+
+      logger.debug(`checkUserPublic --> input: ${result}`);
+      logger.info('checkUserPublic --> for public completed');
+
+      return result;
+    },
+    /**
+     * Create user public
+     * @param {Object} param0 main input object
+     * @param {String} param0.input input
+     */
     createUserPublic: isAuthenticatedResolver.createResolver(async (
       parent, { input }, { connectors: { MysqlSlvUserPublic }, user: { mail, userRoleList } },
     ) => {
@@ -125,8 +152,8 @@ module.exports = {
       const history = generateHistory(mail, 'CREATE');
       const newInput = {
         ...parsedInput,
-        AVATAR: JSON.stringify(parsedInput.AVATAR),
-        SOURCE: 'PORTAL',
+        AVATAR: parsedInput.AVATAR ? JSON.stringify(parsedInput.AVATAR) : null,
+        SOURCE: parsedInput.SOURCE ? parsedInput.SOURCE : 'PORTAL',
         PWD: newPwd,
         ...history,
       };
@@ -138,6 +165,32 @@ module.exports = {
 
       return result;
     }),
+    registerUserPublic: async (
+      parent, { input }, { connectors: { MysqlSlvUserPublic } },
+    ) => {
+      logger.info(`registerUserPublic --> for public with input: ${JSON.stringify(input)}`);
+
+      // process input
+      const parsedInput = JSON.parse(input.data);
+      const newPwd = await hashPasswordAsync(parsedInput.PWD);
+
+      const history = generateHistory(parsedInput.EMAIL, 'CREATE');
+      const newInput = {
+        ...parsedInput,
+        SOURCE: 'PORTAL',
+        STATUS: 'ACTIVE',
+        ROLE: 10,
+        PWD: newPwd,
+        ...history,
+      };
+        // console.log(newInput);
+      const result = await MysqlSlvUserPublic.create(newInput);
+
+      logger.debug(`registerUserPublic --> output: ${JSON.stringify(newInput)}`);
+      logger.info(`registerUserPublic --> by ${parsedInput.EMAIL} completed`);
+
+      return result;
+    },
     updateUserPublic: isAuthenticatedResolver.createResolver(async (
       parent, { email, input }, {
         connectors: { MysqlSlvUserPublic },
@@ -164,7 +217,7 @@ module.exports = {
       const searchOpts = {
         object: {
           ...parsedInput,
-          AVATAR: JSON.stringify(parsedInput.AVATAR),
+          AVATAR: parsedInput.AVATAR ? JSON.stringify(parsedInput.AVATAR) : null,
           PWD: newPwd,
           ...history,
         },

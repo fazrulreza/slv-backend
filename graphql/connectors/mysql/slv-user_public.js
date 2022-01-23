@@ -18,6 +18,7 @@ const attributes = {
   GENDER: Sequelize.STRING,
   DOB: Sequelize.STRING,
   PWD: Sequelize.STRING,
+  OPT_FOR_MARKETING: Sequelize.STRING,
   COMPANY_ID: Sequelize.STRING,
   CREATED_AT: Sequelize.STRING,
   CREATED_BY: Sequelize.STRING,

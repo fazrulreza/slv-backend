@@ -24,6 +24,8 @@ type UserPublic {
   GENDER: String
   DOB: String
   PWD: String
+  OPT_FOR_MARKETING: String
+  COMPANY_ID: String
   # Created timestamp. Auto generated in database. Not needed for create / update mutation
   CREATED_AT: String
   # Creator. Auto generated in database. Not needed for create / update mutation
@@ -59,9 +61,17 @@ type Query {
 
 type Mutation {
 """
+    - check if email exist in DB
+"""
+  checkUserPublic (EMAIL: String!): String
+"""
     - create a public user
 """
   createUserPublic(input: UserPublicInput!): UserPublic!
+"""
+    - register a public user (public-facing)
+"""
+  registerUserPublic(input: UserPublicInput!): UserPublic!
 """
     - update a public user
 """
