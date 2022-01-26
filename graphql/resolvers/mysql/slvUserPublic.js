@@ -3,6 +3,7 @@ const { checkPermission, hashPasswordAsync, processUserRolesOutput } = require('
 const { isAuthenticatedResolver } = require('../../permissions/acl');
 const { ForbiddenError } = require('../../permissions/errors');
 const logger = require('../../../packages/logger');
+// const emailer = require('../../../packages/emailer');
 
 module.exports = {
   Query: {
@@ -187,6 +188,30 @@ module.exports = {
       };
         // console.log(newInput);
       const result = await MysqlSlvUserPublic.create(newInput);
+
+      // const emailInfo = await emailer.sendMail({
+      //   from: '"ELSA" <noreply@smebank.com.my>', // sender address
+      //   to: parsedInput.EMAIL, // list of receivers
+      //   subject: 'Welcome to ELSA!', // Subject line
+      //   text: 'Welcome to ELSA!', // plain text body
+      //   html: `
+      //   <div>
+      //     <h3>Welcome to ELSA!</h3>
+      //     <p>Click <a href="https://www.elsa.my/">here</a> to start your ELSA journey</p>
+      //     <br />
+      //     <address>
+      //       <small>
+      //         <strong>Centre For Entrepreneur Development And Research (CEDAR) Sdn Bhd
+      //       </strong>
+      //     </small><br>
+      //       <small>Level 6, Menara SME Bank, Jalan Sultan Ismail</small><br>
+      //       <small>50250 Kuala Lumpur, Wilayah Persekutuan, Malaysia</small><br>
+      //       <small>Email: <a href="mailto:support@cedar.my">support@cedar.my</a></small><br>
+      //     </address>
+      //   </div>`,
+      // });
+
+      // logger.debug(`registeruserPublic --> email sent: ${emailInfo.messageId}`);
 
       logger.debug(`registerUserPublic --> output: ${JSON.stringify(newInput)}`);
       logger.info(`registerUserPublic --> by ${parsedInput.EMAIL} completed`);
