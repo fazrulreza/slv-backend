@@ -5,7 +5,7 @@ const { readFileSync } = require('fs');
 const { Op } = require('sequelize');
 const path = require('path');
 const bcrypt = require('bcrypt');
-const { profileGroup, tieredInterventionGroup } = require('./parameter');
+const { profileGroup, tieredInterventionGroup, smeSizeChoice } = require('./parameter');
 
 const SECRET = readFileSync(path.join(__dirname, process.env.SECRET));
 const SECRET_PUB = readFileSync(path.join(__dirname, process.env.SECRET_PUB));
@@ -323,6 +323,103 @@ const getRoleWhere = (userRoleList, mail) => {
   }
 };
 
+/**
+ * Get sme size based only on no of staff
+ * @param {string} sector sector
+ * @param {number} value no of staff
+ * @returns {number} value for sme size
+ */
+const getSMEStaff = (sector, value) => {
+  switch (true) {
+    case (sector === 'MANUFACTURING' && (value > 200)):
+    case (sector !== 'MANUFACTURING' && (value > 75)):
+      return 5;
+    case (sector === 'MANUFACTURING' && (value >= 75 && value <= 200)):
+    case (sector !== 'MANUFACTURING' && (value >= 30 && value <= 75)):
+      return 4;
+    case (sector === 'MANUFACTURING' && (value >= 5 && value < 75)):
+    case (sector !== 'MANUFACTURING' && (value >= 5 && value < 30)):
+      return 3;
+    case (value > 1 && value < 5):
+      return 2;
+    case (value === 1):
+      return 1;
+    default:
+      return 0;
+  }
+};
+
+/**
+ * Get sme size based only on revenue
+ * @param {String} sector sector
+ * @param {number} value revenue
+ * @returns {number}
+ */
+const getSMERevenue = (sector, value) => {
+  switch (true) {
+    case (sector === 'MANUFACTURING' && (value > 50000000)):
+    case (sector !== 'MANUFACTURING' && (value > 20000000)):
+      return 5;
+    case (sector === 'MANUFACTURING' && (value >= 15000000 && value <= 50000000)):
+    case (sector !== 'MANUFACTURING' && (value >= 3000000 && value <= 20000000)):
+      return 4;
+    case (sector === 'MANUFACTURING' && (value >= 300000 && value < 15000000)):
+    case (sector !== 'MANUFACTURING' && (value >= 300000 && value < 3000000)):
+      return 3;
+    case (value >= 150000 && value < 300000):
+      return 2;
+    case (value < 150000):
+      return 1;
+    default:
+      return 0;
+  }
+};
+
+/**
+ *
+ * @param {String} SECTOR Sector
+ * @param {number} FULLTIME fulltime employee
+ * @param {String} BUSINESS_OWNER_INVOLVE_PERCENTAGE business owner involvement
+ * @param {number} ANNUAL_TURNOVER annual turnover
+ * @returns {Object} sales turnover and sme class
+ */
+const getSMEClass = (
+  SECTOR, FULLTIME, BUSINESS_OWNER_INVOLVE_PERCENTAGE, ANNUAL_TURNOVER,
+) => {
+  let classValue;
+  let salesValue;
+
+  const OWNER_MANAGED_100 = BUSINESS_OWNER_INVOLVE_PERCENTAGE === '100%' ? 'YES' : 'NO';
+
+  const preStaff = getSMEStaff(SECTOR, FULLTIME);
+  const preRevenue = getSMERevenue(SECTOR, ANNUAL_TURNOVER);
+  const biggerSize = Math.max(preStaff, preRevenue);
+
+  switch (true) {
+    case (preStaff === 1 && preRevenue === 1 && OWNER_MANAGED_100 === 'NO'):
+      classValue = smeSizeChoice[2].classValue;
+      salesValue = smeSizeChoice[2].salesValue;
+      break;
+    case preStaff === preRevenue:
+      classValue = smeSizeChoice[preStaff].classValue;
+      salesValue = smeSizeChoice[preStaff].salesValue;
+      break;
+    case preStaff !== preRevenue:
+      classValue = smeSizeChoice[biggerSize].classValue;
+      salesValue = smeSizeChoice[biggerSize].salesValue;
+      break;
+    default:
+      classValue = 'NON-SME';
+      salesValue = 0;
+      break;
+  }
+
+  return {
+    SALES_TURNOVER: salesValue,
+    SME_CLASS: classValue,
+  };
+};
+
 module.exports = {
   // getFilter,
   getDifference,
@@ -337,4 +434,5 @@ module.exports = {
   hashPasswordAsync,
   comparePasswordAsync,
   getRoleWhere,
+  getSMEClass,
 };

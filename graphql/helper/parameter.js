@@ -34,8 +34,32 @@ const stateList = [
   'PUTRAJAYA',
 ];
 
+const smeSizeChoice = {
+  1: {
+    classValue: 'SOLE TRADER',
+    salesValue: 1,
+  },
+  2: {
+    classValue: 'MICRO ENTERPRISE',
+    salesValue: 2,
+  },
+  3: {
+    classValue: 'SMALL ENTERPRISE',
+    salesValue: 3,
+  },
+  4: {
+    classValue: 'MEDIUM ENTERPRISE',
+    salesValue: 4,
+  },
+  5: {
+    classValue: 'LARGE ENTERPRISE',
+    salesValue: 5,
+  },
+};
+
 module.exports = {
   profileGroup,
   tieredInterventionGroup,
   stateList,
+  smeSizeChoice,
 };

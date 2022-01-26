@@ -1,5 +1,7 @@
 const { generateId, generateHistory } = require('../../../packages/mysql-model');
-const { processSurveyResult, checkPermission, getRoleWhere } = require('../../helper/common');
+const {
+  processSurveyResult, checkPermission, getRoleWhere, getSMEClass,
+} = require('../../helper/common');
 const { isAuthenticatedResolver } = require('../../permissions/acl');
 const { ForbiddenError } = require('../../permissions/errors');
 const logger = require('../../../packages/logger');
@@ -169,13 +171,24 @@ module.exports = {
       logger.debug('createSurvey --> Permission check passed');
 
       // process input
+      let smeClassInput = {};
       const postInput = processInput(input);
+
+      if (!postInput.SME_CLASS || !postInput.SALES_TURNOVER) {
+        smeClassInput = getSMEClass(
+          postInput.SECTOR,
+          postInput.EMPLOYEE_COUNT_DETAIL.FULLTIME,
+          postInput.BUSINESS_OWNER_INVOLVE_PERCENTAGE,
+          postInput.ANNUAL_TURNOVER,
+        );
+      }
 
       const history = generateHistory(mail, 'CREATE');
       const newInput = {
         ...postInput,
         ID: generateId(),
         ...history,
+        ...smeClassInput,
         COMPANY_ID: input.COMPANY_ID,
         MODULE: userRoleList.MODULE === 'ALL' ? 'SME' : userRoleList.MODULE,
         ASSESSMENT_YEAR: 1000,
@@ -201,7 +214,18 @@ module.exports = {
       }
       logger.debug('updateSurvey --> Permission check passed');
 
+      // process input
+      let smeClassInput = {};
       const postInput = processInput(input);
+
+      if (!postInput.SME_CLASS || !postInput.SALES_TURNOVER) {
+        smeClassInput = getSMEClass(
+          postInput.SECTOR,
+          postInput.EMPLOYEE_COUNT_DETAIL.FULLTIME,
+          postInput.BUSINESS_OWNER_INVOLVE_PERCENTAGE,
+          postInput.ANNUAL_TURNOVER,
+        );
+      }
 
       // store new entry
       const history = generateHistory(mail, 'UPDATE', postInput.CREATED_AT);
@@ -209,6 +233,7 @@ module.exports = {
         object: {
           ...postInput,
           ...history,
+          ...smeClassInput,
         },
         where: {
           COMPANY_ID: input.COMPANY_ID,
