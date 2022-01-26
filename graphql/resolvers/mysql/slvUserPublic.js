@@ -137,7 +137,8 @@ module.exports = {
     createUserPublic: isAuthenticatedResolver.createResolver(async (
       parent, { input }, { connectors: { MysqlSlvUserPublic }, user: { mail, userRoleList } },
     ) => {
-      logger.info(`createUserPublic --> by ${mail} input: ${JSON.stringify(input)}`);
+      // logger.info(`createUserPublic --> by ${mail} input: ${JSON.stringify(input)}`);
+      logger.info(`createUserPublic --> by ${mail}`);
 
       if (!checkPermission('USER-CREATE', userRoleList)) {
         logger.error('createUserPublic --> Permission check failed');
@@ -168,7 +169,8 @@ module.exports = {
     registerUserPublic: async (
       parent, { input }, { connectors: { MysqlSlvUserPublic } },
     ) => {
-      logger.info(`registerUserPublic --> for public with input: ${JSON.stringify(input)}`);
+      // logger.info(`registerUserPublic --> for public with input: ${JSON.stringify(input)}`);
+      logger.info('registerUserPublic --> for public');
 
       // process input
       const parsedInput = JSON.parse(input.data);
@@ -197,7 +199,7 @@ module.exports = {
         user: { mail, userRoleList },
       },
     ) => {
-      logger.info(`updateUserPublic --> by ${mail} input for ${email}: ${JSON.stringify(input)}`);
+      logger.info(`updateUserPublic --> by ${mail} input for ${email}`);
 
       if (!checkPermission('USER-UPDATE', userRoleList)) {
         logger.error('updateUserPublic --> Permission check failed');
