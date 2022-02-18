@@ -1,6 +1,7 @@
 const express = require('express');
 const fs = require('fs');
 const https = require('https');
+const cors = require('cors');
 const { ApolloServer } = require('apollo-server-express');
 /** import apollo-errors */
 const { formatError } = require('apollo-errors');
@@ -62,6 +63,7 @@ const apolloServer = new ApolloServer({
 
 const app = express();
 app.use(express.json({ limit: '50mb' }));
+app.use(cors());
 apolloServer.applyMiddleware({ app });
 
 // Create the HTTPS or HTTP server, per configuration
