@@ -19,7 +19,7 @@ module.exports = {
       // Retrieve LDAP account
 
       logger.info(`ldapLogin --> input: ${input}`);
-      const userType = 'PUBLIC';
+      const userType = 10;
       const userData = verifyToken(input);
 
       let userRoleList = {};

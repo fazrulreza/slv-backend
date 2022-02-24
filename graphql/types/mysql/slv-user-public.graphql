@@ -1,13 +1,5 @@
 
 """
-    - input format for Public User API
-"""
-input UserPublicInput {
-    # data follows User type format and gone through JSON.stringify process
-    data: String!
-}
-
-"""
     - available public user fields that can be queried. 
     - Name reflects columns in DB
 """
@@ -67,15 +59,15 @@ type Mutation {
 """
     - create a public user
 """
-  createUserPublic(input: UserPublicInput!): UserPublic!
+  createUserPublic(input: String!): UserPublic!
 """
     - register a public user (public-facing)
 """
-  registerUserPublic(input: UserPublicInput!): UserPublic!
+  registerUserPublic(input: String!): UserPublic!
 """
     - update a public user
 """
-  updateUserPublic(email: String!, input: UserPublicInput!): UpdateResp
+  updateUserPublic(email: String!, input: String!): UpdateResp
 """
     - delete a public user
 """

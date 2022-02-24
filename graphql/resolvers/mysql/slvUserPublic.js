@@ -1,5 +1,7 @@
 const { generateHistory } = require('../../../packages/mysql-model');
-const { checkPermission, hashPasswordAsync, processUserRolesOutput } = require('../../helper/common');
+const {
+  checkPermission, hashPasswordAsync, processUserRolesOutput, verifyToken,
+} = require('../../helper/common');
 const { isAuthenticatedResolver } = require('../../permissions/acl');
 const { ForbiddenError } = require('../../permissions/errors');
 const logger = require('../../../packages/logger');
@@ -148,7 +150,7 @@ module.exports = {
       logger.debug('createUserPublic --> Permission check passed');
 
       // process input
-      const parsedInput = JSON.parse(input.data);
+      const parsedInput = verifyToken(input);
       const newPwd = await hashPasswordAsync(parsedInput.PWD);
 
       const history = generateHistory(mail, 'CREATE');
@@ -174,7 +176,7 @@ module.exports = {
       logger.info('registerUserPublic --> for public');
 
       // process input
-      const parsedInput = JSON.parse(input.data);
+      const parsedInput = verifyToken(input);
       const newPwd = await hashPasswordAsync(parsedInput.PWD);
 
       const history = generateHistory(parsedInput.EMAIL, 'CREATE');
@@ -232,7 +234,7 @@ module.exports = {
       }
       logger.debug('updateUserPublic --> Permission check passed');
 
-      const parsedInput = JSON.parse(input.data);
+      const parsedInput = verifyToken(input);
       let newPwd = parsedInput.PWD;
 
       if (parsedInput.PWD_CHANGE_FLAG) {
