@@ -1,0 +1,14 @@
+
+# support item object
+input SupportItem {
+    source: String!
+    name: String!
+    email: String!
+    phone: String!
+    subject: String!
+    description: String!
+}
+
+type Mutation {
+    sendSupportMail(input: SupportItem!): String
+}
