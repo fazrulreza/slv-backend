@@ -74,6 +74,7 @@ module.exports = {
             userType: uRole,
           };
 
+
           logger.debug(`ldapLogin --> data result: ${JSON.stringify(data)}`);
           logger.debug(`ldapLogin --> mini result: ${JSON.stringify(mini)}`);
 
@@ -90,12 +91,15 @@ module.exports = {
             logger.debug('ldapLogin --> No data found in DB. Creating...');
             const history = generateHistory(userData.email, 'CREATE');
             const newInput = {
+              SOURCE: 'APP',
               EMAIL: userData.email,
               NAME: userData.name,
               AVATAR: userData.photo,
               GENDER: userData.gender,
               DOB: userData.dob,
               PHONE: userData.phone,
+              ROLE: 10,
+              STATUS: 'ACTIVE',
               ...history,
             };
             await MysqlSlvUserPublic.create(newInput);
