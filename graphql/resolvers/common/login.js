@@ -74,6 +74,7 @@ module.exports = {
             userType: uRole,
           };
 
+          // if (uRole === 1) expire = '12h';
 
           logger.debug(`ldapLogin --> data result: ${JSON.stringify(data)}`);
           logger.debug(`ldapLogin --> mini result: ${JSON.stringify(mini)}`);

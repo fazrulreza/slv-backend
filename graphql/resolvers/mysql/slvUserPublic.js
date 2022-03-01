@@ -7,6 +7,13 @@ const { ForbiddenError } = require('../../permissions/errors');
 const logger = require('../../../packages/logger');
 // const emailer = require('../../../packages/emailer');
 
+const getRoleWhereUser = (userRoleList, mail) => {
+  if (userRoleList.DATA_VIEW === 'ALL') {
+    return null;
+  }
+  return { EMAIL: mail };
+};
+
 module.exports = {
   Query: {
     /**
@@ -28,9 +35,13 @@ module.exports = {
       }
       logger.debug('allUserPublic --> Permission check passed');
 
+      const where = getRoleWhereUser(userRoleList, mail);
+      console.log(where);
+      logger.debug(`allUserPublic --> search criteria: ${JSON.stringify(where)}`);
+
       // user
       const searchOpts = {
-        where: null,
+        where,
         order: [['EMAIL']],
       };
       const resUser = await MysqlSlvUserPublic.findAll(searchOpts);
@@ -228,7 +239,8 @@ module.exports = {
     ) => {
       logger.info(`updateUserPublic --> by ${mail} input for ${email}`);
 
-      if (!checkPermission('USER-UPDATE', userRoleList)) {
+      if (!checkPermission('USER-UPDATE', userRoleList)
+      || (userRoleList.NAME === 'PUBLIC' && email !== mail)) {
         logger.error('updateUserPublic --> Permission check failed');
         throw new ForbiddenError();
       }
@@ -272,7 +284,8 @@ module.exports = {
     ) => {
       logger.info(`deleteUserPublic --> by ${mail} input: ${email}`);
 
-      if (!checkPermission('USER-DELETE', userRoleList)) {
+      if (!checkPermission('USER-DELETE', userRoleList)
+      || (userRoleList.NAME === 'PUBLIC' && email !== mail)) {
         logger.error('deleteUserPublic --> Permission check failed');
         throw new ForbiddenError();
       }

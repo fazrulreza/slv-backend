@@ -316,7 +316,7 @@ const getRoleWhere = (userRoleList, mail) => {
       return { OWNER: mail };
     case (userRoleList.DATA_VIEW === 'MODULE'):
       return { MODULE: { [Op.substring]: userRoleList.MODULE } };
-    case (userRoleList.MODULE === 'ALL'):
+    case (userRoleList.DATA_VIEW === 'ALL'):
       return null;
     default:
       return { OWNER: mail };

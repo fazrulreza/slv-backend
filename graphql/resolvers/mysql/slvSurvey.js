@@ -1,6 +1,7 @@
+const { Op } = require('sequelize');
 const { generateId, generateHistory } = require('../../../packages/mysql-model');
 const {
-  processSurveyResult, checkPermission, getRoleWhere, getSMEClass,
+  processSurveyResult, checkPermission, getSMEClass,
 } = require('../../helper/common');
 const { isAuthenticatedResolver } = require('../../permissions/acl');
 const { ForbiddenError } = require('../../permissions/errors');
@@ -29,6 +30,19 @@ const processInput = (input) => {
     ...processedInput,
   };
   return postInput;
+};
+
+const getRoleWhereSurvey = (userRoleList, mail) => {
+  switch (true) {
+    case (userRoleList.DATA_VIEW === 'OWN'):
+      return { CREATED_BY: mail };
+    case (userRoleList.DATA_VIEW === 'MODULE'):
+      return { MODULE: { [Op.substring]: userRoleList.MODULE } };
+    case (userRoleList.DATA_VIEW === 'ALL'):
+      return null;
+    default:
+      return { CREATED_BY: mail };
+  }
 };
 
 module.exports = {
@@ -108,7 +122,7 @@ module.exports = {
       let resultQuest = [];
       let resultScore = [];
 
-      const where = getRoleWhere(userRoleList, mail);
+      const where = getRoleWhereSurvey(userRoleList, mail);
       const searchOpts = { where };
 
       // Assessment
