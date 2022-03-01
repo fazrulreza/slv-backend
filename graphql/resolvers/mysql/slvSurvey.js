@@ -7,11 +7,23 @@ const { isAuthenticatedResolver } = require('../../permissions/acl');
 const { ForbiddenError } = require('../../permissions/errors');
 const logger = require('../../../packages/logger');
 
+/**
+ * Process survey input recevived to suit DB schema
+ * @param {Object} input survey input
+ * @returns processed survey input
+ */
 const processInput = (input) => {
   const parsedInput = JSON.parse(input.data);
+
+  // handle marketing
+  const bothMarketing = JSON.stringify(['Online Marketing', 'Offline Marketing']);
+  const marketingType = parsedInput.MARKETING_TYPE === 'Both Marketing'
+    ? bothMarketing
+    : JSON.stringify(parsedInput.MARKETING_TYPE);
+
   const processedInput = {
     AVAILABLE_SYSTEM: JSON.stringify(parsedInput.AVAILABLE_SYSTEM),
-    MARKETING_TYPE: JSON.stringify(parsedInput.MARKETING_TYPE),
+    MARKETING_TYPE: marketingType,
     ONLINE_MARKETING_TYPE: parsedInput.ONLINE_MARKETING_TYPE
       ? JSON.stringify(parsedInput.ONLINE_MARKETING_TYPE)
       : '[]',
@@ -24,6 +36,7 @@ const processInput = (input) => {
     PARTTIME_EMPLOYEE_COUNT: parsedInput.EMPLOYEE_COUNT_DETAIL.PARTTIME,
     OWNER_MANAGED_100: parsedInput.EMPLOYEE_DETAILS.OWNER_MANAGED_100,
   };
+
   // combine input
   const postInput = {
     ...parsedInput,
