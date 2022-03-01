@@ -13,6 +13,7 @@ const logger = require('../../../packages/logger');
  * @returns processed survey input
  */
 const processInput = (input) => {
+  let smeClassInput = {};
   const parsedInput = JSON.parse(input.data);
 
   // handle marketing
@@ -21,6 +22,13 @@ const processInput = (input) => {
     ? bothMarketing
     : JSON.stringify(parsedInput.MARKETING_TYPE);
 
+  // handle owner managed 100
+  const ownerManaged100 = parsedInput.BUSINESS_OWNER_INVOLVE_PERCENTAGE === '100%' ? 'YES' : 'NO';
+  const ownerManaged100Flag = parsedInput.EMPLOYEE_DETAILS
+    ? parsedInput.EMPLOYEE_DETAILS.OWNER_MANAGED_100
+    : ownerManaged100;
+
+  // generic process input
   const processedInput = {
     AVAILABLE_SYSTEM: JSON.stringify(parsedInput.AVAILABLE_SYSTEM),
     MARKETING_TYPE: marketingType,
@@ -34,13 +42,24 @@ const processInput = (input) => {
     CUSTOMER_PAYMENT_METHODS: JSON.stringify(parsedInput.CUSTOMER_PAYMENT_METHODS),
     FULLTIME_EMPLOYEE_COUNT: parsedInput.EMPLOYEE_COUNT_DETAIL.FULLTIME,
     PARTTIME_EMPLOYEE_COUNT: parsedInput.EMPLOYEE_COUNT_DETAIL.PARTTIME,
-    OWNER_MANAGED_100: parsedInput.EMPLOYEE_DETAILS.OWNER_MANAGED_100,
+    OWNER_MANAGED_100: ownerManaged100Flag,
   };
+
+  // handle missing class
+  if (!parsedInput.SME_CLASS || !parsedInput.SALES_TURNOVER) {
+    smeClassInput = getSMEClass(
+      parsedInput.SECTOR,
+      parsedInput.EMPLOYEE_COUNT_DETAIL.FULLTIME,
+      parsedInput.BUSINESS_OWNER_INVOLVE_PERCENTAGE,
+      parsedInput.ANNUAL_TURNOVER,
+    );
+  }
 
   // combine input
   const postInput = {
     ...parsedInput,
     ...processedInput,
+    ...smeClassInput,
   };
   return postInput;
 };
@@ -198,24 +217,13 @@ module.exports = {
       logger.debug('createSurvey --> Permission check passed');
 
       // process input
-      let smeClassInput = {};
       const postInput = processInput(input);
-
-      if (!postInput.SME_CLASS || !postInput.SALES_TURNOVER) {
-        smeClassInput = getSMEClass(
-          postInput.SECTOR,
-          postInput.EMPLOYEE_COUNT_DETAIL.FULLTIME,
-          postInput.BUSINESS_OWNER_INVOLVE_PERCENTAGE,
-          postInput.ANNUAL_TURNOVER,
-        );
-      }
 
       const history = generateHistory(mail, 'CREATE');
       const newInput = {
         ...postInput,
         ID: generateId(),
         ...history,
-        ...smeClassInput,
         COMPANY_ID: input.COMPANY_ID,
         MODULE: userRoleList.MODULE === 'ALL' ? 'SME' : userRoleList.MODULE,
         ASSESSMENT_YEAR: 1000,
