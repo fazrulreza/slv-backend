@@ -18,12 +18,12 @@ const isAuthenticatedResolver = baseResolver.createResolver((root, args, { user 
     logger.error('authentication --> invalid user');
     throw new AuthenticationRequiredError();
   }
-  if (user.name === 'TokenExpiredError') {
-    logger.error(`authentication --> ${user.name}`);
+  if (user.username === 'TokenExpiredError') {
+    logger.error(`authentication --> ${user.username}`);
     throw new SessionExpiredError();
   }
-  if (user.name === 'JsonWebTokenError') {
-    logger.error(`authentication --> ${user.name}`);
+  if (user.username === 'JsonWebTokenError') {
+    logger.error(`authentication --> ${user.username}`);
     throw new JsonWebTokenError({ message: user.message });
   }
 });

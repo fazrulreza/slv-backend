@@ -260,7 +260,7 @@ const verifyToken = (token) => {
   jwt.verify(token, SECRET_PUB, { algorithms: ['RS256'] }, (err, decoded) => {
     if (err) {
       decodeData = {
-        name: err.name,
+        username: err.name,
         message: err.message,
       };
     } else {

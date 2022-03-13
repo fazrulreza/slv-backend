@@ -29,11 +29,11 @@ module.exports = {
 
       // login process
       switch (true) {
-        case userData.name === 'TokenExpiredError': {
+        case userData.username === 'TokenExpiredError': {
           logger.error('ldapLogin --> TokenExpiredError');
           throw new SessionExpiredError();
         }
-        case userData.name === 'JsonWebTokenError': {
+        case userData.username === 'JsonWebTokenError': {
           logger.error(`ldapLogin --> JsonWebTokenError --> error: ${userData.message}`);
           throw new JsonWebTokenError({ message: userData.message });
         }
@@ -74,7 +74,7 @@ module.exports = {
             userType: uRole,
           };
 
-          // if (uRole === 1) expire = '12h';
+          if (uRole === 1) expire = '12h';
 
           logger.debug(`ldapLogin --> data result: ${JSON.stringify(data)}`);
           logger.debug(`ldapLogin --> mini result: ${JSON.stringify(mini)}`);
@@ -94,7 +94,7 @@ module.exports = {
             const newInput = {
               SOURCE: 'APP',
               EMAIL: userData.email,
-              NAME: userData.name,
+              NAME: userData.username,
               AVATAR: userData.photo,
               GENDER: userData.gender,
               DOB: userData.dob,
