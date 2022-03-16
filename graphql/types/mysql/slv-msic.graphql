@@ -6,10 +6,11 @@
 type MSICResult {
   MSIC: String,
   description_malay_detail: String,
+  description_english_detail: String,
   section: String,
   division: String,
   group: String,
-  Class: String,
+  class: String,
   description_english_section: String,
   description_malay_section: String,
   description_english_division: String,
