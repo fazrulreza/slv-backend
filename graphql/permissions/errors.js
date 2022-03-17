@@ -45,6 +45,10 @@ const ForbiddenError = createError('ForbiddenError', {
   message: 'You are not allowed to do this',
 });
 
+const LargeEnterpriseError = createError('LargeEnterpriseError', {
+  message: 'ELSA cannot be calculated for company with SME size of LARGE ENTERPRISE',
+});
+
 const AuthenticationRequiredError = createError('AuthenticationRequiredError', {
   message: 'You must be logged in to do this',
 });
@@ -82,4 +86,5 @@ module.exports = {
   SessionExpiredError,
   JsonWebTokenError,
   CompanyExistsError,
+  LargeEnterpriseError,
 };

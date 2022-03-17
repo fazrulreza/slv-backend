@@ -4,7 +4,7 @@ const {
 } = require('../../helper/common');
 const { profileGroup } = require('../../helper/parameter');
 const { isAuthenticatedResolver } = require('../../permissions/acl');
-const { ForbiddenError } = require('../../permissions/errors');
+const { ForbiddenError, LargeEnterpriseError } = require('../../permissions/errors');
 const logger = require('../../../packages/logger');
 
 const getPrediction = (resultPredict, fields, factor) => {
@@ -260,6 +260,7 @@ module.exports = {
           resultQuest = resultQuestPre.length !== 0 ? resultQuestPre[0] : null;
 
           if (resultQuest) {
+            if (resultQuest.SME_CLASS === 'LARGE ENTERPRISE') throw new LargeEnterpriseError();
             // process result
             const processedResult = processSurveyResult(resultQuest);
 
