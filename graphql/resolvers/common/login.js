@@ -14,7 +14,8 @@ module.exports = {
   Mutation: {
     ldapLogin: async (
       parent, { input },
-      { connectors: { MysqlSlvUser, MysqlSlvUserRole, MysqlSlvUserPublic } },
+      { connectors: { 
+        MysqlSlvUser, MysqlSlvUserRole, MysqlSlvUserPublic, MysqlSlvCompanyProfile, MysqlSlvSurvey } },
     ) => {
       // Retrieve LDAP account
 
@@ -180,6 +181,7 @@ module.exports = {
         }
       }
 
+      // user roles
       const resUserRole = await MysqlSlvUserRole.findById(data.userType);
       if (resUserRole) {
         const uRoleList = processUserRolesOutput(resUserRole);
@@ -201,6 +203,20 @@ module.exports = {
         userRoleList,
       };
 
+      // company
+      const searchOptsCompany = { where: { CREATED_BY: data.mail } };
+      const resCompany = await MysqlSlvCompanyProfile.findOne(searchOptsCompany);
+      const COMPANY_ID = resCompany ? resCompany.dataValues.ID : null;
+
+      // survey
+      let SURVEY_ID = null;
+
+      if(COMPANY_ID){
+        const searchOptsSurvey = { where: { COMPANY_ID } };
+        const resSurvey = await MysqlSlvSurvey.findOne(searchOptsSurvey);
+        SURVEY_ID = resSurvey ? resSurvey.dataValues.ID : null;
+      }
+
       logger.debug(`ldapLogin --> final data result: ${JSON.stringify(data)}`);
       logger.debug(`ldapLogin --> final mini result: ${JSON.stringify(mini)}`);
 
@@ -215,6 +231,8 @@ module.exports = {
       const finalResult = {
         token,
         minitoken,
+        COMPANY_ID,
+        SURVEY_ID,
       };
 
       logger.debug(`ldapLogin --> output: ${JSON.stringify(finalResult)}`);

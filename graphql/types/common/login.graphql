@@ -4,6 +4,8 @@ type LdapUser {
     token: String
     # mini token to be used for calling graphql API
     minitoken: String
+    COMPANY_ID: String
+    SURVEY_ID: String
 }
 type Mutation {
 """

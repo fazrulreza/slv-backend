@@ -18,6 +18,7 @@ type UserPublic {
   PWD: String
   OPT_FOR_MARKETING: String
   COMPANY_ID: String
+  SURVEY_ID: String
   # Created timestamp. Auto generated in database. Not needed for create / update mutation
   CREATED_AT: String
   # Creator. Auto generated in database. Not needed for create / update mutation

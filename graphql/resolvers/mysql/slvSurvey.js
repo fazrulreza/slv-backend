@@ -204,8 +204,8 @@ module.exports = {
   Mutation: {
     createSurvey: isAuthenticatedResolver.createResolver(async (
       parent, { input }, {
-        connectors: { MysqlSlvSurvey },
-        user: { mail, userRoleList },
+        connectors: { MysqlSlvSurvey, MysqlSlvUserPublic },
+        user: { mail, userType, userRoleList },
       },
     ) => {
       logger.info(`createSurvey --> by ${mail} input: ${JSON.stringify(input)}`);
@@ -228,12 +228,38 @@ module.exports = {
         MODULE: userRoleList.MODULE === 'ALL' ? 'SME' : userRoleList.MODULE,
         ASSESSMENT_YEAR: 1000,
       };
-      const result = await MysqlSlvSurvey.create(newInput);
+      const resSurvey = await MysqlSlvSurvey.create(newInput);
+      const resultSurvey = resSurvey.dataValues;
 
-      logger.debug(`createSurvey --> output: ${JSON.stringify(result)}`);
+      // if public user, update survey ID in profile
+      if (userType === 10) {
+        logger.debug('createSurvey --> Created by public user. Update survey id');
+        // find user ID
+        const searchOpts = {
+          where: { EMAIL: mail },
+        };
+        const resUser = await MysqlSlvUserPublic.findOne(searchOpts);
+        const resultUser = resUser.dataValues;
+
+        // update user
+        const historyUpdate = generateHistory(mail, 'UPDATE', resUser.dataValues.CREATED_AT);
+        const searchOptsUpdate = {
+          object: {
+            ...resultUser,
+            SURVEY_ID: resultSurvey.ID,
+            ...historyUpdate,
+          },
+          where: {
+            EMAIL: mail,
+          },
+        };
+        await MysqlSlvUserPublic.update(searchOptsUpdate);
+      }
+
+      logger.debug(`createSurvey --> output: ${JSON.stringify(resultSurvey)}`);
       logger.info(`createSurvey --> by ${mail} completed`);
 
-      return result;
+      return resultSurvey;
     }),
     updateSurvey: isAuthenticatedResolver.createResolver(async (
       parent, { input }, {

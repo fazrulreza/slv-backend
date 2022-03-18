@@ -20,6 +20,7 @@ const attributes = {
   PWD: Sequelize.STRING,
   OPT_FOR_MARKETING: Sequelize.STRING,
   COMPANY_ID: Sequelize.STRING,
+  SURVEY_ID: Sequelize.STRING,
   CREATED_AT: Sequelize.STRING,
   CREATED_BY: Sequelize.STRING,
   UPDATED_AT: Sequelize.STRING,
