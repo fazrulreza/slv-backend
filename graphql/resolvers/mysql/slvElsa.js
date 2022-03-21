@@ -260,7 +260,10 @@ module.exports = {
           resultQuest = resultQuestPre.length !== 0 ? resultQuestPre[0] : null;
 
           if (resultQuest) {
-            if (resultQuest.SME_CLASS === 'LARGE ENTERPRISE') throw new LargeEnterpriseError();
+            if (resultQuest.SME_CLASS === 'LARGE ENTERPRISE') {
+              logger.error('oneAll --> Large Enterprise not supported');
+              throw new LargeEnterpriseError();
+            }
             // process result
             const processedResult = processSurveyResult(resultQuest);
 

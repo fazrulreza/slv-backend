@@ -2,8 +2,44 @@ const { generateId, generateHistory } = require('../../../packages/mysql-model')
 const { checkPermission, getRoleWhere } = require('../../helper/common');
 const { stateList } = require('../../helper/parameter');
 const { isAuthenticatedResolver } = require('../../permissions/acl');
-const { ForbiddenError } = require('../../permissions/errors');
+const { ForbiddenError, InvalidMSICError, CompanyExistsError } = require('../../permissions/errors');
 const logger = require('../../../packages/logger');
+
+const checkCompanyExist = async (ENTITY_NAME, MysqlSlvCompanyProfile, process, ID = 'new') => {
+  const searchExistOpts = {
+    where: { ENTITY_NAME },
+  };
+  const resCompany = await MysqlSlvCompanyProfile.findOne(searchExistOpts);
+  const resultCompany = resCompany ? resCompany.dataValues : null;
+
+  if (resultCompany && (ID === 'new' || (ID !== 'new' && resultCompany.ID !== ID))) {
+    logger.error(`${process} --> Company already exist`);
+    throw new CompanyExistsError();
+  }
+  return 'N/A'
+}
+
+const checkValidMSIC = async (MSIC, MysqlSlvMSIC, process) => {
+  const searchOptsMSIC = {
+    where: { MSIC },
+  };
+  const resMSIC = await MysqlSlvMSIC.findOne(searchOptsMSIC);
+  const resultMSIC = resMSIC ? resMSIC.dataValues : null;
+
+  if (!resultMSIC) {
+    logger.error(`${process} --> Invalid MSIC`);
+    throw new InvalidMSICError();
+  }
+
+  return {
+    SECTOR: resultMSIC.sector,
+    SECTION: resultMSIC.section,
+    DIVISION: resultMSIC.division,
+    GROUP: resultMSIC.group,
+    CLASS: resultMSIC.class,
+    MSIC: resultMSIC.MSIC,
+  }
+}
 
 module.exports = {
   Query: {
@@ -111,7 +147,7 @@ module.exports = {
         const resQ = resultQuest
           .map((yy) => yy.dataValues)
           .filter((y) => y.COMPANY_ID === x.ID
-          && y.ASSESSMENT_YEAR === 1000);
+            && y.ASSESSMENT_YEAR === 1000);
 
         const resS = resultScore
           .map((zz) => zz.dataValues)
@@ -121,7 +157,7 @@ module.exports = {
         const resK = resultKPI
           .map((aa) => aa.dataValues)
           .filter((a) => a.COMPANY_ID === x.ID
-                && a.ASSESSMENT_YEAR === 1000);
+            && a.ASSESSMENT_YEAR === 1000);
 
         const SURVEY_DONE = resQ.length !== 0;
         const ASSESSMENT_DONE = resS.length !== 0;
@@ -198,7 +234,7 @@ module.exports = {
         const resQ = resultQuest
           .map((yy) => yy.dataValues)
           .filter((y) => y.CREATED_BY === x.USER
-          && y.ASSESSMENT_YEAR === 1000);
+            && y.ASSESSMENT_YEAR === 1000);
 
         const resS = resultScore
           .map((zz) => zz.dataValues)
@@ -339,11 +375,11 @@ module.exports = {
     }),
     createCompany: isAuthenticatedResolver.createResolver(async (
       parent, { input }, {
-        connectors: { MysqlSlvCompanyProfile, MysqlSlvUserPublic },
+        connectors: { MysqlSlvCompanyProfile, MysqlSlvUserPublic, MysqlSlvMSIC },
         user: { mail, userRoleList, userType },
       },
     ) => {
-      logger.info(`createCompany --> by ${mail} input: ${input}`);
+      logger.info(`createCompany --> by ${mail} input: ${JSON.stringify(input)}`);
 
       if (!checkPermission('COMPANY-CREATE', userRoleList)) {
         logger.error('createCompany --> Permission check failed');
@@ -353,6 +389,14 @@ module.exports = {
 
       const parsedInput = JSON.parse(input.data);
 
+      // check for company
+      const companyExist = await checkCompanyExist(
+        parsedInput.ENTITY_NAME, MysqlSlvCompanyProfile, 'createCompany');
+
+      // check for MSIC
+      const MSICObject = await checkValidMSIC(
+        parsedInput.MSIC, MysqlSlvMSIC, 'createCompany')
+
       const history = generateHistory(mail, 'CREATE');
       const newInput = {
         ...parsedInput,
@@ -360,6 +404,7 @@ module.exports = {
         ID: generateId(),
         MODULE: userRoleList.MODULE === 'ALL' ? 'SME' : userRoleList.MODULE,
         OWNER: mail,
+        ...MSICObject,
         ...history,
       };
 
@@ -454,7 +499,7 @@ module.exports = {
     }),
     updateCompany: isAuthenticatedResolver.createResolver(async (
       parent, { ID, input }, {
-        connectors: { MysqlSlvCompanyProfile },
+        connectors: { MysqlSlvCompanyProfile, MysqlSlvMSIC },
         user: { mail, userRoleList },
       },
     ) => {
@@ -467,11 +512,21 @@ module.exports = {
       logger.debug('updateCompany --> Permission check passed');
 
       const parsedInput = JSON.parse(input.data);
+
+      // check for company
+      const companyExist = await checkCompanyExist(
+        parsedInput.ENTITY_NAME, MysqlSlvCompanyProfile, 'updateCompany', ID);
+
+      // check for MSIC
+      const MSICObject = await checkValidMSIC(
+        parsedInput.MSIC, MysqlSlvMSIC, 'updateCompany')
+
       const history = generateHistory(mail, 'UPDATE', parsedInput.CREATED_AT);
       const searchOpts = {
         object: {
           ...parsedInput,
           LOGO: JSON.stringify(parsedInput.LOGO),
+          ...MSICObject,
           ...history,
         },
         where: { ID },

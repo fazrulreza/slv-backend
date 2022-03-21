@@ -37,6 +37,10 @@ const UserLoginExistsError = createError('UserLoginExistsError', {
 const CompanyExistsError = createError('CompanyExistsError', {
   message: 'Company already exists',
 });
+
+const InvalidMSICError = createError('InvalidMSICError', {
+  message: 'Invalid MSIC',
+});
 // ------------------
 
 // ------------------
@@ -87,4 +91,5 @@ module.exports = {
   JsonWebTokenError,
   CompanyExistsError,
   LargeEnterpriseError,
+  InvalidMSICError,
 };
