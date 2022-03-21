@@ -38,7 +38,11 @@ const CompanyExistsError = createError('CompanyExistsError', {
   message: 'Company already exists',
 });
 
-const InvalidMSICError = createError('InvalidMSICError', {
+const DataTooLongError = createError('DataTooLongError', {
+  message: 'Company name too long',
+});
+
+const InvalidDataError = createError('InvalidDataError', {
   message: 'Invalid MSIC',
 });
 // ------------------
@@ -90,6 +94,7 @@ module.exports = {
   SessionExpiredError,
   JsonWebTokenError,
   CompanyExistsError,
+  DataTooLongError,
   LargeEnterpriseError,
-  InvalidMSICError,
+  InvalidDataError,
 };

@@ -1,9 +1,87 @@
+const moment = require('moment');
 const { generateId, generateHistory } = require('../../../packages/mysql-model');
 const { checkPermission, getRoleWhere } = require('../../helper/common');
 const { stateList } = require('../../helper/parameter');
 const { isAuthenticatedResolver } = require('../../permissions/acl');
-const { ForbiddenError, InvalidMSICError, CompanyExistsError } = require('../../permissions/errors');
+const {
+  ForbiddenError, InvalidDataError, CompanyExistsError, DataTooLongError
+} = require('../../permissions/errors');
 const logger = require('../../../packages/logger');
+
+const isValidDate = (dateString) => {
+  var regEx = /^\d{4}-\d{2}-\d{2}$/;
+  if (!dateString.match(regEx)) return false;  // Invalid format
+  var d = new Date(dateString);
+  var dNum = d.getTime();
+  if (!dNum && dNum !== 0) return false; // NaN value, Invalid date
+  return d.toISOString().slice(0, 10) === dateString;
+}
+
+const checkCompanyDetails = (input) => {
+  // entity name
+  if (input.ENTITY_NAME && input.ENTITY_NAME.length > 255) {
+    logger.error(`checkCompanyDetails --> Company Name is too long`);
+    throw new DataTooLongError({ message: 'Company Name is too long' });
+  }
+  // registration no
+  if (input.REGISTRATION_NO && input.REGISTRATION_NO.length > 50) {
+    logger.error(`checkCompanyDetails --> Registration Number is too long`);
+    throw new DataTooLongError({ message: 'Registration Number is too long' });
+  }
+  // new registration no
+  if (input.NEW_REGISTRATION_NO && input.NEW_REGISTRATION_NO.length > 50) {
+    logger.error(`checkCompanyDetails --> New Registration Number is too long`);
+    throw new DataTooLongError({ message: 'New Registration Number is too long' });
+  }
+  // incorporation date
+  if (input.INCORPORATION_DATE && !isValidDate(input.INCORPORATION_DATE)) {
+    logger.error(`checkCompanyDetails --> Invalid Incorporation Date`);
+    throw new InvalidDataError({ message: 'Invalid Incorporation Date' });
+  }
+  // address line 1
+  if (input.ADDRESS_LINE_1 && input.ADDRESS_LINE_1.length > 255) {
+    logger.error(`checkCompanyDetails --> Address Line 1 is too long`);
+    throw new DataTooLongError({ message: 'Address Line 1 is too long' });
+  }
+  // address line 2
+  if (input.ADDRESS_LINE_2 && input.ADDRESS_LINE_2.length > 255) {
+    logger.error(`checkCompanyDetails --> Address Line 2 is too long`);
+    throw new DataTooLongError({ message: 'Address Line 2 is too long' });
+  }
+  // postcode
+  const postcodeRegex = /^\d{5}$/gi;
+  if (input.POSTCODE && !postcodeRegex.test(input.POSTCODE)) {
+    logger.error(`checkCompanyDetails --> Invalid Postcode`);
+    throw new InvalidDataError({ message: 'Invalid PostCode' });
+  }
+  // postcode
+  const phoneRegex = /^\d{9,11}$/gi;
+  if (input.PHONE && !phoneRegex.test(input.PHONE)) {
+    logger.error(`checkCompanyDetails --> Invalid Phone Number`);
+    throw new InvalidDataError({ message: 'Invalid Phone Number' });
+  }
+  // email
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@.]+$/gi;
+  if (input.EMAIL && !emailRegex.test(input.EMAIL)) {
+    logger.error(`checkCompanyDetails --> Invalid Email Address`);
+    throw new InvalidDataError({ message: 'Invalid Email Address' });
+  }
+  // Financing Agency 1
+  if (input.FIN_AGENCY_1 && input.FIN_AGENCY_1.length > 255) {
+    logger.error(`checkCompanyDetails --> Financing Agency 1 is too long`);
+    throw new DataTooLongError({ message: 'Financing Agency 1 is too long' });
+  }
+  // Financing Agency 2
+  if (input.FIN_AGENCY_2 && input.FIN_AGENCY_2.length > 255) {
+    logger.error(`checkCompanyDetails --> Financing Agency 2 is too long`);
+    throw new DataTooLongError({ message: 'Financing Agency 2 is too long' });
+  }
+  // Financing Agency 3
+  if (input.FIN_AGENCY_3 && input.FIN_AGENCY_3.length > 255) {
+    logger.error(`checkCompanyDetails --> Financing Agency 3 is too long`);
+    throw new DataTooLongError({ message: 'Financing Agency 3 is too long' });
+  }
+};
 
 const checkCompanyExist = async (ENTITY_NAME, MysqlSlvCompanyProfile, process, ID = 'new') => {
   const searchExistOpts = {
@@ -28,7 +106,7 @@ const checkValidMSIC = async (MSIC, MysqlSlvMSIC, process) => {
 
   if (!resultMSIC) {
     logger.error(`${process} --> Invalid MSIC`);
-    throw new InvalidMSICError();
+    throw new InvalidDataError({ message: 'Invalid MSIC' });
   }
 
   return {
@@ -388,6 +466,7 @@ module.exports = {
       logger.debug('createCompany --> Permission check passed');
 
       const parsedInput = JSON.parse(input.data);
+      checkCompanyDetails(parsedInput);
 
       // check for company
       const companyExist = await checkCompanyExist(
@@ -404,6 +483,7 @@ module.exports = {
         ID: generateId(),
         MODULE: userRoleList.MODULE === 'ALL' ? 'SME' : userRoleList.MODULE,
         OWNER: mail,
+        ENTRY_DATE: moment().format('YYYY-MM-DD'),
         ...MSICObject,
         ...history,
       };
@@ -512,6 +592,7 @@ module.exports = {
       logger.debug('updateCompany --> Permission check passed');
 
       const parsedInput = JSON.parse(input.data);
+      checkCompanyDetails(parsedInput);
 
       // check for company
       const companyExist = await checkCompanyExist(
