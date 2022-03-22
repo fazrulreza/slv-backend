@@ -4,8 +4,31 @@ const {
   processSurveyResult, checkPermission, getSMEClass,
 } = require('../../helper/common');
 const { isAuthenticatedResolver } = require('../../permissions/acl');
-const { ForbiddenError } = require('../../permissions/errors');
+const {
+  ForbiddenError, DataNotAnArrayError, InvalidDataError, SurveyExistsError,
+} = require('../../permissions/errors');
 const logger = require('../../../packages/logger');
+const { surveyFlagFields, yesNoObj } = require('../../helper/parameter');
+
+/**
+ * Check if survey for current assessment year already exist in DB
+ * @param {string} ENTITY_NAME company name
+ * @param {object} MysqlSlvSurvey Survey Connector Object
+ * @returns {string} N/A
+ */
+const checkSurveyExist = async (COMPANY_ID, MysqlSlvSurvey) => {
+  const searchExistOpts = {
+    where: { COMPANY_ID, ASSESSMENT_YEAR: 1000 },
+  };
+  const resSurvey = await MysqlSlvSurvey.findOne(searchExistOpts);
+  const resultSurvey = resSurvey ? resSurvey.dataValues.ID : null;
+
+  if (resultSurvey) {
+    logger.error('createSurvey --> Survey already exist');
+    throw new SurveyExistsError();
+  }
+  return 'N/A';
+};
 
 /**
  * Process survey input recevived to suit DB schema
@@ -15,6 +38,60 @@ const logger = require('../../../packages/logger');
 const processInput = (input) => {
   let smeClassInput = {};
   const parsedInput = JSON.parse(input.data);
+
+  // validation part
+  // Available system
+  if (!Array.isArray(parsedInput.AVAILABLE_SYSTEM)) {
+    logger.error('processSurveyInput --> Available System is not an Array');
+    throw new DataNotAnArrayError({ message: 'Available System is not an Array' });
+  }
+  // Marketing Type
+  if (!Array.isArray(parsedInput.MARKETING_TYPE) && parsedInput.MARKETING_TYPE !== 'Both Marketing') {
+    logger.error('processSurveyInput --> Marketing Type is not an Array');
+    throw new DataNotAnArrayError({ message: 'Marketing Type is not an Array' });
+  }
+  // Online Marketing Type
+  if (parsedInput.ONLINE_MARKETING_TYPE && !Array.isArray(parsedInput.ONLINE_MARKETING_TYPE)) {
+    logger.error('processSurveyInput --> Online Marketing Type is not an Array');
+    throw new DataNotAnArrayError({ message: 'Online Marketing Type is not an Array' });
+  }
+  // Business Future Plan
+  if (!Array.isArray(parsedInput.BUSINESS_FUTURE_PLAN)) {
+    logger.error('processSurveyInput --> Business Future Plan is not an Array');
+    throw new DataNotAnArrayError({ message: 'Business Future Plan is not an Array' });
+  }
+  // Seek Financing Method
+  if (parsedInput.SEEK_FINANCING_METHOD && !Array.isArray(parsedInput.SEEK_FINANCING_METHOD)) {
+    logger.error('processSurveyInput --> Seek Financing Method is not an Array');
+    throw new DataNotAnArrayError({ message: 'Seek Financing Method is not an Array' });
+  }
+  // Customer Payment Method
+  if (!Array.isArray(parsedInput.CUSTOMER_PAYMENT_METHODS)) {
+    logger.error('processSurveyInput --> Customer Payment Method is not an Array');
+    throw new DataNotAnArrayError({ message: 'Customer Payment Method is not an Array' });
+  }
+  // Full Time Employee
+  const fullTimeEmployeeRegex = /^\d*$/gi;
+  if (parsedInput.EMPLOYEE_COUNT_DETAIL
+    && !fullTimeEmployeeRegex.test(parsedInput.EMPLOYEE_COUNT_DETAIL.FULLTIME)) {
+    logger.error('processSurveyInput --> Invalid Full time Employee');
+    throw new InvalidDataError({ message: 'Invalid Full time Employee' });
+  }
+  // Part Time Employee
+  const partTimeEmployeeRegex = /^\d*$/gi;
+  if (parsedInput.EMPLOYEE_COUNT_DETAIL
+    && !partTimeEmployeeRegex.test(parsedInput.EMPLOYEE_COUNT_DETAIL.PARTTIME)) {
+    logger.error('processSurveyInput --> Invalid Part time Employee');
+    throw new InvalidDataError({ message: 'Invalid Part time Employee' });
+  }
+  // yes no check for flag
+  const flagCheckObj = surveyFlagFields.map((y) => {
+    if (!parsedInput[y] || !yesNoObj.includes(parsedInput[y].toUpperCase())) {
+      logger.error(`processSurveyInput --> Invalid ${y}`);
+      throw new InvalidDataError({ message: `Invalid ${y}` });
+    }
+    return 'pass';
+  });
 
   // handle marketing
   const bothMarketing = JSON.stringify(['Online Marketing', 'Offline Marketing']);
@@ -215,6 +292,8 @@ module.exports = {
         throw new ForbiddenError();
       }
       logger.debug('createSurvey --> Permission check passed');
+
+      await checkSurveyExist(input.COMPANY_ID, MysqlSlvSurvey);
 
       // process input
       const postInput = processInput(input);

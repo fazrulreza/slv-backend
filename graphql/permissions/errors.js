@@ -43,8 +43,21 @@ const DataTooLongError = createError('DataTooLongError', {
 });
 
 const InvalidDataError = createError('InvalidDataError', {
-  message: 'Invalid MSIC',
+  message: 'Invalid Data',
 });
+
+const DataNotAnArrayError = createError('DataNotAnArrayError', {
+  message: 'Data is not an Array',
+});
+
+const SurveyExistsError = createError('SurveyExistsError', {
+  message: 'Current survey for company already exists',
+});
+
+const AssessmentExistsError = createError('AssessmentExistsError', {
+  message: 'Current assessment for company already exists',
+});
+
 // ------------------
 
 // ------------------
@@ -97,4 +110,7 @@ module.exports = {
   DataTooLongError,
   LargeEnterpriseError,
   InvalidDataError,
+  DataNotAnArrayError,
+  SurveyExistsError,
+  AssessmentExistsError,
 };

@@ -1,8 +1,44 @@
 const { generateId, generateHistory } = require('../../../packages/mysql-model');
 const { processSurveyResult, checkPermission } = require('../../helper/common');
 const { isAuthenticatedResolver } = require('../../permissions/acl');
-const { ForbiddenError } = require('../../permissions/errors');
+const { ForbiddenError, AssessmentExistsError, InvalidDataError } = require('../../permissions/errors');
 const logger = require('../../../packages/logger');
+const { assessmentIntObj } = require('../../helper/parameter');
+
+/**
+ * Check if assessment for current assessment year already exist in DB
+ * @param {string} ENTITY_NAME company name
+ * @param {object} MysqlSlvSurvey Survey Connector Object
+ * @returns {string} N/A
+ */
+const checkAssessmentExist = async (COMPANY_ID, MysqlSlvAssessment) => {
+  const searchExistOpts = {
+    where: { COMPANY_ID, ASSESSMENT_YEAR: 3000 },
+  };
+  const resAssessment = await MysqlSlvAssessment.findOne(searchExistOpts);
+  const resultAssessment = resAssessment ? resAssessment.dataValues.ID : null;
+
+  if (resultAssessment) {
+    logger.error('createAssessment --> Survey already exist');
+    throw new AssessmentExistsError();
+  }
+  return 'N/A';
+};
+
+/**
+ * Validate Assessment Object
+ * @param {Object} input main input object
+ */
+const checkAssessmentDetails = (input) => {
+  const flagCheckObj = assessmentIntObj.map((y) => {
+    const regexIntValue = /^[1-6]/gi;
+    if (!input[y] || !regexIntValue.test(input[y])) {
+      logger.error(`checkAssessmentDetails --> Invalid ${y}`);
+      throw new InvalidDataError({ message: `Invalid ${y}` });
+    }
+    return 'pass';
+  });
+};
 
 module.exports = {
   Query: {
@@ -82,8 +118,11 @@ module.exports = {
       }
       logger.debug('createAssessment --> Permission check passed');
 
+      await checkAssessmentExist(input.COMPANY_ID, MysqlSlvAssessment);
+
       // process input
       const parsedInput = JSON.parse(input.data);
+      checkAssessmentDetails(parsedInput);
 
       const history = generateHistory(mail, 'CREATE');
       const newInput = {
@@ -94,7 +133,7 @@ module.exports = {
         MODULE: userRoleList.MODULE === 'ALL' ? 'SME' : userRoleList.MODULE,
         ASSESSMENT_YEAR: 1000,
       };
-        // console.log(newInput);
+      // console.log(newInput);
       const result = await MysqlSlvAssessment.create(newInput);
 
       logger.debug(`createAssessment --> output: ${JSON.stringify(result)}`);

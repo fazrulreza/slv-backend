@@ -14,8 +14,12 @@ module.exports = {
   Mutation: {
     ldapLogin: async (
       parent, { input },
-      { connectors: { 
-        MysqlSlvUser, MysqlSlvUserRole, MysqlSlvUserPublic, MysqlSlvCompanyProfile, MysqlSlvSurvey } },
+      {
+        connectors: {
+          MysqlSlvUser, MysqlSlvUserRole, MysqlSlvUserPublic,
+          MysqlSlvCompanyProfile, MysqlSlvSurvey,
+        },
+      },
     ) => {
       // Retrieve LDAP account
 
@@ -211,7 +215,7 @@ module.exports = {
       // survey
       let SURVEY_ID = null;
 
-      if(COMPANY_ID){
+      if (COMPANY_ID) {
         const searchOptsSurvey = { where: { COMPANY_ID } };
         const resSurvey = await MysqlSlvSurvey.findOne(searchOptsSurvey);
         SURVEY_ID = resSurvey ? resSurvey.dataValues.ID : null;
