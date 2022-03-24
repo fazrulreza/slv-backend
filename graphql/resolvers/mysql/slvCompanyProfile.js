@@ -64,7 +64,7 @@ const checkCompanyDetails = (input) => {
     throw new InvalidDataError({ message: 'Invalid PostCode' });
   }
   // postcode
-  const phoneRegex = /^\d{9,11}$/gi;
+  const phoneRegex = /^\d{9,12}$/gi;
   if (input.PHONE && !phoneRegex.test(input.PHONE)) {
     logger.error('checkCompanyDetails --> Invalid Phone Number');
     throw new InvalidDataError({ message: 'Invalid Phone Number' });
