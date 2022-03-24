@@ -1,7 +1,7 @@
 const moment = require('moment');
 const { generateId, generateHistory } = require('../../../packages/mysql-model');
 const { checkPermission, getRoleWhere } = require('../../helper/common');
-const { stateList } = require('../../helper/parameter');
+const { stateList, requiredCompanyFields } = require('../../helper/parameter');
 const { isAuthenticatedResolver } = require('../../permissions/acl');
 const {
   ForbiddenError, InvalidDataError, CompanyExistsError, DataTooLongError,
@@ -27,6 +27,15 @@ const isValidDate = (dateString) => {
  * @param {Object} input Main input object
  */
 const checkCompanyDetails = (input) => {
+  // check not empty
+  const checkValidObj = Object.keys(requiredCompanyFields).map((y) => {
+    if (!input[y]) {
+      logger.error(`checkCompanyDetails --> Invalid ${requiredCompanyFields[y]}`);
+      throw new InvalidDataError({ message: `Invalid ${requiredCompanyFields[y]}` });
+    }
+    return 'pass';
+  });
+
   // entity name
   if (input.ENTITY_NAME && input.ENTITY_NAME.length > 255) {
     logger.error('checkCompanyDetails --> Company Name is too long');
@@ -46,6 +55,11 @@ const checkCompanyDetails = (input) => {
   if (input.INCORPORATION_DATE && !isValidDate(input.INCORPORATION_DATE)) {
     logger.error('checkCompanyDetails --> Invalid Incorporation Date');
     throw new InvalidDataError({ message: 'Invalid Incorporation Date' });
+  }
+  // bumiputera status
+  if (!input.BUMI_STATUS) {
+    logger.error('checkCompanyDetails --> Invalid Bumiputera Status');
+    throw new InvalidDataError({ message: 'Invalid Bumiputera Status' });
   }
   // address line 1
   if (input.ADDRESS_LINE_1 && input.ADDRESS_LINE_1.length > 255) {
@@ -89,6 +103,11 @@ const checkCompanyDetails = (input) => {
   if (input.FIN_AGENCY_3 && input.FIN_AGENCY_3.length > 255) {
     logger.error('checkCompanyDetails --> Financing Agency 3 is too long');
     throw new DataTooLongError({ message: 'Financing Agency 3 is too long' });
+  }
+  // nature of business
+  if (input.NATURE_OF_BUSINESS && input.NATURE_OF_BUSINESS.length > 1000) {
+    logger.error('checkCompanyDetails --> Nature of Business is too long');
+    throw new DataTooLongError({ message: 'Nature of Business is too long' });
   }
 };
 

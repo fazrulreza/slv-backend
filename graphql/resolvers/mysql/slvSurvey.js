@@ -8,7 +8,7 @@ const {
   ForbiddenError, DataNotAnArrayError, InvalidDataError, SurveyExistsError,
 } = require('../../permissions/errors');
 const logger = require('../../../packages/logger');
-const { surveyFlagFields, yesNoObj } = require('../../helper/parameter');
+const { surveyFlagFields, yesNoObj, commonSurveyFields } = require('../../helper/parameter');
 
 /**
  * Check if survey for current assessment year already exist in DB
@@ -40,18 +40,39 @@ const processInput = (input) => {
   const parsedInput = JSON.parse(input.data);
 
   // validation part
+  // check not empty
+  const checkValidObj = commonSurveyFields.map((y) => {
+    if (!parsedInput[y]) {
+      logger.error(`processSurveyInput --> Invalid ${y}`);
+      throw new InvalidDataError({ message: `Invalid ${y}` });
+    }
+    return 'pass';
+  });
+
+  // yes no check for flag
+  const flagCheckObj = surveyFlagFields.map((y) => {
+    if (!parsedInput[y] || !yesNoObj.includes(parsedInput[y].toUpperCase())) {
+      logger.error(`processSurveyInput --> Invalid ${y}`);
+      throw new InvalidDataError({ message: `Invalid ${y}` });
+    }
+    return 'pass';
+  });
+
   // Available system
   if (!Array.isArray(parsedInput.AVAILABLE_SYSTEM)) {
     logger.error('processSurveyInput --> Available System is not an Array');
     throw new DataNotAnArrayError({ message: 'Available System is not an Array' });
   }
   // Marketing Type
-  if (!Array.isArray(parsedInput.MARKETING_TYPE) && parsedInput.MARKETING_TYPE !== 'Both Marketing') {
+  if (!Array.isArray(parsedInput.MARKETING_TYPE)
+    && parsedInput.MARKETING_TYPE !== 'Both Marketing') {
     logger.error('processSurveyInput --> Marketing Type is not an Array');
     throw new DataNotAnArrayError({ message: 'Marketing Type is not an Array' });
   }
   // Online Marketing Type
-  if (parsedInput.ONLINE_MARKETING_TYPE && !Array.isArray(parsedInput.ONLINE_MARKETING_TYPE)) {
+  if ((parsedInput.MARKETING_TYPE.includes('Online Marketing')
+    || parsedInput.MARKETING_TYPE === 'Both Marketing')
+    && !Array.isArray(parsedInput.ONLINE_MARKETING_TYPE)) {
     logger.error('processSurveyInput --> Online Marketing Type is not an Array');
     throw new DataNotAnArrayError({ message: 'Online Marketing Type is not an Array' });
   }
@@ -61,7 +82,8 @@ const processInput = (input) => {
     throw new DataNotAnArrayError({ message: 'Business Future Plan is not an Array' });
   }
   // Seek Financing Method
-  if (parsedInput.SEEK_FINANCING_METHOD && !Array.isArray(parsedInput.SEEK_FINANCING_METHOD)) {
+  if (parsedInput.SEEK_FINANCING_2YEARS_FLAG.toUpperCase() === 'YES'
+    && !Array.isArray(parsedInput.SEEK_FINANCING_METHOD)) {
     logger.error('processSurveyInput --> Seek Financing Method is not an Array');
     throw new DataNotAnArrayError({ message: 'Seek Financing Method is not an Array' });
   }
@@ -84,14 +106,6 @@ const processInput = (input) => {
     logger.error('processSurveyInput --> Invalid Part time Employee');
     throw new InvalidDataError({ message: 'Invalid Part time Employee' });
   }
-  // yes no check for flag
-  const flagCheckObj = surveyFlagFields.map((y) => {
-    if (!parsedInput[y] || !yesNoObj.includes(parsedInput[y].toUpperCase())) {
-      logger.error(`processSurveyInput --> Invalid ${y}`);
-      throw new InvalidDataError({ message: `Invalid ${y}` });
-    }
-    return 'pass';
-  });
 
   // handle marketing
   const bothMarketing = JSON.stringify(['Online Marketing', 'Offline Marketing']);
