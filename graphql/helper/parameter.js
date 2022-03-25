@@ -57,6 +57,23 @@ const smeSizeChoice = {
   },
 };
 
+const requiredCompanyFields = {
+  ENTITY_NAME: 'Company Name',
+  REGISTRATION_NO: 'Registration Number',
+  NEW_REGISTRATION_NO: 'New Registration Number',
+  INCORPORATION_DATE: 'Incorporation Date',
+  BUMI_STATUS: 'Bumiputera Status',
+  WOMAN_OWNED: '51% & Above Owned by Woman',
+  ENTITY_STATUS: 'Company Status',
+  ENTITY_TYPE: 'Company Type',
+  ADDRESS_LINE_1: 'Address Line 1',
+  POSTCODE: 'Postcode',
+  STATE: 'State',
+  PHONE: 'Phone Number',
+  EMAIL: 'Email Address',
+  NATURE_OF_BUSINESS: 'Nature of Business',
+};
+
 const surveyFlagFields = [
   'PRODUCT_FEEDBACK_COLLECTION_FLAG',
   'OWNER_MANAGED_FLAG',
@@ -71,6 +88,19 @@ const surveyFlagFields = [
   'REGISTERED_BANK_ACCOUNT_FLAG',
   'AUDIT_BUSINESS_ACCOUNT_FLAG',
   'SST_FLAG',
+];
+
+const commonSurveyFields = [
+  'OPERATING_HISTORY',
+  'YEARLY_BUSINESS_PERFORMANCE',
+  'YEARLY_INDUSTRY_PERFORMANCE',
+  'PRODUCT_COUNT',
+  'PRODUCT_PERFORMANCE_2YEARS',
+  'PRODUCT_MARKET_LOCATION',
+  'EMPLOYEE_COUNT',
+  'BUSINESS_OWNER_INVOLVE_PERCENTAGE',
+  'EMPLOYEE_COUNT_2YEARS',
+  'LATE_PAYMENT_CUSTOMER',
 ];
 
 const assessmentIntObj = [
@@ -100,4 +130,6 @@ module.exports = {
   surveyFlagFields,
   assessmentIntObj,
   yesNoObj,
+  requiredCompanyFields,
+  commonSurveyFields,
 };
