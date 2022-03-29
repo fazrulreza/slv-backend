@@ -4,7 +4,9 @@ const {
 } = require('../../helper/common');
 const { profileGroup } = require('../../helper/parameter');
 const { isAuthenticatedResolver } = require('../../permissions/acl');
-const { ForbiddenError, LargeEnterpriseError } = require('../../permissions/errors');
+const {
+  ForbiddenError, LargeEnterpriseError, NoSurveyError, NoAssessmentError,
+} = require('../../permissions/errors');
 const logger = require('../../../packages/logger');
 
 const getPrediction = (resultPredict, fields, factor) => {
@@ -208,6 +210,10 @@ module.exports = {
       const resQuest = resQuestPre.length !== 0
         ? resQuestPre.map((s) => s.dataValues)
         : resQuestPre;
+      if (resQuestPre.length === 0) {
+        logger.error('oneAll --> No survey found');
+        throw new NoSurveyError();
+      }
       logger.debug(`oneAll --> survey found: ${JSON.stringify(resQuest)}`);
 
       // assessment
@@ -215,6 +221,10 @@ module.exports = {
       const resScore = resScorePre.length !== 0
         ? resScorePre.map((a) => a.dataValues)
         : resScorePre;
+      if (resScorePre.length === 0 && !input.PUBLIC) {
+        logger.error('oneAll --> No assessment found');
+        throw new NoAssessmentError();
+      }
       logger.debug(`oneAll --> assessment found: ${JSON.stringify(resScore)}`);
 
       // ELSA
@@ -283,35 +293,35 @@ module.exports = {
               logger.debug('oneAll --> public detected, using prediction data...');
               const IG_INDUSTRY_POTENTIAL = getPrediction(
                 resultPredict, [
-                  resultQuest.YEARLY_BUSINESS_PERFORMANCE,
-                  resultQuest.YEARLY_INDUSTRY_PERFORMANCE,
-                ],
+                resultQuest.YEARLY_BUSINESS_PERFORMANCE,
+                resultQuest.YEARLY_INDUSTRY_PERFORMANCE,
+              ],
                 'IG_INDUSTRY_POTENTIAL',
               );
               logger.debug(`oneAll --> IG_INDUSTRY_POTENTIAL: ${JSON.stringify(IG_INDUSTRY_POTENTIAL)}`);
 
               const BR_PRODUCT_LINE = getPrediction(
                 resultPredict, [
-                  resultQuest.PRODUCT_COUNT,
-                  resultQuest.PRODUCT_PERFORMANCE_2YEARS,
-                  resultQuest.PRODUCT_MARKET_LOCATION,
-                ],
+                resultQuest.PRODUCT_COUNT,
+                resultQuest.PRODUCT_PERFORMANCE_2YEARS,
+                resultQuest.PRODUCT_MARKET_LOCATION,
+              ],
                 'BR_PRODUCT_LINE',
               );
               logger.debug(`oneAll --> BR_PRODUCT_LINE: ${JSON.stringify(BR_PRODUCT_LINE)}`);
 
               const BR_PRODUCT_QUALITY = getPrediction(
                 resultPredict, [
-                  resultQuest.PRODUCT_FEEDBACK_COLLECTION_FLAG,
-                ],
+                resultQuest.PRODUCT_FEEDBACK_COLLECTION_FLAG,
+              ],
                 'BR_PRODUCT_QUALITY',
               );
               logger.debug(`oneAll --> BR_PRODUCT_QUALITY: ${JSON.stringify(BR_PRODUCT_QUALITY)}`);
 
               const BR_TECHNOLOGY = getPrediction(
                 resultPredict, [
-                  resultQuest.AVAILABLE_SYSTEM.length,
-                ],
+                resultQuest.AVAILABLE_SYSTEM.length,
+              ],
                 'BR_TECHNOLOGY',
               );
               logger.debug(`oneAll --> BR_TECHNOLOGY: ${JSON.stringify(BR_TECHNOLOGY)}`);
@@ -322,64 +332,64 @@ module.exports = {
 
               const BR_DEVELOPMENT_CAPACITY = getPrediction(
                 resultPredict, [
-                  JSON.stringify(resultQuest.MARKETING_TYPE),
-                  preBRDCheck2,
-                ],
+                JSON.stringify(resultQuest.MARKETING_TYPE),
+                preBRDCheck2,
+              ],
                 'BR_DEVELOPMENT_CAPACITY',
               );
               logger.debug(`oneAll --> BR_DEVELOPMENT_CAPACITY: ${JSON.stringify(BR_DEVELOPMENT_CAPACITY)}`);
 
               const LC_ORGANIZATION = getPrediction(
                 resultPredict, [
-                  resultQuest.OWNER_MANAGED_FLAG,
-                  resultQuest.ORGANIZATION_STRUCTURE_FLAG,
-                  resultQuest.EMPLOYEE_COUNT,
-                ],
+                resultQuest.OWNER_MANAGED_FLAG,
+                resultQuest.ORGANIZATION_STRUCTURE_FLAG,
+                resultQuest.EMPLOYEE_COUNT,
+              ],
                 'LC_ORGANIZATION',
               );
               logger.debug(`oneAll --> LC_ORGANIZATION: ${JSON.stringify(LC_ORGANIZATION)}`);
 
               const LC_PLANNING = getPrediction(
                 resultPredict, [
-                  resultQuest.SME_CLASS,
-                  resultQuest.BUSINESS_OWNER_INVOLVE_PERCENTAGE,
-                ],
+                resultQuest.SME_CLASS,
+                resultQuest.BUSINESS_OWNER_INVOLVE_PERCENTAGE,
+              ],
                 'LC_PLANNING',
               );
               logger.debug(`oneAll --> LC_PLANNING: ${JSON.stringify(LC_PLANNING)}`);
 
               const PR_STAFFING = getPrediction(
                 resultPredict, [
-                  resultQuest.EMPLOYEE_OJT_FLAG,
-                  resultQuest.EMPLOYEE_SOP_FLAG,
-                  resultQuest.EMPLOYEE_WRITTEN_CONTRACT_FLAG,
-                  resultQuest.EMPLOYEE_COUNT_2YEARS,
-                ],
+                resultQuest.EMPLOYEE_OJT_FLAG,
+                resultQuest.EMPLOYEE_SOP_FLAG,
+                resultQuest.EMPLOYEE_WRITTEN_CONTRACT_FLAG,
+                resultQuest.EMPLOYEE_COUNT_2YEARS,
+              ],
                 'PR_STAFFING',
               );
               logger.debug(`oneAll --> PR_STAFFING: ${JSON.stringify(PR_STAFFING)}`);
 
               const PR_STAFF_PERFORMANCE = getPrediction(
                 resultPredict, [
-                  resultQuest.EMPLOYEE_JD_KPI_FLAG,
-                ],
+                resultQuest.EMPLOYEE_JD_KPI_FLAG,
+              ],
                 'PR_STAFF_PERFORMANCE',
               );
               logger.debug(`oneAll --> PR_STAFF_PERFORMANCE: ${JSON.stringify(PR_STAFF_PERFORMANCE)}`);
 
               const SR_EXECUTION_CAPACITY = getPrediction(
                 resultPredict, [
-                  resultQuest.OPERATIONAL_GUIDELINE_FLAG,
-                ],
+                resultQuest.OPERATIONAL_GUIDELINE_FLAG,
+              ],
                 'SR_EXECUTION_CAPACITY',
               );
               logger.debug(`oneAll --> SR_EXECUTION_CAPACITY: ${JSON.stringify(SR_EXECUTION_CAPACITY)}`);
 
               const SR_BUDGETTING = getPrediction(
                 resultPredict, [
-                  resultQuest.BUSINESS_PLAN_FLAG,
-                  resultQuest.BUSINESS_FUTURE_PLAN.length,
-                ],
+                resultQuest.BUSINESS_PLAN_FLAG,
+                resultQuest.BUSINESS_FUTURE_PLAN.length,
+              ],
                 'SR_BUDGETTING',
               );
               logger.debug(`oneAll --> SR_BUDGETTING: ${JSON.stringify(SR_BUDGETTING)}`);
@@ -390,21 +400,21 @@ module.exports = {
 
               const FR_FINANCE = getPrediction(
                 resultPredict, [
-                  resultQuest.SEEK_FINANCING_2YEARS_FLAG,
-                  resultQuest.LATE_PAYMENT_CUSTOMER,
-                  preFICheck2,
-                  resultQuest.CUSTOMER_PAYMENT_METHODS.length,
-                ],
+                resultQuest.SEEK_FINANCING_2YEARS_FLAG,
+                resultQuest.LATE_PAYMENT_CUSTOMER,
+                preFICheck2,
+                resultQuest.CUSTOMER_PAYMENT_METHODS.length,
+              ],
                 'FR_FINANCE',
               );
               logger.debug(`oneAll --> FR_FINANCE: ${JSON.stringify(FR_FINANCE)}`);
 
               const FR_FINANCIAL_SYSTEM = getPrediction(
                 resultPredict, [
-                  resultQuest.REGISTERED_BANK_ACCOUNT_FLAG,
-                  resultQuest.AUDIT_BUSINESS_ACCOUNT_FLAG,
-                  resultQuest.SST_FLAG,
-                ],
+                resultQuest.REGISTERED_BANK_ACCOUNT_FLAG,
+                resultQuest.AUDIT_BUSINESS_ACCOUNT_FLAG,
+                resultQuest.SST_FLAG,
+              ],
                 'FR_FINANCIAL_SYSTEM',
               );
               logger.debug(`oneAll --> FR_FINANCIAL_SYSTEM: ${JSON.stringify(FR_FINANCIAL_SYSTEM)}`);

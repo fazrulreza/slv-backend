@@ -58,6 +58,14 @@ const AssessmentExistsError = createError('AssessmentExistsError', {
   message: 'Current assessment for company already exists',
 });
 
+const NoSurveyError = createError('NoSurveyError', {
+  message: 'No survey found',
+});
+
+const NoAssessmentError = createError('NoAssessmentError', {
+  message: 'No assessment found',
+});
+
 // ------------------
 
 // ------------------
@@ -113,4 +121,6 @@ module.exports = {
   DataNotAnArrayError,
   SurveyExistsError,
   AssessmentExistsError,
+  NoSurveyError,
+  NoAssessmentError,
 };
