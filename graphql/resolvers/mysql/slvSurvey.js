@@ -36,7 +36,6 @@ const checkSurveyExist = async (COMPANY_ID, MysqlSlvSurvey) => {
  * @returns processed survey input
  */
 const processInput = (input) => {
-  let smeClassInput = {};
   const parsedInput = JSON.parse(input.data);
 
   // validation part
@@ -137,14 +136,12 @@ const processInput = (input) => {
   };
 
   // handle missing class
-  if (!parsedInput.SME_CLASS || !parsedInput.SALES_TURNOVER) {
-    smeClassInput = getSMEClass(
-      parsedInput.SECTOR,
-      parsedInput.EMPLOYEE_COUNT_DETAIL.FULLTIME,
-      parsedInput.BUSINESS_OWNER_INVOLVE_PERCENTAGE,
-      parsedInput.ANNUAL_TURNOVER,
-    );
-  }
+  const smeClassInput = getSMEClass(
+    parsedInput.SECTOR,
+    parsedInput.EMPLOYEE_COUNT_DETAIL.FULLTIME,
+    parsedInput.BUSINESS_OWNER_INVOLVE_PERCENTAGE,
+    parsedInput.ANNUAL_TURNOVER,
+  );
 
   // combine input
   const postInput = {
@@ -369,17 +366,7 @@ module.exports = {
       logger.debug('updateSurvey --> Permission check passed');
 
       // process input
-      let smeClassInput = {};
       const postInput = processInput(input);
-
-      if (!postInput.SME_CLASS || !postInput.SALES_TURNOVER) {
-        smeClassInput = getSMEClass(
-          postInput.SECTOR,
-          postInput.EMPLOYEE_COUNT_DETAIL.FULLTIME,
-          postInput.BUSINESS_OWNER_INVOLVE_PERCENTAGE,
-          postInput.ANNUAL_TURNOVER,
-        );
-      }
 
       // store new entry
       const history = generateHistory(mail, 'UPDATE', postInput.CREATED_AT);
@@ -387,7 +374,6 @@ module.exports = {
         object: {
           ...postInput,
           ...history,
-          ...smeClassInput,
         },
         where: {
           COMPANY_ID: input.COMPANY_ID,
