@@ -1,7 +1,7 @@
 const { Op } = require('sequelize');
 const { generateId, generateHistory } = require('../../../packages/mysql-model');
 const {
-  processSurveyResult, checkPermission, getSMEClass,
+  processSurveyResult, checkPermission, getSMEClass, removeDuplicatesFromArray, getRoleWhere,
 } = require('../../helper/common');
 const { isAuthenticatedResolver } = require('../../permissions/acl');
 const {
@@ -152,19 +152,6 @@ const processInput = (input) => {
   return postInput;
 };
 
-const getRoleWhereSurvey = (userRoleList, mail) => {
-  switch (true) {
-    case (userRoleList.DATA_VIEW === 'OWN'):
-      return { CREATED_BY: mail };
-    case (userRoleList.DATA_VIEW === 'MODULE'):
-      return { MODULE: { [Op.substring]: userRoleList.MODULE } };
-    case (userRoleList.DATA_VIEW === 'ALL'):
-      return null;
-    default:
-      return { CREATED_BY: mail };
-  }
-};
-
 module.exports = {
   Query: {
     /**
@@ -242,7 +229,7 @@ module.exports = {
       let resultQuest = [];
       let resultScore = [];
 
-      const where = getRoleWhereSurvey(userRoleList, mail);
+      const where = getRoleWhere(userRoleList, mail, 'CREATED_BY');
       const searchOpts = { where };
 
       // Assessment
@@ -266,6 +253,7 @@ module.exports = {
       // company
       const resCompany = await MysqlSlvCompanyProfile.findAll(searchOpts);
       logger.debug(`smeScatter --> company found: ${JSON.stringify(resCompany)}`);
+
       resultCompany = resCompany
         .map((x) => {
           const resC = x.dataValues;
@@ -287,6 +275,106 @@ module.exports = {
       logger.info(`smeScatter --> by ${mail} completed`);
 
       return resultCompany;
+    }),
+    /**
+         * Get group by data based on column
+         * @param {Object} param0 main input object
+         * @param {String} param0.COLUMN column to be aggregated
+         */
+    surveyField: isAuthenticatedResolver.createResolver(async (
+      parent, { COLUMN },
+      {
+        connectors: {
+          MysqlSlvSurvey, MysqlSlvCompanyProfile, MysqlSlvAssessment, MysqlSlvMSIC,
+        },
+        user: { mail, userRoleList },
+      },
+    ) => {
+      logger.info(`surveyField --> by ${mail} called with input ${COLUMN}`);
+
+      if (!checkPermission('SURVEY-READ', userRoleList)) {
+        logger.error('surveyField --> Permission check failed');
+        throw new ForbiddenError();
+      }
+      logger.debug('surveyField --> Permission check passed');
+
+      let resultCompany = [];
+      let resultQuest = [];
+      let resultScore = [];
+      let resultMSIC = [];
+
+      const where = getRoleWhere(userRoleList, mail, 'CREATED_BY');
+      const searchOpts = { where };
+
+      // MSIC if needed
+      if (COLUMN === 'SECTION' || COLUMN === 'DIVISION' || COLUMN === 'GROUP' || COLUMN === 'CLASS' || COLUMN === 'MSIC') {
+        const searchOptsMSIC = { where: null };
+        const resMSIC = await MysqlSlvMSIC.findAll(searchOptsMSIC);
+        resultMSIC = resMSIC.map((x) => x.dataValues);
+      }
+
+      // Assessment
+      const resScore = await MysqlSlvAssessment.findAll(searchOpts);
+      logger.debug(`surveyField --> assessment found: ${JSON.stringify(resScore)}`);
+      if (resScore.length !== 0) {
+        resultScore = resScore
+          .map((a) => a.dataValues)
+          .filter((oa) => oa.ASSESSMENT_YEAR === 1000);
+      }
+
+      // Survey
+      const resQuest = await MysqlSlvSurvey.findAll(searchOpts);
+      logger.debug(`surveyField --> survey found: ${JSON.stringify(resQuest)}`);
+      if (resQuest.length !== 0) {
+        resultQuest = resQuest
+          .map((s) => s.dataValues)
+          .filter((oa) => oa.ASSESSMENT_YEAR === 1000);
+      }
+
+      // company
+      const resCompany = await MysqlSlvCompanyProfile.findAll(searchOpts);
+      logger.debug(`surveyField --> company found: ${JSON.stringify(resCompany)}`);
+
+      resultCompany = resCompany
+        .map((x) => {
+          const resC = x.dataValues;
+          const resQ = resultQuest.filter((y) => y.COMPANY_ID === resC.ID);
+          const resS = resultScore.filter((z) => z.COMPANY_ID === resC.ID);
+
+          const resQ1 = resQ.length !== 0 ? resQ[0] : null;
+          const resS1 = resS.length !== 0 ? resS[0] : null;
+
+          return {
+            ...resQ1,
+            ...resS1,
+            ...resC,
+          };
+        })
+        .filter((cls) => cls.SME_CLASS && cls.SME_CLASS !== 'LARGE ENTERPRISE' && cls.SME_CLASS !== 'N/A')
+        .filter((as) => as.OH_OPERATING_HISTORY)
+        .map((c) => c[COLUMN])
+        .map((up) => (up ? up.toUpperCase() : up));
+
+      const uniqueColumn = removeDuplicatesFromArray(resultCompany);
+      const data = uniqueColumn.map((uc) => {
+        const res = resultCompany.filter((rc) => rc === uc);
+        return {
+          KEY: uc,
+          VALUE: res.length,
+        };
+      });
+
+      const finalResult = {
+        data,
+        total: resultCompany.length,
+        column: COLUMN,
+        MSIC: resultMSIC,
+      };
+
+      logger.debug(`surveyField --> output: ${JSON.stringify(resultCompany)}`);
+      logger.info(`surveyField --> by ${mail} completed`);
+
+      return finalResult;
     }),
   },
   Mutation: {

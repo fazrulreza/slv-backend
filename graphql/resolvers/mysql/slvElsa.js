@@ -1,8 +1,8 @@
 const { generateId, generateHistory } = require('../../../packages/mysql-model');
 const {
-  processSurveyResult, calculateScores, getTotalScore, checkPermission, getRoleWhere,
+  processSurveyResult, calculateScores, getTotalScore, checkPermission, getRoleWhere, removeDuplicatesFromArray,
 } = require('../../helper/common');
-const { profileGroup } = require('../../helper/parameter');
+const { profileGroup, factorOrder } = require('../../helper/parameter');
 const { isAuthenticatedResolver } = require('../../permissions/acl');
 const {
   ForbiddenError, LargeEnterpriseError, NoSurveyError, NoAssessmentError,
@@ -107,6 +107,65 @@ module.exports = {
       logger.debug(`fullElsaList --> output: ${JSON.stringify(result)}`);
       logger.info(`fullElsaList --> by ${mail} completed`);
       return result;
+    }),
+    /**
+         * Get group by data based on column
+         * @param {Object} param0 main input object
+         * @param {String} param0.COLUMN column to be aggregated
+         */
+    elsaPriority: isAuthenticatedResolver.createResolver(async (
+      parent, param,
+      {
+        connectors: { MysqlSlvELSAScorecard },
+        user: { mail, userRoleList },
+      },
+    ) => {
+      logger.info(`elsaPriority --> by ${mail} called with no input`);
+
+      if (!checkPermission('ELSA-READ', userRoleList)) {
+        logger.error('elsaPriority --> Permission check failed');
+        throw new ForbiddenError();
+      }
+      logger.debug('elsaPriority --> Permission check passed');
+
+      let resultELSA = [];
+
+      const where = getRoleWhere(userRoleList, mail, 'CREATED_BY');
+      const searchOpts = { where };
+
+      // ELSA
+      const resELSA = await MysqlSlvELSAScorecard.findAll(searchOpts);
+      logger.debug(`elsaPriority --> data found: ${JSON.stringify(resELSA)}`);
+
+      resultELSA = resELSA
+        .map((x) => {
+          const resE = x.dataValues;
+
+          return {
+            FACTOR: resE.FACTOR,
+            PRIORITY_ACTION_TAKEN: resE.PRIORITY_ACTION_TAKEN,
+            ASSESSMENT_YEAR: resE.ASSESSMENT_YEAR,
+          };
+        })
+        .filter((y) => y.ASSESSMENT_YEAR === 1000);
+
+      // console.log(uniqueColumn);
+      const data = factorOrder.map((f) => {
+        const res = resultELSA.filter((re) => re.FACTOR === f && re.PRIORITY_ACTION_TAKEN);
+        return {
+          KEY: f,
+          VALUE: res.length,
+        };
+      });
+
+      const finalResult = {
+        data,
+      };
+
+      logger.debug(`elsaPriority --> output: ${JSON.stringify(resultELSA)}`);
+      logger.info(`elsaPriority --> by ${mail} completed`);
+
+      return finalResult;
     }),
     /**
      * Retrieve one by Company ID and Assessment Year

@@ -34,6 +34,14 @@ const stateList = [
   'PUTRAJAYA',
 ];
 
+const factorOrder = [
+  'BR_',
+  'LC_',
+  'PR_',
+  'SR_',
+  'FR_',
+];
+
 const smeSizeChoice = {
   1: {
     classValue: 'SOLE TRADER',
@@ -132,4 +140,5 @@ module.exports = {
   yesNoObj,
   requiredCompanyFields,
   commonSurveyFields,
+  factorOrder,
 };

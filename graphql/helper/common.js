@@ -54,6 +54,15 @@ const getDifference = (curr, hist) => Object.entries(hist)
   .reduce((acc, [key, v]) => ({ ...acc, [key]: v }), {});
 
 /**
+ * Remove duplicates from Array
+ * @param {Object []} arr array
+ * @returns Unique array object
+ */
+const removeDuplicatesFromArray = (arr) => [...new Set(
+  arr.map((el) => JSON.stringify(el)),
+)].map((e) => JSON.parse(e));
+
+/**
  * Process survey data from DB to suit response
  * @param {Object} result data from DB
  * @returns {Object} processed data
@@ -310,16 +319,16 @@ const comparePasswordAsync = async (text, hashed) => bcrypt.compare(text, hashed
  * @param {string} mail user mail
  * @returns {Object} where object to be used in sequelize find
  */
-const getRoleWhere = (userRoleList, mail) => {
+const getRoleWhere = (userRoleList, mail, column = 'OWNER') => {
   switch (true) {
     case (userRoleList.DATA_VIEW === 'OWN'):
-      return { OWNER: mail };
+      return { [column]: mail };
     case (userRoleList.DATA_VIEW === 'MODULE'):
       return { MODULE: { [Op.substring]: userRoleList.MODULE } };
     case (userRoleList.DATA_VIEW === 'ALL'):
       return null;
     default:
-      return { OWNER: mail };
+      return { [column]: mail };
   }
 };
 
@@ -435,4 +444,5 @@ module.exports = {
   comparePasswordAsync,
   getRoleWhere,
   getSMEClass,
+  removeDuplicatesFromArray,
 };

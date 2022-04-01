@@ -98,6 +98,10 @@ type Query {
     - Specific ELSA-only output for a company.
 """
     oneElsa (input: ELSAInput!): ELSAOneOutput
+"""
+    - retrieve data based on columns
+"""
+  elsaPriority: surveyFieldFinalOutput!
 }
 
 type Mutation {

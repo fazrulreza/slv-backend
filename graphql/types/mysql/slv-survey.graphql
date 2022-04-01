@@ -99,6 +99,21 @@ type smeScatterOutput {
   ASSESSMENT_DONE: Int
 }
 
+"""
+    - output for available fields in surveyFields query
+"""
+type surveyFieldOutput {
+  KEY: String
+  VALUE: Int
+}
+
+type surveyFieldFinalOutput {
+  data: [surveyFieldOutput!]!
+  total: Int
+  column: String
+  MSIC: [MSICResult]
+}
+
 type Query {
 """
     - retrieve all surveys for a company
@@ -108,6 +123,11 @@ type Query {
     - retrieve summarized data for scatter plot mapping
 """
   smeScatter: [smeScatterOutput!]!
+"""
+    - retrieve data based on columns
+"""
+  surveyField (COLUMN: String!): surveyFieldFinalOutput!
+  
 }
 
 type Mutation {
