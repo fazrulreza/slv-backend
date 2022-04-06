@@ -135,34 +135,34 @@ const checkCompanyExist = async (ENTITY_NAME, MysqlSlvCompanyProfile, process, I
   return 'N/A';
 };
 
-// /**
-//  *
-//  * @param {string} MSIC MSIC
-//  * @param {Object} MysqlSlvMSIC MSIC Connector Object
-//  * @param {string} process ame of the process calling the function
-//  * @returns {object} MSIC set
-//  */
-// const checkValidMSIC = async (MSIC, MysqlSlvMSIC, process) => {
-//   const searchOptsMSIC = {
-//     where: { MSIC },
-//   };
-//   const resMSIC = await MysqlSlvMSIC.findOne(searchOptsMSIC);
-//   const resultMSIC = resMSIC ? resMSIC.dataValues : null;
+/**
+ *
+ * @param {string} MSIC MSIC
+ * @param {Object} MysqlSlvMSIC MSIC Connector Object
+ * @param {string} process ame of the process calling the function
+ * @returns {object} MSIC set
+ */
+const checkValidSection = async (SECTION, MysqlSlvMSIC, process) => {
+  const searchOptsSection = {
+    where: { SECTION },
+  };
+  const resSection = await MysqlSlvMSIC.findOne(searchOptsSection);
+  const resultSection = resSection ? resSection.dataValues : null;
 
-//   if (!resultMSIC) {
-//     logger.error(`${process} --> Invalid MSIC`);
-//     throw new InvalidDataError({ message: 'Invalid MSIC' });
-//   }
+  if (!resultSection) {
+    logger.error(`${process} --> Invalid Section`);
+    throw new InvalidDataError({ message: 'Invalid Section' });
+  }
 
-//   return {
-//     SECTOR: resultMSIC.sector,
-//     SECTION: resultMSIC.section,
-//     DIVISION: resultMSIC.division,
-//     GROUP: resultMSIC.group,
-//     CLASS: resultMSIC.class,
-//     MSIC: resultMSIC.MSIC,
-//   };
-// };
+  return {
+    SECTOR: resultSection.sector,
+    SECTION: resultSection.section,
+    // DIVISION: resultMSIC.division,
+    // GROUP: resultMSIC.group,
+    // CLASS: resultMSIC.class,
+    // MSIC: resultMSIC.MSIC,
+  };
+};
 
 module.exports = {
   Query: {
@@ -509,7 +509,7 @@ module.exports = {
     }),
     createCompany: isAuthenticatedResolver.createResolver(async (
       parent, { input }, {
-        connectors: { MysqlSlvCompanyProfile, MysqlSlvUserPublic },
+        connectors: { MysqlSlvCompanyProfile, MysqlSlvUserPublic, MysqlSlvMSIC },
         user: { mail, userRoleList, userType },
       },
     ) => {
@@ -530,9 +530,9 @@ module.exports = {
       );
 
       // check for MSIC
-      // const MSICObject = await checkValidMSIC(
-      //   parsedInput.MSIC, MysqlSlvMSIC, 'createCompany',
-      // );
+      const MSICObject = await checkValidSection(
+        parsedInput.SECTION, MysqlSlvMSIC, 'createCompany',
+      );
 
       const history = generateHistory(mail, 'CREATE');
       const newInput = {
@@ -542,7 +542,7 @@ module.exports = {
         MODULE: userRoleList.MODULE === 'ALL' ? 'SME' : userRoleList.MODULE,
         OWNER: mail,
         ENTRY_DATE: moment().format('YYYY-MM-DD'),
-        // ...MSICObject,
+        ...MSICObject,
         ...history,
       };
 
@@ -637,7 +637,7 @@ module.exports = {
     }),
     updateCompany: isAuthenticatedResolver.createResolver(async (
       parent, { ID, input }, {
-        connectors: { MysqlSlvCompanyProfile },
+        connectors: { MysqlSlvCompanyProfile, MysqlSlvMSIC },
         user: { mail, userRoleList },
       },
     ) => {
@@ -658,16 +658,16 @@ module.exports = {
       );
 
       // check for MSIC
-      // const MSICObject = await checkValidMSIC(
-      //   parsedInput.MSIC, MysqlSlvMSIC, 'updateCompany',
-      // );
+      const MSICObject = await checkValidSection(
+        parsedInput.SECTION, MysqlSlvMSIC, 'createCompany',
+      );
 
       const history = generateHistory(mail, 'UPDATE', parsedInput.CREATED_AT);
       const searchOpts = {
         object: {
           ...parsedInput,
           LOGO: JSON.stringify(parsedInput.LOGO),
-          // ...MSICObject,
+          ...MSICObject,
           ...history,
         },
         where: { ID },
