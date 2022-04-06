@@ -36,7 +36,6 @@ module.exports = {
       logger.debug('allUserPublic --> Permission check passed');
 
       const where = getRoleWhereUser(userRoleList, mail);
-      console.log(where);
       logger.debug(`allUserPublic --> search criteria: ${JSON.stringify(where)}`);
 
       // user

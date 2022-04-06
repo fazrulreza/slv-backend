@@ -1,6 +1,7 @@
 const { generateId, generateHistory } = require('../../../packages/mysql-model');
 const {
-  processSurveyResult, calculateScores, getTotalScore, checkPermission, getRoleWhere, removeDuplicatesFromArray,
+  processSurveyResult, calculateScores, getTotalScore, checkPermission, getRoleWhere,
+  getCurrentData, getFilteredData,
 } = require('../../helper/common');
 const { profileGroup, factorOrder } = require('../../helper/parameter');
 const { isAuthenticatedResolver } = require('../../permissions/acl');
@@ -18,8 +19,6 @@ const getPrediction = (resultPredict, fields, factor) => {
   const keyDataPre = resultPredict
     .filter((x) => x.FACTOR === factor && x.KEY === keySearch);
   const keyData = keyDataPre.length !== 0 ? keyDataPre[0].VALUE : 2;
-  // console.log(factor, keySearch);
-  // console.log(keyData);
   return keyData;
 };
 
@@ -28,15 +27,16 @@ module.exports = {
     /**
      * Retrieve ELSA data grouped by lifecycle status
      * @param {Object} param0 main input object
+     * @param {Object} param0.filter filter to be applied
      */
     fullElsaList: isAuthenticatedResolver.createResolver(async (
-      parent, param,
+      parent, { filter },
       {
         connectors: { MysqlSlvCompanyProfile, MysqlSlvELSAScorecard, MysqlSlvSurvey },
         user: { mail, userRoleList },
       },
     ) => {
-      logger.info(`fullElsaList --> by ${mail} called with no input`);
+      logger.info(`fullElsaList --> by ${mail} called with filter ${JSON.stringify(filter)}`);
 
       if (!checkPermission('ELSA-READ', userRoleList)) {
         logger.error('fullElsaList --> Permission check failed');
@@ -46,62 +46,61 @@ module.exports = {
 
       let result = [];
       let resultCompany = [];
-      let resultQuest = [];
-      let resultElsa = [];
 
       const where = getRoleWhere(userRoleList, mail);
       const searchOpts = { where };
       const searchOptsAll = { where: null };
 
-      // company
-      const resCompany = await MysqlSlvCompanyProfile.findAll(searchOpts);
-      if (resCompany.length !== 0) {
-        resultCompany = resCompany.map((x) => x.dataValues.ID);
-      }
-      logger.debug(`fullElsaList --> total company found: ${resCompany.length}`);
-
       // survey
-      const resQuest = await MysqlSlvSurvey.findAll(searchOpts);
-      logger.debug(`fullElsaList --> total survey found: ${resQuest.length}`);
-      if (resQuest.length !== 0) {
-        resultQuest = resQuest
-          .map((s) => s.dataValues)
-          .filter((oa) => oa.ASSESSMENT_YEAR === 1000)
-          .filter((cls) => cls.SME_CLASS !== 'LARGE ENTERPRISE' && cls.SME_CLASS !== 'N/A')
-          .map((sv) => sv.COMPANY_ID);
-      }
+      const resultQuest = await getCurrentData(
+        MysqlSlvSurvey, searchOptsAll, 'fullElsaList', 'survey',
+      );
 
       // ELSA
-      const resElsa = await MysqlSlvELSAScorecard.findAll(searchOptsAll);
-      logger.debug(`fullElsaList --> total ELSA Scorecard found: ${resElsa.length}`);
-      if (resElsa.length !== 0) {
-        resultElsa = resElsa
-          .map((j) => j.dataValues)
-          .filter((oa) => oa.ASSESSMENT_YEAR === 1000);
-      }
+      const resultElsa = await getCurrentData(
+        MysqlSlvELSAScorecard, searchOptsAll, 'fullElsaList', 'ELSA Scorecard',
+      );
 
-      if (resultCompany.length !== 0 && resultQuest.length !== 0 && resultElsa.length !== 0) {
-        logger.debug('fullElsaList --> all queries has length != 0');
-        const scoreArray = resultCompany
-          .map((cm) => {
-            const scorecard = resultElsa.filter((cmp) => cmp.COMPANY_ID === cm);
-            if (scorecard.length === 0) return 0;
-            if (!resultQuest.includes(cm)) return 0;
-            // calculate total score
-            const finalScore = getTotalScore(scorecard);
-            return Math.floor(finalScore);
-          });
+      // company
+      const resCompany = await MysqlSlvCompanyProfile.findAll(searchOpts);
+      logger.debug(`fullElsaList --> total company found: ${resCompany.length}`);
 
-        const noZeroScoreArray = scoreArray.filter((m) => m !== 0);
-        logger.debug(`fullElsaList --> Total company with ELSA score: ${noZeroScoreArray.length}`);
+      resultCompany = resCompany
+        .map((x) => {
+          const resC = x.dataValues;
+          const resQ = resultQuest.filter((y) => y.COMPANY_ID === resC.ID);
 
-        if (noZeroScoreArray.length !== 0) {
-          result = Object.keys(profileGroup)
-            .map((k) => ({
-              stage: k,
-              count: noZeroScoreArray.filter((m) => m === (parseInt(k, 10))).length,
-            }));
-        }
+          const resQ1 = resQ.length !== 0 ? resQ[0] : null;
+
+          return {
+            ...resC,
+            ...resQ1,
+          };
+        })
+        .filter((cls) => cls.SME_CLASS && cls.SME_CLASS !== 'LARGE ENTERPRISE' && cls.SME_CLASS !== 'N/A');
+
+      resultCompany = getFilteredData(resultCompany, filter);
+
+      // calculate socre for each company
+      const scoreArray = resultCompany
+        .map((cm) => {
+          const scorecard = resultElsa.filter((cmp) => cmp.COMPANY_ID === cm.COMPANY_ID);
+          if (scorecard.length === 0) return 0;
+
+          // calculate total score
+          const finalScore = getTotalScore(scorecard);
+          return Math.floor(finalScore);
+        });
+
+      const noZeroScoreArray = scoreArray.filter((m) => m !== 0);
+      logger.debug(`fullElsaList --> Total company with ELSA score: ${noZeroScoreArray.length}`);
+
+      if (noZeroScoreArray.length !== 0) {
+        result = Object.keys(profileGroup)
+          .map((k) => ({
+            stage: k,
+            count: noZeroScoreArray.filter((m) => m === (parseInt(k, 10))).length,
+          }));
       }
 
       logger.debug(`fullElsaList --> output: ${JSON.stringify(result)}`);
@@ -111,16 +110,18 @@ module.exports = {
     /**
          * Get group by data based on column
          * @param {Object} param0 main input object
-         * @param {String} param0.COLUMN column to be aggregated
+         * @param {Object} param0.filter filter to be applied
          */
     elsaPriority: isAuthenticatedResolver.createResolver(async (
-      parent, param,
+      parent, { filter },
       {
-        connectors: { MysqlSlvELSAScorecard },
+        connectors: {
+          MysqlSlvELSAScorecard, MysqlSlvCompanyProfile, MysqlSlvSurvey, MysqlSlvAssessment,
+        },
         user: { mail, userRoleList },
       },
     ) => {
-      logger.info(`elsaPriority --> by ${mail} called with no input`);
+      logger.info(`elsaPriority --> by ${mail} called with filter ${JSON.stringify(filter)}`);
 
       if (!checkPermission('ELSA-READ', userRoleList)) {
         logger.error('elsaPriority --> Permission check failed');
@@ -128,26 +129,61 @@ module.exports = {
       }
       logger.debug('elsaPriority --> Permission check passed');
 
+      let resultCompany = [];
       let resultELSA = [];
 
-      const where = getRoleWhere(userRoleList, mail, 'CREATED_BY');
+      const where = getRoleWhere(userRoleList, mail);
       const searchOpts = { where };
+      const searchOptsAll = { where: null };
 
       // ELSA
-      const resELSA = await MysqlSlvELSAScorecard.findAll(searchOpts);
-      logger.debug(`elsaPriority --> data found: ${JSON.stringify(resELSA)}`);
+      resultELSA = await getCurrentData(
+        MysqlSlvELSAScorecard, searchOptsAll, 'elsaPriority', 'ELSA Scorecard',
+      );
 
-      resultELSA = resELSA
+      // Assessment
+      const resultScore = await getCurrentData(
+        MysqlSlvAssessment, searchOptsAll, 'elsaPriority', 'assessment',
+      );
+
+      // Survey
+      const resultQuest = await getCurrentData(
+        MysqlSlvSurvey, searchOptsAll, 'elsaPriority', 'survey',
+      );
+
+      // company
+      const resCompany = await MysqlSlvCompanyProfile.findAll(searchOpts);
+      logger.debug(`elsaPriority --> company found: ${JSON.stringify(resCompany)}`);
+
+      resultCompany = resCompany
         .map((x) => {
-          const resE = x.dataValues;
+          const resC = x.dataValues;
+          const resQ = resultQuest.filter((y) => y.COMPANY_ID === resC.ID);
+          const resS = resultScore.filter((z) => z.COMPANY_ID === resC.ID);
+
+          const resQ1 = resQ.length !== 0 ? resQ[0] : null;
+          const resS1 = resS.length !== 0 ? resS[0] : null;
 
           return {
-            FACTOR: resE.FACTOR,
-            PRIORITY_ACTION_TAKEN: resE.PRIORITY_ACTION_TAKEN,
-            ASSESSMENT_YEAR: resE.ASSESSMENT_YEAR,
+            ...resC,
+            ...resQ1,
+            ...resS1,
+            ASSESSMENT_DONE: resS.length,
           };
         })
-        .filter((y) => y.ASSESSMENT_YEAR === 1000);
+        .filter((cls) => cls.SME_CLASS && cls.SME_CLASS !== 'LARGE ENTERPRISE' && cls.SME_CLASS !== 'N/A')
+        .filter(((as) => as.ASSESSMENT_DONE !== 0));
+
+      resultCompany = getFilteredData(resultCompany, filter);
+
+      const companyList = resultCompany.map((cm) => cm.COMPANY_ID);
+
+      resultELSA = resultELSA
+        .filter((e) => companyList.includes(e.COMPANY_ID))
+        .map((el) => ({
+          FACTOR: el.FACTOR,
+          PRIORITY_ACTION_TAKEN: el.PRIORITY_ACTION_TAKEN,
+        }));
 
       // console.log(uniqueColumn);
       const data = factorOrder.map((f) => {
@@ -352,35 +388,35 @@ module.exports = {
               logger.debug('oneAll --> public detected, using prediction data...');
               const IG_INDUSTRY_POTENTIAL = getPrediction(
                 resultPredict, [
-                resultQuest.YEARLY_BUSINESS_PERFORMANCE,
-                resultQuest.YEARLY_INDUSTRY_PERFORMANCE,
-              ],
+                  resultQuest.YEARLY_BUSINESS_PERFORMANCE,
+                  resultQuest.YEARLY_INDUSTRY_PERFORMANCE,
+                ],
                 'IG_INDUSTRY_POTENTIAL',
               );
               logger.debug(`oneAll --> IG_INDUSTRY_POTENTIAL: ${JSON.stringify(IG_INDUSTRY_POTENTIAL)}`);
 
               const BR_PRODUCT_LINE = getPrediction(
                 resultPredict, [
-                resultQuest.PRODUCT_COUNT,
-                resultQuest.PRODUCT_PERFORMANCE_2YEARS,
-                resultQuest.PRODUCT_MARKET_LOCATION,
-              ],
+                  resultQuest.PRODUCT_COUNT,
+                  resultQuest.PRODUCT_PERFORMANCE_2YEARS,
+                  resultQuest.PRODUCT_MARKET_LOCATION,
+                ],
                 'BR_PRODUCT_LINE',
               );
               logger.debug(`oneAll --> BR_PRODUCT_LINE: ${JSON.stringify(BR_PRODUCT_LINE)}`);
 
               const BR_PRODUCT_QUALITY = getPrediction(
                 resultPredict, [
-                resultQuest.PRODUCT_FEEDBACK_COLLECTION_FLAG,
-              ],
+                  resultQuest.PRODUCT_FEEDBACK_COLLECTION_FLAG,
+                ],
                 'BR_PRODUCT_QUALITY',
               );
               logger.debug(`oneAll --> BR_PRODUCT_QUALITY: ${JSON.stringify(BR_PRODUCT_QUALITY)}`);
 
               const BR_TECHNOLOGY = getPrediction(
                 resultPredict, [
-                resultQuest.AVAILABLE_SYSTEM.length,
-              ],
+                  resultQuest.AVAILABLE_SYSTEM.length,
+                ],
                 'BR_TECHNOLOGY',
               );
               logger.debug(`oneAll --> BR_TECHNOLOGY: ${JSON.stringify(BR_TECHNOLOGY)}`);
@@ -391,64 +427,64 @@ module.exports = {
 
               const BR_DEVELOPMENT_CAPACITY = getPrediction(
                 resultPredict, [
-                JSON.stringify(resultQuest.MARKETING_TYPE),
-                preBRDCheck2,
-              ],
+                  JSON.stringify(resultQuest.MARKETING_TYPE),
+                  preBRDCheck2,
+                ],
                 'BR_DEVELOPMENT_CAPACITY',
               );
               logger.debug(`oneAll --> BR_DEVELOPMENT_CAPACITY: ${JSON.stringify(BR_DEVELOPMENT_CAPACITY)}`);
 
               const LC_ORGANIZATION = getPrediction(
                 resultPredict, [
-                resultQuest.OWNER_MANAGED_FLAG,
-                resultQuest.ORGANIZATION_STRUCTURE_FLAG,
-                resultQuest.EMPLOYEE_COUNT,
-              ],
+                  resultQuest.OWNER_MANAGED_FLAG,
+                  resultQuest.ORGANIZATION_STRUCTURE_FLAG,
+                  resultQuest.EMPLOYEE_COUNT,
+                ],
                 'LC_ORGANIZATION',
               );
               logger.debug(`oneAll --> LC_ORGANIZATION: ${JSON.stringify(LC_ORGANIZATION)}`);
 
               const LC_PLANNING = getPrediction(
                 resultPredict, [
-                resultQuest.SME_CLASS,
-                resultQuest.BUSINESS_OWNER_INVOLVE_PERCENTAGE,
-              ],
+                  resultQuest.SME_CLASS,
+                  resultQuest.BUSINESS_OWNER_INVOLVE_PERCENTAGE,
+                ],
                 'LC_PLANNING',
               );
               logger.debug(`oneAll --> LC_PLANNING: ${JSON.stringify(LC_PLANNING)}`);
 
               const PR_STAFFING = getPrediction(
                 resultPredict, [
-                resultQuest.EMPLOYEE_OJT_FLAG,
-                resultQuest.EMPLOYEE_SOP_FLAG,
-                resultQuest.EMPLOYEE_WRITTEN_CONTRACT_FLAG,
-                resultQuest.EMPLOYEE_COUNT_2YEARS,
-              ],
+                  resultQuest.EMPLOYEE_OJT_FLAG,
+                  resultQuest.EMPLOYEE_SOP_FLAG,
+                  resultQuest.EMPLOYEE_WRITTEN_CONTRACT_FLAG,
+                  resultQuest.EMPLOYEE_COUNT_2YEARS,
+                ],
                 'PR_STAFFING',
               );
               logger.debug(`oneAll --> PR_STAFFING: ${JSON.stringify(PR_STAFFING)}`);
 
               const PR_STAFF_PERFORMANCE = getPrediction(
                 resultPredict, [
-                resultQuest.EMPLOYEE_JD_KPI_FLAG,
-              ],
+                  resultQuest.EMPLOYEE_JD_KPI_FLAG,
+                ],
                 'PR_STAFF_PERFORMANCE',
               );
               logger.debug(`oneAll --> PR_STAFF_PERFORMANCE: ${JSON.stringify(PR_STAFF_PERFORMANCE)}`);
 
               const SR_EXECUTION_CAPACITY = getPrediction(
                 resultPredict, [
-                resultQuest.OPERATIONAL_GUIDELINE_FLAG,
-              ],
+                  resultQuest.OPERATIONAL_GUIDELINE_FLAG,
+                ],
                 'SR_EXECUTION_CAPACITY',
               );
               logger.debug(`oneAll --> SR_EXECUTION_CAPACITY: ${JSON.stringify(SR_EXECUTION_CAPACITY)}`);
 
               const SR_BUDGETTING = getPrediction(
                 resultPredict, [
-                resultQuest.BUSINESS_PLAN_FLAG,
-                resultQuest.BUSINESS_FUTURE_PLAN.length,
-              ],
+                  resultQuest.BUSINESS_PLAN_FLAG,
+                  resultQuest.BUSINESS_FUTURE_PLAN.length,
+                ],
                 'SR_BUDGETTING',
               );
               logger.debug(`oneAll --> SR_BUDGETTING: ${JSON.stringify(SR_BUDGETTING)}`);
@@ -459,21 +495,21 @@ module.exports = {
 
               const FR_FINANCE = getPrediction(
                 resultPredict, [
-                resultQuest.SEEK_FINANCING_2YEARS_FLAG,
-                resultQuest.LATE_PAYMENT_CUSTOMER,
-                preFICheck2,
-                resultQuest.CUSTOMER_PAYMENT_METHODS.length,
-              ],
+                  resultQuest.SEEK_FINANCING_2YEARS_FLAG,
+                  resultQuest.LATE_PAYMENT_CUSTOMER,
+                  preFICheck2,
+                  resultQuest.CUSTOMER_PAYMENT_METHODS.length,
+                ],
                 'FR_FINANCE',
               );
               logger.debug(`oneAll --> FR_FINANCE: ${JSON.stringify(FR_FINANCE)}`);
 
               const FR_FINANCIAL_SYSTEM = getPrediction(
                 resultPredict, [
-                resultQuest.REGISTERED_BANK_ACCOUNT_FLAG,
-                resultQuest.AUDIT_BUSINESS_ACCOUNT_FLAG,
-                resultQuest.SST_FLAG,
-              ],
+                  resultQuest.REGISTERED_BANK_ACCOUNT_FLAG,
+                  resultQuest.AUDIT_BUSINESS_ACCOUNT_FLAG,
+                  resultQuest.SST_FLAG,
+                ],
                 'FR_FINANCIAL_SYSTEM',
               );
               logger.debug(`oneAll --> FR_FINANCIAL_SYSTEM: ${JSON.stringify(FR_FINANCIAL_SYSTEM)}`);

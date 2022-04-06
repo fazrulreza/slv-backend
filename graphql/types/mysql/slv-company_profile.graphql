@@ -104,7 +104,7 @@ type Query {
 """
     - retrieve all companies for company listing
 """
-    allCompanies: [CompanyProfile!]!
+    allCompanies(filter: String): [CompanyProfile!]!
 """
     - retrieve summary of all user activities
 """
@@ -112,7 +112,7 @@ type Query {
 """
     - retrieve summary of company by state
 """
-    stateReports: [StateList!]!
+    stateReports(filter: String): [StateList!]!
 }
 
 type Mutation {

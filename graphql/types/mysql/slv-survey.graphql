@@ -122,11 +122,11 @@ type Query {
 """
     - retrieve summarized data for scatter plot mapping
 """
-  smeScatter: [smeScatterOutput!]!
+  smeScatter(filter: String): [smeScatterOutput!]!
 """
     - retrieve data based on columns
 """
-  surveyField (COLUMN: String!): surveyFieldFinalOutput!
+  surveyField (COLUMN: String!, filter: String): surveyFieldFinalOutput!
   
 }
 

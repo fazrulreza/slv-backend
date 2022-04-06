@@ -6,6 +6,7 @@ const { Op } = require('sequelize');
 const path = require('path');
 const bcrypt = require('bcrypt');
 const { profileGroup, tieredInterventionGroup, smeSizeChoice } = require('./parameter');
+const logger = require('../../packages/logger');
 
 const SECRET = readFileSync(path.join(__dirname, process.env.SECRET));
 const SECRET_PUB = readFileSync(path.join(__dirname, process.env.SECRET_PUB));
@@ -317,9 +318,10 @@ const comparePasswordAsync = async (text, hashed) => bcrypt.compare(text, hashed
  * Generate where part for sequelize find based on role
  * @param {Object} userRoleList user Role List
  * @param {string} mail user mail
+ * @param {string} column column to search
  * @returns {Object} where object to be used in sequelize find
  */
-const getRoleWhere = (userRoleList, mail, column = 'OWNER') => {
+const getRoleWhere = (userRoleList, mail, column = 'CREATED_BY') => {
   switch (true) {
     case (userRoleList.DATA_VIEW === 'OWN'):
       return { [column]: mail };
@@ -429,6 +431,44 @@ const getSMEClass = (
   };
 };
 
+/**
+ * Generic DB query helper for getting data for current year
+ * @param {Object} connector connector object to DB
+ * @param {Object} searchOpts search options
+ * @param {string} process process name
+ * @param {string} type type of data
+ * @returns {Object} data
+ */
+const getCurrentData = async (connector, searchOpts, process, type) => {
+  let finalData = [];
+
+  const tempData = await connector.findAll(searchOpts);
+  if (tempData.length !== 0) {
+    finalData = tempData
+      .map((s) => s.dataValues)
+      .filter((oa) => oa.ASSESSMENT_YEAR === 1000);
+  }
+  logger.debug(`${process} --> total ${type} found: ${finalData.length}`);
+  return finalData;
+};
+
+/**
+ * Filter data based on specified filter
+ * @param {Object} data main data
+ * @param {Object} filter filter to be applied
+ * @returns
+ */
+const getFilteredData = (data, filter) => {
+  let finalData = data;
+
+  if (filter) {
+    const newFilter = JSON.parse(filter);
+    finalData = data
+      .filter((item) => Object.entries(newFilter).every(([key, value]) => item[key] === value));
+  }
+  return finalData;
+};
+
 module.exports = {
   // getFilter,
   getDifference,
@@ -445,4 +485,6 @@ module.exports = {
   getRoleWhere,
   getSMEClass,
   removeDuplicatesFromArray,
+  getCurrentData,
+  getFilteredData,
 };

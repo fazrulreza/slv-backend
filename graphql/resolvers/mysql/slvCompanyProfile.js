@@ -1,6 +1,8 @@
 const moment = require('moment');
 const { generateId, generateHistory } = require('../../../packages/mysql-model');
-const { checkPermission, getRoleWhere } = require('../../helper/common');
+const {
+  checkPermission, getRoleWhere, getCurrentData, getFilteredData,
+} = require('../../helper/common');
 const { stateList, requiredCompanyFields } = require('../../helper/parameter');
 const { isAuthenticatedResolver } = require('../../permissions/acl');
 const {
@@ -28,7 +30,7 @@ const isValidDate = (dateString) => {
  */
 const checkCompanyDetails = (input) => {
   // check not empty
-  const checkValidObj = Object.keys(requiredCompanyFields).map((y) => {
+  Object.keys(requiredCompanyFields).forEach((y) => {
     if (!input[y]) {
       logger.error(`checkCompanyDetails --> Invalid ${requiredCompanyFields[y]}`);
       throw new InvalidDataError({ message: `Invalid ${requiredCompanyFields[y]}` });
@@ -133,34 +135,34 @@ const checkCompanyExist = async (ENTITY_NAME, MysqlSlvCompanyProfile, process, I
   return 'N/A';
 };
 
-/**
- *
- * @param {string} MSIC MSIC
- * @param {Object} MysqlSlvMSIC MSIC Connector Object
- * @param {string} process ame of the process calling the function
- * @returns {object} MSIC set
- */
-const checkValidMSIC = async (MSIC, MysqlSlvMSIC, process) => {
-  const searchOptsMSIC = {
-    where: { MSIC },
-  };
-  const resMSIC = await MysqlSlvMSIC.findOne(searchOptsMSIC);
-  const resultMSIC = resMSIC ? resMSIC.dataValues : null;
+// /**
+//  *
+//  * @param {string} MSIC MSIC
+//  * @param {Object} MysqlSlvMSIC MSIC Connector Object
+//  * @param {string} process ame of the process calling the function
+//  * @returns {object} MSIC set
+//  */
+// const checkValidMSIC = async (MSIC, MysqlSlvMSIC, process) => {
+//   const searchOptsMSIC = {
+//     where: { MSIC },
+//   };
+//   const resMSIC = await MysqlSlvMSIC.findOne(searchOptsMSIC);
+//   const resultMSIC = resMSIC ? resMSIC.dataValues : null;
 
-  if (!resultMSIC) {
-    logger.error(`${process} --> Invalid MSIC`);
-    throw new InvalidDataError({ message: 'Invalid MSIC' });
-  }
+//   if (!resultMSIC) {
+//     logger.error(`${process} --> Invalid MSIC`);
+//     throw new InvalidDataError({ message: 'Invalid MSIC' });
+//   }
 
-  return {
-    SECTOR: resultMSIC.sector,
-    SECTION: resultMSIC.section,
-    DIVISION: resultMSIC.division,
-    GROUP: resultMSIC.group,
-    CLASS: resultMSIC.class,
-    MSIC: resultMSIC.MSIC,
-  };
-};
+//   return {
+//     SECTOR: resultMSIC.sector,
+//     SECTION: resultMSIC.section,
+//     DIVISION: resultMSIC.division,
+//     GROUP: resultMSIC.group,
+//     CLASS: resultMSIC.class,
+//     MSIC: resultMSIC.MSIC,
+//   };
+// };
 
 module.exports = {
   Query: {
@@ -213,10 +215,10 @@ module.exports = {
     /**
      * Retrieve all
      * @param {Object} param0 main input object
-     * @param {String} param0.msic msic
+     * @param {String} param0.filter filter to be applied
      */
     allCompanies: isAuthenticatedResolver.createResolver(async (
-      parent, param, {
+      parent, { filter }, {
         connectors: {
           MysqlSlvCompanyProfile, MysqlSlvSurvey, MysqlSlvAssessment, MysqlGetxKPI,
         },
@@ -231,6 +233,8 @@ module.exports = {
       }
       logger.debug('allCompanies --> Permission check passed');
 
+      let resultCompany = [];
+
       const where = getRoleWhere(userRoleList, mail);
       logger.debug(`allCompanies --> search criteria: ${JSON.stringify(where)}`);
 
@@ -239,60 +243,68 @@ module.exports = {
         where,
         order: [['ENTITY_NAME']],
       };
-      const result = await MysqlSlvCompanyProfile.findAll(searchOpts);
-      const resultCompany = result.map((x) => {
-        const comp = x.dataValues;
-        return {
-          ...comp,
-          LOGO: JSON.parse(comp.LOGO),
-        };
-      });
-      logger.debug(`allCompanies --> total company found: ${resultCompany.length}`);
 
-      const searchOpts2 = { where: null };
+      const searchOptsAll = { where: null };
 
       // survey
-      const resultQuest = await MysqlSlvSurvey.findAll(searchOpts2);
-      logger.debug(`allCompanies --> total survey found: ${resultQuest.length}`);
+      const resultQuest = await getCurrentData(
+        MysqlSlvSurvey, searchOptsAll, 'allCompanies', 'survey',
+      );
 
       // assessment
-      const resultScore = await MysqlSlvAssessment.findAll(searchOpts2);
-      logger.debug(`allCompanies --> total assessment found: ${resultScore.length}`);
+      const resultScore = await getCurrentData(
+        MysqlSlvAssessment, searchOptsAll, 'allCompanies', 'assessment',
+      );
 
       // getx
-      const resultKPI = await MysqlGetxKPI.findAll(searchOpts2);
-      logger.debug(`allCompanies --> total getx found: ${resultKPI.length}`);
+      const resultKPI = await getCurrentData(
+        MysqlGetxKPI, searchOptsAll, 'allCompanies', 'getx',
+      );
+
+      const resCompany = await MysqlSlvCompanyProfile.findAll(searchOpts);
+      logger.debug(`allCompanies --> total company found: ${resultCompany.length}`);
 
       // compile result
-      const resultFinal = resultCompany.map((x) => {
-        const resQ = resultQuest
-          .map((yy) => yy.dataValues)
-          .filter((y) => y.COMPANY_ID === x.ID
-            && y.ASSESSMENT_YEAR === 1000);
-
-        const resS = resultScore
-          .map((zz) => zz.dataValues)
-          .filter((z) => z.COMPANY_ID === x.ID
-            && z.ASSESSMENT_YEAR === 1000);
-
-        const resK = resultKPI
-          .map((aa) => aa.dataValues)
-          .filter((a) => a.COMPANY_ID === x.ID
-            && a.ASSESSMENT_YEAR === 1000);
+      resultCompany = resCompany.map((x) => {
+        const resC = x.dataValues;
+        const resC1 = {
+          ...resC,
+          LOGO: JSON.parse(resC.LOGO),
+        };
+        const resQ = resultQuest.filter((y) => y.COMPANY_ID === x.ID);
+        const resS = resultScore.filter((z) => z.COMPANY_ID === x.ID);
+        const resK = resultKPI.filter((a) => a.COMPANY_ID === x.ID);
 
         const SURVEY_DONE = resQ.length !== 0;
         const ASSESSMENT_DONE = resS.length !== 0;
         const KPI_DONE = resK.length !== 0;
-        const SME_CLASS = resQ.length !== 0 ? resQ[0].SME_CLASS : 'N/A';
+
+        const resQ1 = resQ.length !== 0 ? resQ[0] : null;
+        const resS1 = resS.length !== 0 ? resS[0] : null;
+        const resK1 = resK.length !== 0 ? resK[0] : null;
 
         return {
-          ...x,
-          SME_CLASS,
+          ...resC1,
+          ...resQ1,
+          ...resS1,
+          ...resK1,
           SURVEY_DONE,
           ASSESSMENT_DONE,
           KPI_DONE,
+          company: resC1,
         };
       });
+
+      resultCompany = getFilteredData(resultCompany, filter);
+
+      const resultFinal = resultCompany.map((m) => ({
+        ...m.company,
+        SURVEY_DONE: m.SURVEY_DONE,
+        ASSESSMENT_DONE: m.ASSESSMENT_DONE,
+        KPI_DONE: m.KPI_DONE,
+        SME_CLASS: m.SME_CLASS ? m.SME_CLASS : 'N/A',
+      }));
+
       // console.dir(resultQuest, { depth: null, colorized: true });
       logger.debug(`allCompanies --> output total: ${resultCompany.length}`);
       logger.info(`allCompanies --> by ${mail} completed`);
@@ -334,12 +346,15 @@ module.exports = {
       // user role
       const resultUserRole = await MysqlSlvUserRole.findAll(searchOpts);
       logger.debug(`userReports --> total user roles found: ${resultUserRole.length}`);
+
       // company
       const resultCompany = await MysqlSlvCompanyProfile.findAll(searchOpts);
       logger.debug(`userReports --> total companies found: ${resultCompany.length}`);
+
       // survey
       const resultQuest = await MysqlSlvSurvey.findAll(searchOpts);
       logger.debug(`userReports --> total survey found: ${resultQuest.length}`);
+
       // assessment
       const resultScore = await MysqlSlvAssessment.findAll(searchOpts);
       logger.debug(`userReports --> total assessment found: ${resultScore.length}`);
@@ -354,13 +369,11 @@ module.exports = {
 
         const resQ = resultQuest
           .map((yy) => yy.dataValues)
-          .filter((y) => y.CREATED_BY === x.USER
-            && y.ASSESSMENT_YEAR === 1000);
+          .filter((y) => y.CREATED_BY === x.USER && y.ASSESSMENT_YEAR === 1000);
 
         const resS = resultScore
           .map((zz) => zz.dataValues)
-          .filter((z) => z.CREATED_BY === x.USER
-            && z.ASSESSMENT_YEAR === 1000);
+          .filter((z) => z.CREATED_BY === x.USER && z.ASSESSMENT_YEAR === 1000);
 
         return {
           USER: x.USER.includes('@') ? x.USER.substring(0, x.USER.lastIndexOf('@')) : x.USER,
@@ -380,14 +393,15 @@ module.exports = {
     /**
      * Retrieve data for company by state report
      * @param {Object} param0 main input object
+     * @param {Object} param0.filter filter to be applied
      */
     stateReports: isAuthenticatedResolver.createResolver(async (
-      parent, param, {
+      parent, { filter }, {
         connectors: { MysqlSlvCompanyProfile, MysqlSlvSurvey, MysqlSlvAssessment },
         user: { mail, userRoleList },
       },
     ) => {
-      logger.info(`stateReports --> by ${mail} called with no input`);
+      logger.info(`stateReports --> by ${mail} called with filter ${JSON.stringify(filter)}`);
 
       if (!checkPermission('COMPANY-READ', userRoleList)) {
         logger.error('stateReports --> Permission check failed');
@@ -396,32 +410,21 @@ module.exports = {
       logger.debug('stateReports --> Permission check passed');
 
       let resultCompany = [];
-      let resultQuest = [];
-      let resultScore = [];
 
       const where = getRoleWhere(userRoleList, mail);
       logger.debug(`stateReports --> search criteria: ${JSON.stringify(where)}`);
       const searchOpts = { where };
+      const searchOptsAll = { where: null };
 
       // Survey
-      const resQuest = await MysqlSlvSurvey.findAll(searchOpts);
-      logger.debug(`stateReports --> total survey found: ${resQuest.length}`);
-
-      if (resQuest.length !== 0) {
-        resultQuest = resQuest
-          .map((s) => s.dataValues)
-          .filter((oa) => oa.ASSESSMENT_YEAR === 1000);
-      }
+      const resultQuest = await getCurrentData(
+        MysqlSlvSurvey, searchOptsAll, 'stateReports', 'survey',
+      );
 
       // Assessment
-      const resScore = await MysqlSlvAssessment.findAll(searchOpts);
-      logger.debug(`stateReports --> total assessment found: ${resScore.length}`);
-
-      if (resScore.length !== 0) {
-        resultScore = resScore
-          .map((a) => a.dataValues)
-          .filter((oa) => oa.ASSESSMENT_YEAR === 1000);
-      }
+      const resultScore = await getCurrentData(
+        MysqlSlvAssessment, searchOptsAll, 'stateReports', 'assessment',
+      );
 
       // company
       const resCompany = await MysqlSlvCompanyProfile.findAll(searchOpts);
@@ -432,14 +435,20 @@ module.exports = {
           const resC = x.dataValues;
           const resQ = resultQuest.filter((y) => y.COMPANY_ID === resC.ID);
           const resS = resultScore.filter((z) => z.COMPANY_ID === resC.ID);
+
+          const resQ1 = resQ.length !== 0 ? resQ[0] : null;
+          const resS1 = resS.length !== 0 ? resS[0] : null;
+
           return {
             ...resC,
-            SME_CLASS: resQ.length !== 0 ? resQ[0].SME_CLASS : 'N/A',
-            ASSESSMENT_DONE: resS.length,
+            ...resQ1,
+            ...resS1,
           };
         })
-        .filter((cls) => cls.SME_CLASS !== 'LARGE ENTERPRISE' && cls.SME_CLASS !== 'N/A')
-        .filter(((as) => as.ASSESSMENT_DONE !== 0));
+        .filter((cls) => cls.SME_CLASS && cls.SME_CLASS !== 'LARGE ENTERPRISE' && cls.SME_CLASS !== 'N/A')
+        .filter((as) => as.OH_OPERATING_HISTORY);
+
+      resultCompany = getFilteredData(resultCompany, filter);
 
       // get count list
       const stateStats = stateList.map((st) => {
@@ -500,7 +509,7 @@ module.exports = {
     }),
     createCompany: isAuthenticatedResolver.createResolver(async (
       parent, { input }, {
-        connectors: { MysqlSlvCompanyProfile, MysqlSlvUserPublic, MysqlSlvMSIC },
+        connectors: { MysqlSlvCompanyProfile, MysqlSlvUserPublic },
         user: { mail, userRoleList, userType },
       },
     ) => {
@@ -521,9 +530,9 @@ module.exports = {
       );
 
       // check for MSIC
-      const MSICObject = await checkValidMSIC(
-        parsedInput.MSIC, MysqlSlvMSIC, 'createCompany',
-      );
+      // const MSICObject = await checkValidMSIC(
+      //   parsedInput.MSIC, MysqlSlvMSIC, 'createCompany',
+      // );
 
       const history = generateHistory(mail, 'CREATE');
       const newInput = {
@@ -533,7 +542,7 @@ module.exports = {
         MODULE: userRoleList.MODULE === 'ALL' ? 'SME' : userRoleList.MODULE,
         OWNER: mail,
         ENTRY_DATE: moment().format('YYYY-MM-DD'),
-        ...MSICObject,
+        // ...MSICObject,
         ...history,
       };
 
@@ -628,7 +637,7 @@ module.exports = {
     }),
     updateCompany: isAuthenticatedResolver.createResolver(async (
       parent, { ID, input }, {
-        connectors: { MysqlSlvCompanyProfile, MysqlSlvMSIC },
+        connectors: { MysqlSlvCompanyProfile },
         user: { mail, userRoleList },
       },
     ) => {
@@ -649,16 +658,16 @@ module.exports = {
       );
 
       // check for MSIC
-      const MSICObject = await checkValidMSIC(
-        parsedInput.MSIC, MysqlSlvMSIC, 'updateCompany',
-      );
+      // const MSICObject = await checkValidMSIC(
+      //   parsedInput.MSIC, MysqlSlvMSIC, 'updateCompany',
+      // );
 
       const history = generateHistory(mail, 'UPDATE', parsedInput.CREATED_AT);
       const searchOpts = {
         object: {
           ...parsedInput,
           LOGO: JSON.stringify(parsedInput.LOGO),
-          ...MSICObject,
+          // ...MSICObject,
           ...history,
         },
         where: { ID },

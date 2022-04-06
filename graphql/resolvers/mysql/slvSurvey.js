@@ -1,7 +1,7 @@
-const { Op } = require('sequelize');
 const { generateId, generateHistory } = require('../../../packages/mysql-model');
 const {
-  processSurveyResult, checkPermission, getSMEClass, removeDuplicatesFromArray, getRoleWhere,
+  processSurveyResult, checkPermission, getSMEClass, removeDuplicatesFromArray,
+  getRoleWhere, getCurrentData, getFilteredData,
 } = require('../../helper/common');
 const { isAuthenticatedResolver } = require('../../permissions/acl');
 const {
@@ -40,21 +40,19 @@ const processInput = (input) => {
 
   // validation part
   // check not empty
-  const checkValidObj = commonSurveyFields.map((y) => {
+  commonSurveyFields.forEach((y) => {
     if (!parsedInput[y]) {
       logger.error(`processSurveyInput --> Invalid ${y}`);
       throw new InvalidDataError({ message: `Invalid ${y}` });
     }
-    return 'pass';
   });
 
   // yes no check for flag
-  const flagCheckObj = surveyFlagFields.map((y) => {
+  surveyFlagFields.forEach((y) => {
     if (!parsedInput[y] || !yesNoObj.includes(parsedInput[y].toUpperCase())) {
       logger.error(`processSurveyInput --> Invalid ${y}`);
       throw new InvalidDataError({ message: `Invalid ${y}` });
     }
-    return 'pass';
   });
 
   // Available system
@@ -208,16 +206,16 @@ module.exports = {
     /**
          * Retrieve one by ID
          * @param {Object} param0 main input object
-         * @param {String} param0.id id
+         * @param {String} param0.filter filter to be applied
          */
     smeScatter: isAuthenticatedResolver.createResolver(async (
-      parent, param,
+      parent, { filter },
       {
         connectors: { MysqlSlvSurvey, MysqlSlvCompanyProfile, MysqlSlvAssessment },
         user: { mail, userRoleList },
       },
     ) => {
-      logger.info(`smeScatter --> by ${mail} called with no input`);
+      logger.info(`smeScatter --> by ${mail} called with filter ${JSON.stringify(filter)}`);
 
       if (!checkPermission('SURVEY-READ', userRoleList)) {
         logger.error('smeScatter --> Permission check failed');
@@ -226,29 +224,20 @@ module.exports = {
       logger.debug('smeScatter --> Permission check passed');
 
       let resultCompany = [];
-      let resultQuest = [];
-      let resultScore = [];
 
-      const where = getRoleWhere(userRoleList, mail, 'CREATED_BY');
+      const where = getRoleWhere(userRoleList, mail);
       const searchOpts = { where };
+      const searchOptsAll = { where: null };
 
       // Assessment
-      const resScore = await MysqlSlvAssessment.findAll(searchOpts);
-      logger.debug(`smeScatter --> assessment found: ${JSON.stringify(resScore)}`);
-      if (resScore.length !== 0) {
-        resultScore = resScore
-          .map((a) => a.dataValues)
-          .filter((oa) => oa.ASSESSMENT_YEAR === 1000);
-      }
+      const resultScore = await getCurrentData(
+        MysqlSlvAssessment, searchOptsAll, 'smeScatter', 'assessment',
+      );
 
       // Survey
-      const resQuest = await MysqlSlvSurvey.findAll(searchOpts);
-      logger.debug(`smeScatter --> survey found: ${JSON.stringify(resQuest)}`);
-      if (resQuest.length !== 0) {
-        resultQuest = resQuest
-          .map((s) => s.dataValues)
-          .filter((oa) => oa.ASSESSMENT_YEAR === 1000);
-      }
+      const resultQuest = await getCurrentData(
+        MysqlSlvSurvey, searchOptsAll, 'smeScatter', 'survey',
+      );
 
       // company
       const resCompany = await MysqlSlvCompanyProfile.findAll(searchOpts);
@@ -259,30 +248,44 @@ module.exports = {
           const resC = x.dataValues;
           const resQ = resultQuest.filter((y) => y.COMPANY_ID === resC.ID);
           const resS = resultScore.filter((z) => z.COMPANY_ID === resC.ID);
+
+          const resQ1 = resQ.length !== 0 ? resQ[0] : null;
+          const resS1 = resS.length !== 0 ? resS[0] : null;
+
           return {
-            COMPANY_ID: resC.ID,
-            SECTOR: resC.SECTOR,
-            ANNUAL_TURNOVER: resQ.length !== 0 ? resQ[0].ANNUAL_TURNOVER : 0,
-            FULLTIME_EMPLOYEE_COUNT: resQ.length !== 0 ? resQ[0].FULLTIME_EMPLOYEE_COUNT : 0,
-            SME_CLASS: resQ.length !== 0 ? resQ[0].SME_CLASS : 'N/A',
+            ...resC,
+            ...resQ1,
+            ...resS1,
             ASSESSMENT_DONE: resS.length,
           };
         })
-        .filter((cls) => cls.SME_CLASS !== 'LARGE ENTERPRISE' && cls.SME_CLASS !== 'N/A')
+        .filter((cls) => cls.SME_CLASS && cls.SME_CLASS !== 'LARGE ENTERPRISE' && cls.SME_CLASS !== 'N/A')
         .filter(((as) => as.ASSESSMENT_DONE !== 0));
+
+      resultCompany = getFilteredData(resultCompany, filter);
+
+      const resultFinal = resultCompany.map((f) => ({
+        COMPANY_ID: f.ID,
+        SECTOR: f.SECTOR,
+        ANNUAL_TURNOVER: f.ANNUAL_TURNOVER ? f.ANNUAL_TURNOVER : 0,
+        FULLTIME_EMPLOYEE_COUNT: f.FULLTIME_EMPLOYEE_COUNT ? f.FULLTIME_EMPLOYEE_COUNT : 0,
+        SME_CLASS: f.SME_CLASS ? f.SME_CLASS : 'N/A',
+        ASSESSMENT_DONE: f.ASSESSMENT_DONE,
+      }));
 
       logger.debug(`smeScatter --> output: ${JSON.stringify(resultCompany)}`);
       logger.info(`smeScatter --> by ${mail} completed`);
 
-      return resultCompany;
+      return resultFinal;
     }),
     /**
          * Get group by data based on column
          * @param {Object} param0 main input object
          * @param {String} param0.COLUMN column to be aggregated
+         * @param {Object} param0.filter filter to be applied
          */
     surveyField: isAuthenticatedResolver.createResolver(async (
-      parent, { COLUMN },
+      parent, { COLUMN, filter },
       {
         connectors: {
           MysqlSlvSurvey, MysqlSlvCompanyProfile, MysqlSlvAssessment, MysqlSlvMSIC,
@@ -290,7 +293,7 @@ module.exports = {
         user: { mail, userRoleList },
       },
     ) => {
-      logger.info(`surveyField --> by ${mail} called with input ${COLUMN}`);
+      logger.info(`surveyField --> by ${mail} called with input ${COLUMN} and filter ${filter}`);
 
       if (!checkPermission('SURVEY-READ', userRoleList)) {
         logger.error('surveyField --> Permission check failed');
@@ -299,37 +302,31 @@ module.exports = {
       logger.debug('surveyField --> Permission check passed');
 
       let resultCompany = [];
-      let resultQuest = [];
-      let resultScore = [];
       let resultMSIC = [];
 
-      const where = getRoleWhere(userRoleList, mail, 'CREATED_BY');
+      const where = getRoleWhere(userRoleList, mail);
       const searchOpts = { where };
+      const searchOptsAll = { where: null };
 
       // MSIC if needed
-      if (COLUMN === 'SECTION' || COLUMN === 'DIVISION' || COLUMN === 'GROUP' || COLUMN === 'CLASS' || COLUMN === 'MSIC') {
-        const searchOptsMSIC = { where: null };
-        const resMSIC = await MysqlSlvMSIC.findAll(searchOptsMSIC);
+      if (COLUMN === 'SECTION'
+      || COLUMN === 'DIVISION'
+      || COLUMN === 'GROUP'
+      || COLUMN === 'CLASS'
+      || COLUMN === 'MSIC') {
+        const resMSIC = await MysqlSlvMSIC.findAll(searchOptsAll);
         resultMSIC = resMSIC.map((x) => x.dataValues);
       }
 
       // Assessment
-      const resScore = await MysqlSlvAssessment.findAll(searchOpts);
-      logger.debug(`surveyField --> assessment found: ${JSON.stringify(resScore)}`);
-      if (resScore.length !== 0) {
-        resultScore = resScore
-          .map((a) => a.dataValues)
-          .filter((oa) => oa.ASSESSMENT_YEAR === 1000);
-      }
+      const resultScore = await getCurrentData(
+        MysqlSlvAssessment, searchOptsAll, 'surveyField', 'assessment',
+      );
 
       // Survey
-      const resQuest = await MysqlSlvSurvey.findAll(searchOpts);
-      logger.debug(`surveyField --> survey found: ${JSON.stringify(resQuest)}`);
-      if (resQuest.length !== 0) {
-        resultQuest = resQuest
-          .map((s) => s.dataValues)
-          .filter((oa) => oa.ASSESSMENT_YEAR === 1000);
-      }
+      const resultQuest = await getCurrentData(
+        MysqlSlvSurvey, searchOptsAll, 'surveyField', 'survey',
+      );
 
       // company
       const resCompany = await MysqlSlvCompanyProfile.findAll(searchOpts);
@@ -351,8 +348,12 @@ module.exports = {
           };
         })
         .filter((cls) => cls.SME_CLASS && cls.SME_CLASS !== 'LARGE ENTERPRISE' && cls.SME_CLASS !== 'N/A')
-        .filter((as) => as.OH_OPERATING_HISTORY)
-        .map((c) => c[COLUMN])
+        .filter((as) => as.OH_OPERATING_HISTORY);
+
+      resultCompany = getFilteredData(resultCompany, filter);
+
+      // filter column
+      resultCompany = resultCompany.map((c) => c[COLUMN])
         .map((up) => (up ? up.toUpperCase() : up));
 
       const uniqueColumn = removeDuplicatesFromArray(resultCompany);

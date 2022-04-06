@@ -93,7 +93,7 @@ type Query {
 """
     -  Summary of ELSA count by it stages
 """
-    fullElsaList: [ELSACount!]!
+    fullElsaList(filter: String): [ELSACount!]!
 """
     - Specific ELSA-only output for a company.
 """
@@ -101,7 +101,7 @@ type Query {
 """
     - retrieve data based on columns
 """
-  elsaPriority: surveyFieldFinalOutput!
+    elsaPriority(filter: String): surveyFieldFinalOutput!
 }
 
 type Mutation {
