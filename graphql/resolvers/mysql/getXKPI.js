@@ -604,7 +604,7 @@ module.exports = {
         ID: generateId(),
       };
       const resultKPI = await MysqlGetxKPI.create(getXKPIInput);
-      logger.info(`createGetXKPI --> KPI created: ${JSON.stringify(resultKPI)}`);
+      logger.debug(`createGetXKPI --> KPI created: ${JSON.stringify(resultKPI)}`);
 
       // KPI sign
       const getXSignKPIInput = {
@@ -613,7 +613,7 @@ module.exports = {
         GETX_ID: getXKPIInput.ID,
       };
       const resultKPISign = await MysqlGetxSign.create(getXSignKPIInput);
-      logger.info(`createGetXKPI --> KPI signature created: ${JSON.stringify(resultKPISign)}`);
+      logger.debug(`createGetXKPI --> KPI signature created: ${JSON.stringify(resultKPISign)}`);
 
       // Actual KPI Sign
       const getXSignActualInput = {
@@ -622,7 +622,7 @@ module.exports = {
         GETX_ID: getXKPIInput.ID,
       };
       const resultKPIActual = await MysqlGetxSign.create(getXSignActualInput);
-      logger.info(`createGetXKPI --> Achievement created: ${JSON.stringify(resultKPIActual)}`);
+      logger.debug(`createGetXKPI --> Achievement created: ${JSON.stringify(resultKPIActual)}`);
 
       // Attachment
       const getXAttachmentInput = {
@@ -631,7 +631,7 @@ module.exports = {
         GETX_ID: getXKPIInput.ID,
       };
       const resultKPIAttachment = await MysqlGetxAttachment.create(getXAttachmentInput);
-      logger.info(`createGetXKPI --> Attachment created: ${JSON.stringify(resultKPIAttachment)}`);
+      logger.debug(`createGetXKPI --> Attachment created: ${JSON.stringify(resultKPIAttachment)}`);
 
       logger.debug(`createGetXKPI --> output: ${JSON.stringify(resultKPI)}`);
       logger.info(`createGetXKPI --> by ${mail} completed`);
@@ -670,7 +670,7 @@ module.exports = {
         },
       };
       const resultKPI = await MysqlGetxKPI.update(searchOptsKPI);
-      logger.info(`updateGetXKPI --> KPI updated: ${JSON.stringify(resultKPI)}`);
+      logger.debug(`updateGetXKPI --> KPI updated: ${JSON.stringify(resultKPI)}`);
 
       // Sign
       if (SIGN_KPI_ID) {
@@ -687,7 +687,7 @@ module.exports = {
           },
         };
         const resultKPISignU = await MysqlGetxSign.update(searchOptsSignKPI);
-        logger.info(`updateGetXKPI --> KPI signature updated: ${JSON.stringify(resultKPISignU)}`);
+        logger.debug(`updateGetXKPI --> KPI signature updated: ${JSON.stringify(resultKPISignU)}`);
       } else {
         const getXSignKPIInput = {
           ...signKPIInput,
@@ -696,7 +696,7 @@ module.exports = {
           GETX_ID: kpiInput.ID,
         };
         const resultKPISignC = await MysqlGetxSign.create(getXSignKPIInput);
-        logger.info(`updateGetXKPI --> KPI signature created: ${JSON.stringify(resultKPISignC)}`);
+        logger.debug(`updateGetXKPI --> KPI signature created: ${JSON.stringify(resultKPISignC)}`);
       }
 
       // Achievement
@@ -714,7 +714,7 @@ module.exports = {
           },
         };
         const resultKPISignActualU = await MysqlGetxSign.update(searchOptsSignActual);
-        logger.info(`updateGetXKPI --> Achievement signature updated: ${JSON.stringify(resultKPISignActualU)}`);
+        logger.debug(`updateGetXKPI --> Achievement signature updated: ${JSON.stringify(resultKPISignActualU)}`);
       } else {
         const getXSignActualInput = {
           ...signActualInput,
@@ -723,7 +723,7 @@ module.exports = {
           GETX_ID: kpiInput.ID,
         };
         const resultKPISignActualC = await MysqlGetxSign.create(getXSignActualInput);
-        logger.info(`updateGetXKPI --> Achievement signature created: ${JSON.stringify(resultKPISignActualC)}`);
+        logger.debug(`updateGetXKPI --> Achievement signature created: ${JSON.stringify(resultKPISignActualC)}`);
       }
 
       // attachment
@@ -741,7 +741,7 @@ module.exports = {
           },
         };
         const resultKPIAttachmentU = await MysqlGetxAttachment.update(searchOptsAttachment);
-        logger.info(`updateGetXKPI --> KPI Attachment updated: ${JSON.stringify(resultKPIAttachmentU)}`);
+        logger.debug(`updateGetXKPI --> KPI Attachment updated: ${JSON.stringify(resultKPIAttachmentU)}`);
       } else {
         const getXAttachmentInput = {
           ...attachmentInput,
@@ -750,7 +750,7 @@ module.exports = {
           GETX_ID: kpiInput.ID,
         };
         const resultKPIAttachmentC = await MysqlGetxAttachment.create(getXAttachmentInput);
-        logger.info(`updateGetXKPI --> KPI Attachment created: ${JSON.stringify(resultKPIAttachmentC)}`);
+        logger.debug(`updateGetXKPI --> KPI Attachment created: ${JSON.stringify(resultKPIAttachmentC)}`);
       }
 
       // result
@@ -793,7 +793,7 @@ module.exports = {
         ID: generateId(),
       };
       const resFinalKPI = await MysqlGetxKPI.create(finalKPI);
-      logger.info(`finalizeKPI --> KPI created: ${JSON.stringify(resFinalKPI)}`);
+      logger.debug(`finalizeKPI --> KPI created: ${JSON.stringify(resFinalKPI)}`);
 
       // attachment
       const searchOptsAtt = { where: { COMPANY_ID: input.COMPANY_ID } };
@@ -810,7 +810,7 @@ module.exports = {
         GETX_ID: finalKPI.ID,
       };
       const resFinalKPIAttachment = await MysqlGetxAttachment.create(finalAtt);
-      logger.info(`finalizeKPI --> KPI attachment created: ${JSON.stringify(resFinalKPIAttachment)}`);
+      logger.debug(`finalizeKPI --> KPI attachment created: ${JSON.stringify(resFinalKPIAttachment)}`);
 
       // scorecard
       const searchOptsSign = {
@@ -838,7 +838,7 @@ module.exports = {
         return newSign;
       });
       const resFinalKPISign = await MysqlGetxSign.bulkCreate(signInput);
-      logger.info(`finalizeKPI --> KPI Signature created: ${JSON.stringify(resFinalKPISign)}`);
+      logger.debug(`finalizeKPI --> KPI Signature created: ${JSON.stringify(resFinalKPISign)}`);
 
       logger.debug(`finalizeKPI --> output: ${JSON.stringify(input)}`);
       logger.info(`finalizeKPI --> by ${mail} completed`);
