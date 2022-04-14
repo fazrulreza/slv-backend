@@ -585,7 +585,8 @@ module.exports = {
         user: { mail, userRoleList },
       },
     ) => {
-      logger.info(`createGetXKPI --> by ${mail} input: ${JSON.stringify(input)}`);
+      logger.info(`createGetXKPI --> by ${mail} input: ${input.COMPANY_ID}`);
+      logger.debug(`createGetXKPI --> input: ${JSON.stringify(input)}`);
 
       if (!checkPermission('GETX-CREATE', userRoleList)) {
         logger.error('createGetXKPI --> Permission check failed');
@@ -645,7 +646,8 @@ module.exports = {
         user: { mail, userRoleList },
       },
     ) => {
-      logger.info(`updateGetXKPI --> by ${mail} input: ${JSON.stringify(input)}`);
+      logger.info(`updateGetXKPI --> by ${mail} input: ${input.COMPANY_ID}`);
+      logger.debug(`updateGetXKPI --> input: ${JSON.stringify(input)}`);
 
       if (!checkPermission('GETX-UPDATE', userRoleList)) {
         logger.error('updateGetXKPI --> Permission check failed');
@@ -770,7 +772,8 @@ module.exports = {
         user: { mail, userRoleList },
       },
     ) => {
-      logger.info(`finalizeKPI --> by ${mail} input: ${JSON.stringify(input)}`);
+      logger.info(`finalizeKPI --> by ${mail} input: ${input.COMPANY_ID}`);
+      logger.debug(`finalizeKPI --> input: ${JSON.stringify(input)}`);
 
       if (!checkPermission('GETX-CREATE', userRoleList)) {
         logger.error('finalizeKPI --> Permission check failed');
