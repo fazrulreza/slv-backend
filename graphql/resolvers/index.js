@@ -1,8 +1,8 @@
 /** import path */
 const { join } = require('path');
-/** import merge-graphql-schema */
-const { fileLoader, mergeResolvers } = require('merge-graphql-schemas');
+const { mergeResolvers } = require('@graphql-tools/merge');
+const { loadFilesSync } = require('@graphql-tools/load-files');
 
 /** Configure resolvers path for merging */
-const resolversArray = fileLoader(join(__dirname, '.'), { recursive: true });
+const resolversArray = loadFilesSync(join(__dirname, '.'), { recursive: true, ignoreIndex: true });
 module.exports = mergeResolvers(resolversArray);
