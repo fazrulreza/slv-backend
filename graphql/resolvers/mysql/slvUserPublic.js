@@ -1,6 +1,6 @@
 const { generateHistory } = require('../../../packages/mysql-model');
 const {
-  checkPermission, hashPasswordAsync, processUserRolesOutput, verifyToken,
+  checkPermission, hashPasswordAsync, processUserRolesOutput, verifyToken, isValidUrl,
 } = require('../../helper/common');
 const { isAuthenticatedResolver } = require('../../permissions/acl');
 const { ForbiddenError } = require('../../permissions/errors');
@@ -58,7 +58,6 @@ module.exports = {
           const resU2 = resultUserRole.filter((z) => z.ID === resU1.ROLE)[0];
           return {
             ...resU1,
-            AVATAR: JSON.parse(resU1.AVATAR),
             USER_ROLE: resU2.NAME,
             MODULE: resU2.MODULE,
           };
@@ -82,7 +81,7 @@ module.exports = {
     oneUserPublic: isAuthenticatedResolver.createResolver(async (
       parent, { email }, {
         connectors: { MysqlSlvUserPublic, MysqlSlvUserRole },
-        user: { mail, userRoleList },
+        user: { mail, userType, userRoleList },
       },
     ) => {
       logger.info(`oneUserPublic --> by ${mail} input: ${email}`);
@@ -96,10 +95,7 @@ module.exports = {
       // user
       const searchOpts = { where: { EMAIL: email } };
       const resUser = await MysqlSlvUserPublic.findOne(searchOpts);
-      const resultUser = {
-        ...resUser.dataValues,
-        AVATAR: JSON.parse(resUser.dataValues.AVATAR),
-      };
+      const resultUser = resUser.dataValues;
       logger.debug(`oneUserPublic --> user found: ${JSON.stringify(resultUser)}`);
 
       // roles

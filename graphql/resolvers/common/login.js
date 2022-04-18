@@ -1,4 +1,5 @@
 const moment = require('moment');
+const { OAuth2Client } = require('google-auth-library');
 const Login = require('../../../packages/ldap');
 const { generateHistory } = require('../../../packages/mysql-model');
 const {
@@ -9,6 +10,8 @@ const {
   SessionExpiredError, JsonWebTokenError, NotFoundError, WrongPasswordError,
 } = require('../../permissions/errors');
 const logger = require('../../../packages/logger');
+
+const client = new OAuth2Client(process.env.CLIENT_ID);
 
 module.exports = {
   Mutation: {
@@ -86,21 +89,38 @@ module.exports = {
 
           break;
         }
-        case (userData.source === 'GOOGLE' || userData.source === 'FACEBOOK'): {
-          logger.debug('ldapLogin --> Login from public using GOOGLE / FACEBOOK');
+        case (userData.source === 'GOOGLE' || userData.source === 'FACEBOOK' || userData.source === 'FIREBASE'): {
+          logger.debug('ldapLogin --> Login from public using GOOGLE / FACEBOOK / FIREBASE');
+
+          let EMAIL = userData.email ? userData.email : userData.username;
+          let NAME = userData.username;
+          let AVATAR = userData.photo;
+
+          if (userData.source === 'GOOGLE') {
+            const ticket = await client.verifyIdToken({
+              idToken: userData.username,
+              audience: process.env.CLIENT_ID,
+            });
+            // console.log(ticket.getPayload());
+            const { name, email, picture } = ticket.getPayload();
+            EMAIL = email;
+            NAME = name;
+            AVATAR = picture;
+          }
+
           const searchOpts = {
-            where: { EMAIL: userData.email },
+            where: { EMAIL },
           };
 
           const resUser = await MysqlSlvUserPublic.findOne(searchOpts);
           if (!resUser) {
             logger.debug('ldapLogin --> No data found in DB. Creating...');
-            const history = generateHistory(userData.email, 'CREATE');
+            const history = generateHistory(EMAIL, 'CREATE');
             const newInput = {
               SOURCE: 'APP',
-              EMAIL: userData.email,
-              NAME: userData.username,
-              AVATAR: userData.photo,
+              EMAIL,
+              NAME,
+              AVATAR,
               GENDER: userData.gender,
               DOB: userData.dob,
               PHONE: userData.phone,
@@ -111,13 +131,13 @@ module.exports = {
             await MysqlSlvUserPublic.create(newInput);
 
             data = {
-              mail: userData.email,
+              mail: EMAIL,
               mobile: userData.phone,
-              photo: userData.photo,
+              photo: AVATAR,
               userType: 10,
             };
             mini = {
-              mail: userData.email,
+              mail: EMAIL,
               userType: 10,
             };
 

@@ -7,7 +7,7 @@ type UserPublic {
   NAME: String
   EMAIL: String
   SOURCE: String
-  AVATAR: [FileType]
+  AVATAR: String
   # Refers to ID generated in UserRole
   ROLE: Int
   # Status of the current record. Active or inactive

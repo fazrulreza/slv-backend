@@ -469,6 +469,23 @@ const getFilteredData = (data, filter) => {
   return finalData;
 };
 
+/**
+ * Check if URL isa valid or not
+ * @param {string} urlString url
+ * @returns {boolean}
+ */
+const isValidUrl = (urlString) => {
+  let url;
+
+  try {
+    url = new URL(urlString);
+  } catch (_) {
+    return false;
+  }
+
+  return url.protocol === 'http:' || url.protocol === 'https:';
+};
+
 module.exports = {
   // getFilter,
   getDifference,
@@ -487,4 +504,5 @@ module.exports = {
   removeDuplicatesFromArray,
   getCurrentData,
   getFilteredData,
+  isValidUrl,
 };
