@@ -35,7 +35,6 @@ const checkCompanyDetails = (input) => {
       logger.error(`checkCompanyDetails --> Invalid ${requiredCompanyFields[y]}`);
       throw new InvalidDataError({ message: `Invalid ${requiredCompanyFields[y]}` });
     }
-    return 'pass';
   });
 
   // entity name
@@ -126,13 +125,16 @@ const checkCompanyExist = async (ENTITY_NAME, MysqlSlvCompanyProfile, process, I
     where: { ENTITY_NAME },
   };
   const resCompany = await MysqlSlvCompanyProfile.findOne(searchExistOpts);
-  const resultCompany = resCompany ? resCompany.dataValues : null;
+  const resultCompany = resCompany ? resCompany.dataValues.ENTITY_NAME : 'N/A';
 
-  if (resultCompany && (ID === 'new' || (ID !== 'new' && resultCompany.ID !== ID))) {
+  if (resultCompany === 'N/A'
+    && process !== 'checkCompany'
+    && (ID === 'new'
+    || (ID !== 'new' && resultCompany.ID !== ID))) {
     logger.error(`${process} --> Company already exist`);
     throw new CompanyExistsError();
   }
-  return 'N/A';
+  return resultCompany;
 };
 
 /**
@@ -495,12 +497,7 @@ module.exports = {
       }
       logger.debug('checkCompany --> Permission check passed');
 
-      const searchExistOpts = {
-        where: { ENTITY_NAME: NAME },
-      };
-
-      const res = await MysqlSlvCompanyProfile.findOne(searchExistOpts);
-      const result = res ? res.dataValues.ENTITY_NAME : 'N/A';
+      const result = checkCompanyExist(NAME, MysqlSlvCompanyProfile, 'checkCompany');
 
       logger.debug(`checkCompany --> input: ${result}`);
       logger.info(`checkCompany --> by ${mail} completed`);
@@ -525,9 +522,7 @@ module.exports = {
       checkCompanyDetails(parsedInput);
 
       // check for company
-      await checkCompanyExist(
-        parsedInput.ENTITY_NAME, MysqlSlvCompanyProfile, 'createCompany',
-      );
+      checkCompanyExist(parsedInput.ENTITY_NAME, MysqlSlvCompanyProfile, 'createCompany');
 
       // check for MSIC
       const MSICObject = await checkValidSection(
@@ -653,9 +648,7 @@ module.exports = {
       checkCompanyDetails(parsedInput);
 
       // check for company
-      await checkCompanyExist(
-        parsedInput.ENTITY_NAME, MysqlSlvCompanyProfile, 'updateCompany', ID,
-      );
+      checkCompanyExist(parsedInput.ENTITY_NAME, MysqlSlvCompanyProfile, 'updateCompany', ID);
 
       // check for MSIC
       const MSICObject = await checkValidSection(

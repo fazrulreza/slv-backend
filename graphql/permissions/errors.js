@@ -15,7 +15,7 @@ const WrongPasswordError = createError('WrongPasswordError', {
 });
 
 const UserExistsError = createError('UserExistsError', {
-  message: 'Username already exists',
+  message: 'Email already exists',
 });
 
 const GroupExistsError = createError('GroupExistsError', {

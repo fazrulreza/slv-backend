@@ -82,6 +82,12 @@ const requiredCompanyFields = {
   NATURE_OF_BUSINESS: 'Nature of Business',
 };
 
+const requiredUserFields = {
+  NAME: 'Name',
+  EMAIL: 'Email',
+  PASSWORD: 'Password',
+};
+
 const surveyFlagFields = [
   'PRODUCT_FEEDBACK_COLLECTION_FLAG',
   'OWNER_MANAGED_FLAG',
@@ -141,4 +147,5 @@ module.exports = {
   requiredCompanyFields,
   commonSurveyFields,
   factorOrder,
+  requiredUserFields,
 };

@@ -1,10 +1,11 @@
 const { generateHistory } = require('../../../packages/mysql-model');
 const {
-  checkPermission, hashPasswordAsync, processUserRolesOutput, verifyToken, isValidUrl,
+  checkPermission, hashPasswordAsync, processUserRolesOutput, verifyToken,
 } = require('../../helper/common');
 const { isAuthenticatedResolver } = require('../../permissions/acl');
-const { ForbiddenError } = require('../../permissions/errors');
+const { ForbiddenError, UserExistsError, InvalidDataError } = require('../../permissions/errors');
 const logger = require('../../../packages/logger');
+const { requiredUserFields } = require('../../helper/parameter');
 // const emailer = require('../../../packages/emailer');
 
 const getRoleWhereUser = (userRoleList, mail) => {
@@ -12,6 +13,42 @@ const getRoleWhereUser = (userRoleList, mail) => {
     return null;
   }
   return { EMAIL: mail };
+};
+
+/**
+ * Check if company already exist in DB
+ * @param {string} EMAIL company name
+ * @param {object} MysqlSlvUserPublic User Public Connector Object
+ * @param {boolean} [register=false] name of the process calling the function
+ * @returns {string} N/A
+ */
+const checkUserExist = async (EMAIL, MysqlSlvUserPublic, register = false) => {
+  const searchExistOpts = {
+    where: { EMAIL },
+  };
+
+  const res = await MysqlSlvUserPublic.findOne(searchExistOpts);
+  const result = res ? res.dataValues.EMAIL : 'N/A';
+
+  if (register && result === 'N/A') {
+    logger.error(`${process} --> User already exist`);
+    throw new UserExistsError();
+  }
+  return result;
+};
+
+/**
+ * Validation for company profile fields
+ * @param {Object} input Main input object
+ */
+const checkUserPublicDetails = (input) => {
+  // check not empty
+  Object.keys(requiredUserFields).forEach((y) => {
+    if (!input[y]) {
+      logger.error(`checkUserPublicDetails --> Invalid ${requiredUserFields[y]}`);
+      throw new InvalidDataError({ message: `Invalid ${requiredUserFields[y]}` });
+    }
+  });
 };
 
 module.exports = {
@@ -81,7 +118,7 @@ module.exports = {
     oneUserPublic: isAuthenticatedResolver.createResolver(async (
       parent, { email }, {
         connectors: { MysqlSlvUserPublic, MysqlSlvUserRole },
-        user: { mail, userType, userRoleList },
+        user: { mail, userRoleList },
       },
     ) => {
       logger.info(`oneUserPublic --> by ${mail} input: ${email}`);
@@ -126,12 +163,7 @@ module.exports = {
     ) => {
       logger.info(`checkUserPublic --> by public with input: ${EMAIL}`);
 
-      const searchExistOpts = {
-        where: { EMAIL },
-      };
-
-      const res = await MysqlSlvUserPublic.findOne(searchExistOpts);
-      const result = res ? res.dataValues.EMAIL : 'N/A';
+      const result = checkUserExist(EMAIL, MysqlSlvUserPublic);
 
       logger.debug(`checkUserPublic --> input: ${result}`);
       logger.info('checkUserPublic --> for public completed');
@@ -157,7 +189,10 @@ module.exports = {
 
       // process input
       const parsedInput = verifyToken(input);
-      const newPwd = await hashPasswordAsync(parsedInput.PWD);
+      checkUserPublicDetails(parsedInput);
+      checkUserExist(parsedInput.EMAIL, MysqlSlvUserPublic, true);
+
+      const newPwd = hashPasswordAsync(parsedInput.PWD);
 
       const history = generateHistory(mail, 'CREATE');
       const newInput = {
@@ -178,17 +213,20 @@ module.exports = {
     registerUserPublic: async (
       parent, { input }, { connectors: { MysqlSlvUserPublic } },
     ) => {
-      // logger.info(`registerUserPublic --> for public with input: ${JSON.stringify(input)}`);
       logger.info('registerUserPublic --> for public');
+      logger.debug(`registerUserPublic --> for public with input: ${input}`);
 
       // process input
       const parsedInput = verifyToken(input);
-      const newPwd = await hashPasswordAsync(parsedInput.PWD);
+      checkUserPublicDetails(parsedInput);
+      checkUserExist(parsedInput.EMAIL, MysqlSlvUserPublic, true);
+
+      const newPwd = hashPasswordAsync(parsedInput.PWD);
 
       const history = generateHistory(parsedInput.EMAIL, 'CREATE');
       const newInput = {
         ...parsedInput,
-        SOURCE: 'PORTAL',
+        SOURCE: parsedInput.SOURCE ? parsedInput.SOURCE : 'PORTAL',
         STATUS: 'ACTIVE',
         ROLE: 10,
         PWD: newPwd,
@@ -242,6 +280,9 @@ module.exports = {
       logger.debug('updateUserPublic --> Permission check passed');
 
       const parsedInput = verifyToken(input);
+      checkUserPublicDetails(parsedInput);
+      checkUserExist(parsedInput.EMAIL, MysqlSlvUserPublic, true);
+
       let newPwd = parsedInput.PWD;
 
       if (parsedInput.PWD_CHANGE_FLAG) {

@@ -1,6 +1,6 @@
 const emailer = require('../../../packages/emailer');
 const logger = require('../../../packages/logger');
-const { generateHistory } = require('../../../packages/mysql-model');
+const { generateHistory, generateId } = require('../../../packages/mysql-model');
 
 module.exports = {
   Mutation: {
@@ -15,6 +15,11 @@ module.exports = {
 
       const { CREATED_AT } = generateHistory(email, 'CREATE');
 
+      const x = generateId();
+      const time = x.slice(0, 8);
+      const random = x.slice(x.length - 3);
+      const inquiryID = `ELSA-${source}-${time}=${random}`;
+
       const emailInfo = await emailer.sendMail({
         from: '"ELSA" <noreply@smebank.com.my>', // sender address
         to: 'support@cedar.my', // list of receivers
@@ -25,6 +30,10 @@ module.exports = {
             <h3>Inquiry / Issue received for ELSA-${source}</h3>
             <br />
             <table align="center" width="80%" cellpadding="6px">
+            <tr align="left">
+                <th style="border: 1px solid #dddddd">Inquiry ID</th>
+                <td style="border: 1px solid #dddddd">${inquiryID}</td>
+            </tr>
               <tr align="left">
                   <th style="border: 1px solid #dddddd">Name</th>
                   <td style="border: 1px solid #dddddd">${name}</td>
