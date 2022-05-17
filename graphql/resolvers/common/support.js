@@ -18,7 +18,7 @@ module.exports = {
       const x = generateId();
       const time = x.slice(0, 8);
       const random = x.slice(x.length - 3);
-      const inquiryID = `ELSA-${source}-${time}=${random}`;
+      const inquiryID = `ELSA-${source}-${time}-${random}`;
 
       const emailInfo = await emailer.sendMail({
         from: '"ELSA" <noreply@smebank.com.my>', // sender address

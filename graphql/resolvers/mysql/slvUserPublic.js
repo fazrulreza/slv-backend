@@ -19,10 +19,11 @@ const getRoleWhereUser = (userRoleList, mail) => {
  * Check if company already exist in DB
  * @param {string} EMAIL company name
  * @param {object} MysqlSlvUserPublic User Public Connector Object
- * @param {boolean} [register=false] name of the process calling the function
+ * @param {string} process processname
+ * @param {boolean} [register=false] register?
  * @returns {string} N/A
  */
-const checkUserExist = async (EMAIL, MysqlSlvUserPublic, register = false) => {
+const checkUserExist = async (EMAIL, MysqlSlvUserPublic, process, register = false) => {
   const searchExistOpts = {
     where: { EMAIL },
   };
@@ -30,7 +31,7 @@ const checkUserExist = async (EMAIL, MysqlSlvUserPublic, register = false) => {
   const res = await MysqlSlvUserPublic.findOne(searchExistOpts);
   const result = res ? res.dataValues.EMAIL : 'N/A';
 
-  if (register && result === 'N/A') {
+  if (register && result !== 'N/A') {
     logger.error(`${process} --> User already exist`);
     throw new UserExistsError();
   }
@@ -163,7 +164,7 @@ module.exports = {
     ) => {
       logger.info(`checkUserPublic --> by public with input: ${EMAIL}`);
 
-      const result = checkUserExist(EMAIL, MysqlSlvUserPublic);
+      const result = checkUserExist(EMAIL, MysqlSlvUserPublic, 'checkUserPublic');
 
       logger.debug(`checkUserPublic --> input: ${result}`);
       logger.info('checkUserPublic --> for public completed');
@@ -190,9 +191,9 @@ module.exports = {
       // process input
       const parsedInput = verifyToken(input);
       checkUserPublicDetails(parsedInput);
-      checkUserExist(parsedInput.EMAIL, MysqlSlvUserPublic, true);
+      checkUserExist(parsedInput.EMAIL, MysqlSlvUserPublic, 'createUserPublic', true);
 
-      const newPwd = hashPasswordAsync(parsedInput.PWD);
+      const newPwd = await hashPasswordAsync(parsedInput.PWD);
 
       const history = generateHistory(mail, 'CREATE');
       const newInput = {
@@ -219,9 +220,9 @@ module.exports = {
       // process input
       const parsedInput = verifyToken(input);
       checkUserPublicDetails(parsedInput);
-      checkUserExist(parsedInput.EMAIL, MysqlSlvUserPublic, true);
+      checkUserExist(parsedInput.EMAIL, MysqlSlvUserPublic, 'registerUserPublic', true);
 
-      const newPwd = hashPasswordAsync(parsedInput.PWD);
+      const newPwd = await hashPasswordAsync(parsedInput.PWD);
 
       const history = generateHistory(parsedInput.EMAIL, 'CREATE');
       const newInput = {
@@ -281,7 +282,7 @@ module.exports = {
 
       const parsedInput = verifyToken(input);
       checkUserPublicDetails(parsedInput);
-      checkUserExist(parsedInput.EMAIL, MysqlSlvUserPublic, true);
+      checkUserExist(parsedInput.EMAIL, MysqlSlvUserPublic, 'updateUserPublic', true);
 
       let newPwd = parsedInput.PWD;
 

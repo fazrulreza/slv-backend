@@ -85,7 +85,7 @@ const requiredCompanyFields = {
 const requiredUserFields = {
   NAME: 'Name',
   EMAIL: 'Email',
-  PASSWORD: 'Password',
+  PWD: 'Password',
 };
 
 const surveyFlagFields = [

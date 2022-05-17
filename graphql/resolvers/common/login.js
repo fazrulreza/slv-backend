@@ -179,7 +179,7 @@ module.exports = {
           const resultUser = resUser.dataValues;
           logger.debug(`ldapLogin --> User data from DB: ${JSON.stringify(resultUser)}`);
 
-          const pass = comparePasswordAsync(userData.password, resultUser.PWD);
+          const pass = await comparePasswordAsync(userData.password, resultUser.PWD);
           logger.debug(`ldapLogin --> Password match : ${pass}`);
 
           if (!pass) {
