@@ -917,7 +917,7 @@ body-parser@1.19.2:
     raw-body "2.4.3"
     type-is "~1.6.18"
 
-body-parser@^1.18.3:
+body-parser@1.20.0, body-parser@^1.18.3:
   version "1.20.0"
   resolved "https://registry.yarnpkg.com/body-parser/-/body-parser-1.20.0.tgz#3de69bd89011c11573d7bfee6a64f11b6bd27cc5"
   integrity sha512-DfJ+q6EPcGKZD1QWUjSpqp+Q7bDQTsQIF4zfUAtZ6qk+H/3/QRhg9CEp39ss+/T2vw0+HaidC0ecJj/DRLIaKg==
@@ -1172,6 +1172,11 @@ cookie@0.4.2:
   version "0.4.2"
   resolved "https://registry.yarnpkg.com/cookie/-/cookie-0.4.2.tgz#0e41f24de5ecf317947c82fc789e06a884824432"
   integrity sha512-aSWTXFzaKWkvHO1Ny/s+ePFpvKsPnjc551iI41v3ny/ow6tBG5Vd+FuqGNhh1LxOmVzOlGUriIlOaokOvhaStA==
+
+cookie@0.5.0:
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/cookie/-/cookie-0.5.0.tgz#d1f5d71adec6558c58f389987c366aa47e994f8b"
+  integrity sha512-YZ3GUyn/o8gfKJlnlX7g7xq4gyO6OSuhGPKaaGssGB2qgDUS0gPgtTvoyZLTt9Ab6dC4hfc9dV5arkvc/OCmrw==
 
 core-js-pure@^3.10.2, core-js-pure@^3.20.2:
   version "3.21.1"
@@ -1729,6 +1734,43 @@ express@^4.0.0, express@^4.17.1:
     utils-merge "1.0.1"
     vary "~1.1.2"
 
+express@^4.18.1:
+  version "4.18.1"
+  resolved "https://registry.yarnpkg.com/express/-/express-4.18.1.tgz#7797de8b9c72c857b9cd0e14a5eea80666267caf"
+  integrity sha512-zZBcOX9TfehHQhtupq57OF8lFZ3UZi08Y97dwFCkD8p9d/d2Y3M+ykKcwaMDEL+4qyUolgBDX6AblpR3fL212Q==
+  dependencies:
+    accepts "~1.3.8"
+    array-flatten "1.1.1"
+    body-parser "1.20.0"
+    content-disposition "0.5.4"
+    content-type "~1.0.4"
+    cookie "0.5.0"
+    cookie-signature "1.0.6"
+    debug "2.6.9"
+    depd "2.0.0"
+    encodeurl "~1.0.2"
+    escape-html "~1.0.3"
+    etag "~1.8.1"
+    finalhandler "1.2.0"
+    fresh "0.5.2"
+    http-errors "2.0.0"
+    merge-descriptors "1.0.1"
+    methods "~1.1.2"
+    on-finished "2.4.1"
+    parseurl "~1.3.3"
+    path-to-regexp "0.1.7"
+    proxy-addr "~2.0.7"
+    qs "6.10.3"
+    range-parser "~1.2.1"
+    safe-buffer "5.2.1"
+    send "0.18.0"
+    serve-static "1.15.0"
+    setprototypeof "1.2.0"
+    statuses "2.0.1"
+    type-is "~1.6.18"
+    utils-merge "1.0.1"
+    vary "~1.1.2"
+
 extend@^3.0.2:
   version "3.0.2"
   resolved "https://registry.yarnpkg.com/extend/-/extend-3.0.2.tgz#f8b1136b4071fbd8eb140aff858b1019ec2915fa"
@@ -1800,6 +1842,19 @@ fill-range@^7.0.1:
   integrity sha512-qOo9F+dMUmC2Lcb4BbVvnKJxTPjCm+RRpe4gDuGrzkL7mEVl/djYSu2OdQ2Pa302N4oqkSg9ir6jaLWJ2USVpQ==
   dependencies:
     to-regex-range "^5.0.1"
+
+finalhandler@1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/finalhandler/-/finalhandler-1.2.0.tgz#7d23fe5731b207b4640e4fcd00aec1f9207a7b32"
+  integrity sha512-5uXcUVftlQMFnWC9qu/svkWv3GTd2PfUhK/3PLkYNAe7FbqJMt3515HaxE6eRL74GdsriiwujiawdaB1BpEISg==
+  dependencies:
+    debug "2.6.9"
+    encodeurl "~1.0.2"
+    escape-html "~1.0.3"
+    on-finished "2.4.1"
+    parseurl "~1.3.3"
+    statuses "2.0.1"
+    unpipe "~1.0.0"
 
 finalhandler@~1.1.2:
   version "1.1.2"
@@ -1919,12 +1974,23 @@ gaxios@^4.0.0:
     is-stream "^2.0.0"
     node-fetch "^2.6.7"
 
-gcp-metadata@^4.2.0:
-  version "4.3.1"
-  resolved "https://registry.yarnpkg.com/gcp-metadata/-/gcp-metadata-4.3.1.tgz#fb205fe6a90fef2fd9c85e6ba06e5559ee1eefa9"
-  integrity sha512-x850LS5N7V1F3UcV7PoupzGsyD6iVwTVvsh3tbXfkctZnBnjW5yu5z1/3k3SehF7TyoTIe78rJs02GMMy+LF+A==
+gaxios@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/gaxios/-/gaxios-5.0.0.tgz#df11e5d0a45831dd39eb5fbbba0d6a6b09815e70"
+  integrity sha512-VD/yc5ln6XU8Ch1hyYY6kRMBE0Yc2np3fPyeJeYHhrPs1i8rgnsApPMWyrugkl7LLoSqpOJVBWlQIa87OAvt8Q==
   dependencies:
-    gaxios "^4.0.0"
+    abort-controller "^3.0.0"
+    extend "^3.0.2"
+    https-proxy-agent "^5.0.0"
+    is-stream "^2.0.0"
+    node-fetch "^2.6.7"
+
+gcp-metadata@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/gcp-metadata/-/gcp-metadata-5.0.0.tgz#a00f999f60a4461401e7c515f8a3267cfb401ee7"
+  integrity sha512-gfwuX3yA3nNsHSWUL4KG90UulNiq922Ukj3wLTrcnX33BB7PwB1o0ubR8KVvXu9nJH+P5w1j2SQSNNqto+H0DA==
+  dependencies:
+    gaxios "^5.0.0"
     json-bigint "^1.0.0"
 
 generate-function@^2.3.1:
@@ -2010,18 +2076,18 @@ globby@11.0.4:
     merge2 "^1.3.0"
     slash "^3.0.0"
 
-google-auth-library@^7.14.1:
-  version "7.14.1"
-  resolved "https://registry.yarnpkg.com/google-auth-library/-/google-auth-library-7.14.1.tgz#e3483034162f24cc71b95c8a55a210008826213c"
-  integrity sha512-5Rk7iLNDFhFeBYc3s8l1CqzbEBcdhwR193RlD4vSNFajIcINKI8W8P0JLmBpwymHqqWbX34pJDQu39cSy/6RsA==
+google-auth-library@^8.0.2:
+  version "8.0.2"
+  resolved "https://registry.yarnpkg.com/google-auth-library/-/google-auth-library-8.0.2.tgz#5fa0f2d3795c3e4019d2bb315ade4454cc9c30b5"
+  integrity sha512-HoG+nWFAThLovKpvcbYzxgn+nBJPTfAwtq0GxPN821nOO+21+8oP7MoEHfd1sbDulUFFGfcjJr2CnJ4YssHcyg==
   dependencies:
     arrify "^2.0.0"
     base64-js "^1.3.0"
     ecdsa-sig-formatter "^1.0.11"
     fast-text-encoding "^1.0.0"
-    gaxios "^4.0.0"
-    gcp-metadata "^4.2.0"
-    gtoken "^5.0.4"
+    gaxios "^5.0.0"
+    gcp-metadata "^5.0.0"
+    gtoken "^5.3.2"
     jws "^4.0.0"
     lru-cache "^6.0.0"
 
@@ -2093,7 +2159,7 @@ graphql@^15.5.1:
   resolved "https://registry.yarnpkg.com/graphql/-/graphql-15.8.0.tgz#33410e96b012fa3bdb1091cc99a94769db212b38"
   integrity sha512-5gghUc24tP9HRznNpV2+FIoq3xKkj5dTQqf4v0CpdPbFVwFkWoxOM+o+2OC9ZSvjEMTjfmG9QT+gcvggTwW1zw==
 
-gtoken@^5.0.4:
+gtoken@^5.3.2:
   version "5.3.2"
   resolved "https://registry.yarnpkg.com/gtoken/-/gtoken-5.3.2.tgz#deb7dc876abe002178e0515e383382ea9446d58f"
   integrity sha512-gkvEKREW7dXWF8NV8pVrKfW7WqReAmjjkMBh6lNCCGOM4ucS0r0YyXXl0r/9Yj8wcW/32ISkfc8h5mPTDbtifQ==
@@ -3498,6 +3564,25 @@ send@0.17.2:
     range-parser "~1.2.1"
     statuses "~1.5.0"
 
+send@0.18.0:
+  version "0.18.0"
+  resolved "https://registry.yarnpkg.com/send/-/send-0.18.0.tgz#670167cc654b05f5aa4a767f9113bb371bc706be"
+  integrity sha512-qqWzuOjSFOuqPjFe4NOsMLafToQQwBSOEpS+FwEt3A2V3vKubTquT3vmLTQpFgMXp8AlFWFuP1qKaJZOtPpVXg==
+  dependencies:
+    debug "2.6.9"
+    depd "2.0.0"
+    destroy "1.2.0"
+    encodeurl "~1.0.2"
+    escape-html "~1.0.3"
+    etag "~1.8.1"
+    fresh "0.5.2"
+    http-errors "2.0.0"
+    mime "1.6.0"
+    ms "2.1.3"
+    on-finished "2.4.1"
+    range-parser "~1.2.1"
+    statuses "2.0.1"
+
 seq-queue@^0.0.5:
   version "0.0.5"
   resolved "https://registry.yarnpkg.com/seq-queue/-/seq-queue-0.0.5.tgz#d56812e1c017a6e4e7c3e3a37a1da6d78dd3c93e"
@@ -3539,6 +3624,16 @@ serve-static@1.14.2:
     escape-html "~1.0.3"
     parseurl "~1.3.3"
     send "0.17.2"
+
+serve-static@1.15.0:
+  version "1.15.0"
+  resolved "https://registry.yarnpkg.com/serve-static/-/serve-static-1.15.0.tgz#faaef08cffe0a1a62f60cad0c4e513cff0ac9540"
+  integrity sha512-XGuRDNjXUijsUL0vl6nSD7cwURuzEgglbOaFuZM9g3kwDXOWVTck0jLzjPzGD+TazWbboZYu52/9/XPdUgne9g==
+  dependencies:
+    encodeurl "~1.0.2"
+    escape-html "~1.0.3"
+    parseurl "~1.3.3"
+    send "0.18.0"
 
 set-blocking@^2.0.0:
   version "2.0.0"

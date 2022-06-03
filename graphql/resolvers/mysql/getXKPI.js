@@ -171,7 +171,7 @@ const getKPIPoint = (data, type) => {
     return parseInt(data[`${type}_PERCENT`], 10) >= 100 ? 1 : 0;
   }
   return (
-    (parseInt(data[`${type}_ACHIEVEMENT`], 10) >= parseInt(data[`${type}_TARGET`], 10))
+    (parseInt(data[`${type}_ACHIEVEMENT`], 10) >= parseInt(data[`${type}_CURRENT`], 10))
     && (parseInt(data[`${type}_ACHIEVEMENT`], 10) !== 0))
     ? 1 : 0;
 };
