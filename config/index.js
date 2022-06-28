@@ -5,6 +5,16 @@ const mysqlConnection = {
   database: process.env.MYSQL_DATABASE,
 };
 
+const firebaseConfig = {
+  apiKey: process.env.API_KEY,
+  authDomain: process.env.AUTH_DOMAIN,
+  projectId: process.env.PROJECT_ID,
+  STORAGE_BUCKET: process.env.MYSQL_HOST,
+  MESSAGING_SENDER_ID: process.env.MYSQL_HOST,
+  APP_ID: process.env.MYSQL_HOST,
+  MEASUREMENT_ID: process.env.MYSQL_HOST,
+};
+
 const COMPANY_PROFILE = 'company_profile';
 const SURVEY = 'survey';
 const MSIC = 'msic';
@@ -33,6 +43,7 @@ const whiteListOperation = [
 
 module.exports = {
   mysqlConnection,
+  firebaseConfig,
   ASSESSMENT,
   COMPANY_PROFILE,
   ELSA_SCORECARD,

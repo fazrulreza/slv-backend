@@ -1,5 +1,7 @@
 const moment = require('moment');
 const { OAuth2Client } = require('google-auth-library');
+const { initializeApp } = require('firebase/app');
+const { getAuth, signInWithEmailAndPassword } = require('firebase/auth');
 const Login = require('../../../packages/ldap');
 const { generateHistory } = require('../../../packages/mysql-model');
 const {
@@ -10,8 +12,16 @@ const {
   SessionExpiredError, JsonWebTokenError, NotFoundError, WrongPasswordError,
 } = require('../../permissions/errors');
 const logger = require('../../../packages/logger');
+const wrapper = require('../../../packages/wrapper');
+const { firebaseConfig } = require('../../../config');
 
 const client = new OAuth2Client(process.env.CLIENT_ID);
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+
+// Initialize Firebase Authentication and get a reference to the service
+const auth = getAuth(app);
 
 module.exports = {
   Mutation: {
@@ -167,6 +177,19 @@ module.exports = {
         case userData.public:
         default: {
           logger.debug('ldapLogin --> Login from Public but not from Google / Facebook');
+
+          // check in firebase if exist or not
+          logger.debug('ldapLogin --> Get data from firebase');
+          const { data: fireData, error } = await wrapper(
+            signInWithEmailAndPassword(auth, userData.username, userData.password),
+          );
+
+          if (error && error.code === 'auth/wrong-password') {
+            logger.error('ldapLogin --> Firebase Password match = false');
+            throw WrongPasswordError(error.code);
+          }
+
+          // check in DB
           const searchOpts = {
             where: { EMAIL: userData.username },
           };
@@ -176,15 +199,19 @@ module.exports = {
             logger.error('ldapLogin --> No user found');
             throw new NotFoundError({ message: 'No user found' });
           }
+
           const resultUser = resUser.dataValues;
           logger.debug(`ldapLogin --> User data from DB: ${JSON.stringify(resultUser)}`);
 
-          const pass = await comparePasswordAsync(userData.password, resultUser.PWD);
-          logger.debug(`ldapLogin --> Password match : ${pass}`);
+          // if not exist in firebase, check password
+          if (!fireData || (error && error.code === 'auth/user-not-found')) {
+            const pass = await comparePasswordAsync(userData.password, resultUser.PWD);
+            logger.debug(`ldapLogin --> Password match : ${pass}`);
 
-          if (!pass) {
-            logger.error(`ldapLogin --> Password match = ${pass}`);
-            throw WrongPasswordError();
+            if (!pass) {
+              logger.error(`ldapLogin --> Password match = ${pass}`);
+              throw WrongPasswordError();
+            }
           }
 
           data = {
