@@ -1,3 +1,6 @@
+/**
+ * ELSA Stage LOV
+ */
 const profileGroup = {
   1: 'PRE-TAKEOFF',
   2: 'TAKEOFF',
@@ -7,6 +10,9 @@ const profileGroup = {
   6: 'DECLINE',
 };
 
+/**
+ * Tiered Intervention LOV
+ */
 const tieredInterventionGroup = {
   1: 'Tier 2: Extra support required',
   2: 'Tier 2: Extra support required',
@@ -15,6 +21,9 @@ const tieredInterventionGroup = {
   5: 'Tier 1: Awareness creation (readiness for next lifecycle stage)',
 };
 
+/**
+ * State LOV
+ */
 const stateList = [
   'JOHOR',
   'KEDAH',
@@ -34,6 +43,9 @@ const stateList = [
   'WILAYAH PERSEKUTUAN PUTRAJAYA',
 ];
 
+/**
+ * ELSA Factor order
+ */
 const factorOrder = [
   'BR_',
   'LC_',
@@ -42,6 +54,9 @@ const factorOrder = [
   'FR_',
 ];
 
+/**
+ * SME Size LOV
+ */
 const smeSizeChoice = {
   1: {
     classValue: 'SOLE TRADER',
@@ -65,6 +80,9 @@ const smeSizeChoice = {
   },
 };
 
+/**
+ * Required Company Fields for data check and transformation
+ */
 const requiredCompanyFields = {
   ENTITY_NAME: 'Company Name',
   REGISTRATION_NO: 'Registration Number',
@@ -82,12 +100,18 @@ const requiredCompanyFields = {
   NATURE_OF_BUSINESS: 'Nature of Business',
 };
 
+/**
+ * Required User Fields for data check
+ */
 const requiredUserFields = {
   NAME: 'Name',
   EMAIL: 'Email',
   PWD: 'Password',
 };
 
+/**
+ * Survey Flag Fields for data check
+ */
 const surveyFlagFields = [
   'PRODUCT_FEEDBACK_COLLECTION_FLAG',
   'OWNER_MANAGED_FLAG',
@@ -104,6 +128,9 @@ const surveyFlagFields = [
   'SST_FLAG',
 ];
 
+/**
+ * Required survey Fields for data check
+ */
 const commonSurveyFields = [
   'OPERATING_HISTORY',
   'YEARLY_BUSINESS_PERFORMANCE',
@@ -117,6 +144,9 @@ const commonSurveyFields = [
   'LATE_PAYMENT_CUSTOMER',
 ];
 
+/**
+ * Assessment Fields with integer for data check
+ */
 const assessmentIntObj = [
   'OH_OPERATING_HISTORY',
   'IG_INDUSTRY_POTENTIAL',

@@ -6,6 +6,9 @@ const {
 } = require('../errors');
 const logger = require('../../../packages/logger');
 
+/**
+ * Base permission resolver
+ */
 const baseResolver = createResolver(null, (root, args, context, error) => (
   isInstance(error)
     ? error
@@ -13,6 +16,9 @@ const baseResolver = createResolver(null, (root, args, context, error) => (
       message: `An unknown error has occurred! message: ${error}`,
     })));
 
+/**
+ * Authentication resolver
+ */
 const isAuthenticatedResolver = baseResolver.createResolver((root, args, { user }) => {
   if (!user) {
     logger.error('authentication --> invalid user');

@@ -127,10 +127,10 @@ const checkCompanyExist = async (ENTITY_NAME, MysqlSlvCompanyProfile, process, I
   const resCompany = await MysqlSlvCompanyProfile.findOne(searchExistOpts);
   const resultCompany = resCompany ? resCompany.dataValues.ENTITY_NAME : 'N/A';
 
-  if (resultCompany === 'N/A'
-    && process !== 'checkCompany'
-    && (ID === 'new'
-    || (ID !== 'new' && resultCompany.ID !== ID))) {
+  // checkCompany @ createCompany ? N/A = Good
+  // updateCompany ? N/A = Bad, ID not equal to DB ID = Bad
+  if (((process === 'checkCompany' || process === 'createCompany') && resultCompany !== 'N/A')
+    || (process === 'updateCompany' && (resultCompany === 'N/A' || ID !== resultCompany.ID))) {
     logger.error(`${process} --> Company already exist`);
     throw new CompanyExistsError();
   }
@@ -497,7 +497,7 @@ module.exports = {
       }
       logger.debug('checkCompany --> Permission check passed');
 
-      const result = checkCompanyExist(NAME, MysqlSlvCompanyProfile, 'checkCompany');
+      const result = await checkCompanyExist(NAME, MysqlSlvCompanyProfile, 'checkCompany');
 
       logger.debug(`checkCompany --> input: ${result}`);
       logger.info(`checkCompany --> by ${mail} completed`);
@@ -522,7 +522,7 @@ module.exports = {
       checkCompanyDetails(parsedInput);
 
       // check for company
-      checkCompanyExist(parsedInput.ENTITY_NAME, MysqlSlvCompanyProfile, 'createCompany');
+      await checkCompanyExist(parsedInput.ENTITY_NAME, MysqlSlvCompanyProfile, 'createCompany');
 
       // check for MSIC
       const MSICObject = await checkValidSection(
@@ -648,7 +648,7 @@ module.exports = {
       checkCompanyDetails(parsedInput);
 
       // check for company
-      checkCompanyExist(parsedInput.ENTITY_NAME, MysqlSlvCompanyProfile, 'updateCompany', ID);
+      await checkCompanyExist(parsedInput.ENTITY_NAME, MysqlSlvCompanyProfile, 'updateCompany', ID);
 
       // check for MSIC
       const MSICObject = await checkValidSection(

@@ -164,7 +164,7 @@ module.exports = {
     ) => {
       logger.info(`checkUserPublic --> by public with input: ${EMAIL}`);
 
-      const result = checkUserExist(EMAIL, MysqlSlvUserPublic, 'checkUserPublic');
+      const result = await checkUserExist(EMAIL, MysqlSlvUserPublic, 'checkUserPublic');
 
       logger.debug(`checkUserPublic --> input: ${result}`);
       logger.info('checkUserPublic --> for public completed');
@@ -191,7 +191,7 @@ module.exports = {
       // process input
       const parsedInput = verifyToken(input);
       checkUserPublicDetails(parsedInput);
-      checkUserExist(parsedInput.EMAIL, MysqlSlvUserPublic, 'createUserPublic', true);
+      await checkUserExist(parsedInput.EMAIL, MysqlSlvUserPublic, 'createUserPublic', true);
 
       const newPwd = await hashPasswordAsync(parsedInput.PWD);
 
@@ -220,7 +220,7 @@ module.exports = {
       // process input
       const parsedInput = verifyToken(input);
       checkUserPublicDetails(parsedInput);
-      checkUserExist(parsedInput.EMAIL, MysqlSlvUserPublic, 'registerUserPublic', true);
+      await checkUserExist(parsedInput.EMAIL, MysqlSlvUserPublic, 'registerUserPublic', true);
 
       const newPwd = await hashPasswordAsync(parsedInput.PWD);
 
@@ -282,7 +282,7 @@ module.exports = {
 
       const parsedInput = verifyToken(input);
       checkUserPublicDetails(parsedInput);
-      checkUserExist(parsedInput.EMAIL, MysqlSlvUserPublic, 'updateUserPublic', true);
+      await checkUserExist(parsedInput.EMAIL, MysqlSlvUserPublic, 'updateUserPublic', true);
 
       let newPwd = parsedInput.PWD;
 

@@ -66,16 +66,16 @@ const NoAssessmentError = createError('NoAssessmentError', {
   message: 'No assessment found',
 });
 
+const LargeEnterpriseError = createError('LargeEnterpriseError', {
+  message: 'ELSA cannot be calculated for company with SME size of LARGE ENTERPRISE',
+});
+
 // ------------------
 
 // ------------------
 // ACL Errors
 const ForbiddenError = createError('ForbiddenError', {
   message: 'You are not allowed to do this',
-});
-
-const LargeEnterpriseError = createError('LargeEnterpriseError', {
-  message: 'ELSA cannot be calculated for company with SME size of LARGE ENTERPRISE',
 });
 
 const AuthenticationRequiredError = createError('AuthenticationRequiredError', {

@@ -10,7 +10,6 @@ const logger = require('../../packages/logger');
 
 const SECRET = readFileSync(path.join(__dirname, process.env.SECRET));
 const SECRET_PUB = readFileSync(path.join(__dirname, process.env.SECRET_PUB));
-// console.log(path.join(__dirname, process.env.SECRET));
 
 // const getFilter = (size, state, sector, revenue, year, division, msic) => {
 //   let filter = '';
@@ -44,27 +43,26 @@ const SECRET_PUB = readFileSync(path.join(__dirname, process.env.SECRET_PUB));
 //   return filter;
 // };
 
-/**
- * Get difference between current and historical data
- * @param {Object} curr current data
- * @param {Object} hist historical data
- * @returns {Object} difference
- */
-const getDifference = (curr, hist) => Object.entries(hist)
-  .filter(([key, val]) => curr[key] !== val && key in curr)
-  .reduce((acc, [key, v]) => ({ ...acc, [key]: v }), {});
+// /**
+//  * Get difference between current and historical data
+//  * @param {Object} curr current data
+//  * @param {Object} hist historical data
+//  * @returns {Object} difference
+//  */
+// const getDifference = (curr, hist) => Object.entries(hist)
+//   .filter(([key, val]) => curr[key] !== val && key in curr)
+//   .reduce((acc, [key, v]) => ({ ...acc, [key]: v }), {});
 
 /**
  * Remove duplicates from Array
  * @param {Object []} arr array
  * @returns Unique array object
  */
-const removeDuplicatesFromArray = (arr) => [...new Set(
-  arr.map((el) => JSON.stringify(el)),
-)].map((e) => JSON.parse(e));
+const removeDuplicatesFromArray = (arr) => [...new Set(arr.map((el) => JSON.stringify(el)))]
+  .map((e) => JSON.parse(e));
 
 /**
- * Process survey data from DB to suit response
+ * Process survey data from DB to suit response e.g. parsing JSON
  * @param {Object} result data from DB
  * @returns {Object} processed data
  */
@@ -115,25 +113,25 @@ const processSurveyResult = (result) => {
   };
 };
 
-/**
- * Remove Empty entries in object
- * @param {Object} obj Object to be processed
- * @returns Object without empty entries
- */
-const cleanEmpty = (obj) => {
-  if (Array.isArray(obj)) {
-    return obj
-      .map((v) => ((v && typeof v === 'object') ? cleanEmpty(v) : v))
-      .filter((v) => !(v == null));
-  }
-  return Object.entries(obj)
-    .map(([k, v]) => [k, v && typeof v === 'object' ? cleanEmpty(v) : v])
-    .reduce((a, [k, v]) => ((v === null || v.length === 0) ? a : (a[k] = v, a)), {});
-  // || Object.values(v).length === 0)
-};
+// /**
+//  * Remove Empty entries in object
+//  * @param {Object} obj Object to be processed
+//  * @returns Object without empty entries
+//  */
+// const cleanEmpty = (obj) => {
+//   if (Array.isArray(obj)) {
+//     return obj
+//       .map((v) => ((v && typeof v === 'object') ? cleanEmpty(v) : v))
+//       .filter((v) => !(v == null));
+//   }
+//   return Object.entries(obj)
+//     .map(([k, v]) => [k, v && typeof v === 'object' ? cleanEmpty(v) : v])
+//     .reduce((a, [k, v]) => ((v === null || v.length === 0) ? a : (a[k] = v, a)), {});
+//   // || Object.values(v).length === 0)
+// };
 
 /**
- * Calculate ELSA items
+ * Calculate ELSA sub factor scores and its paramater
  * @param {Object} getClassScore Object containing ELSA scores
  * @param {string} initial type of data to be calculated
  * @param {number} year assessment year
@@ -142,7 +140,7 @@ const cleanEmpty = (obj) => {
 const calculateScores = (getClassScore, initial, year) => {
   const tempGroup = getClassScore
     .filter((x) => Object.keys(x)[0].startsWith(initial)) // filter by initial
-    .filter((y) => !Object.keys(y)[0].endsWith('COMMENT')) // remove comment
+    .filter((y) => !Object.keys(y)[0].endsWith('COMMENT')) // remove comment fields
     .reduce((acc, v) => {
       if (v.unitClassScore === 'N/A' || v.unitClassScore === 0) {
         return {
@@ -204,7 +202,6 @@ const calculateScores = (getClassScore, initial, year) => {
     RECOMMENDED_TIERED_INTERVENTION: recommendedTieredIntervention,
     ASSESSMENT_YEAR: year,
   };
-  // console.log(initial, finalGroup);
   return finalGroup;
 };
 
@@ -214,16 +211,10 @@ const calculateScores = (getClassScore, initial, year) => {
  * @returns {number} total scores of KPI
  */
 const getTotalScore = (scorecard) => {
-  // console.log(scorecard);
-  // console.log(scorecard.map((y) => y.FINAL_SCORE));
   const sumScore = scorecard
     .reduce(((acc, v) => (v.FINAL_SCORE === 'N/A' ? acc : acc + parseFloat(v.FINAL_SCORE))), 0);
   const countScore = scorecard
     .reduce(((acc, v) => (v.FINAL_SCORE === 'N/A' ? acc : acc + 1)), 0);
-  // console.log(sumScore);
-  // console.log(countScore);
-  // console.log(sumScore / countScore);
-  // console.log((Math.floor((sumScore / countScore) * 10) / 10));
   return (Math.floor((sumScore / countScore) * 10) / 10);
 };
 
@@ -335,7 +326,7 @@ const getRoleWhere = (userRoleList, mail, column = 'CREATED_BY') => {
 };
 
 /**
- * Get sme size based only on no of staff
+ * Get sme size based only on number of staff
  * @param {string} sector sector
  * @param {number} value no of staff
  * @returns {number} value for sme size
@@ -387,7 +378,7 @@ const getSMERevenue = (sector, value) => {
 };
 
 /**
- *
+ * Get SME size based on both revenue and number of staff
  * @param {String} SECTOR Sector
  * @param {number} FULLTIME fulltime employee
  * @param {String} BUSINESS_OWNER_INVOLVE_PERCENTAGE business owner involvement
@@ -488,9 +479,9 @@ const isValidUrl = (urlString) => {
 
 module.exports = {
   // getFilter,
-  getDifference,
+  // getDifference,
   processSurveyResult,
-  cleanEmpty,
+  // cleanEmpty,
   calculateScores,
   getTotalScore,
   processUserRolesOutput,
