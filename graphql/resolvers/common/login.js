@@ -111,7 +111,6 @@ module.exports = {
               idToken: userData.username,
               audience: process.env.CLIENT_ID,
             });
-            // console.log(ticket.getPayload());
             const { name, email, picture } = ticket.getPayload();
             EMAIL = email;
             NAME = name;
@@ -186,7 +185,7 @@ module.exports = {
 
           if (error && error.code === 'auth/wrong-password') {
             logger.error('ldapLogin --> Firebase Password match = false');
-            throw WrongPasswordError(error.code);
+            throw new WrongPasswordError(error.code);
           }
 
           // check in DB
@@ -210,7 +209,7 @@ module.exports = {
 
             if (!pass) {
               logger.error(`ldapLogin --> Password match = ${pass}`);
-              throw WrongPasswordError();
+              throw new WrongPasswordError();
             }
           }
 
