@@ -333,7 +333,7 @@ module.exports = {
       logger.debug(`oneAll --> ELSA scorecard found: ${JSON.stringify(resElsa)}`);
 
       // MSIC
-      const searchOpts2 = { where: { MSIC: resultCompany.MSIC } };
+      const searchOpts2 = { where: { SECTION: resultCompany.SECTION } };
       const resMSIC = await MysqlSlvMSIC.findOne(searchOpts2);
       const resultMSIC = resMSIC ? resMSIC.dataValues : null;
 
