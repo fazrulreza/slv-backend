@@ -268,7 +268,7 @@ module.exports = {
       const resultFinal = resultCompany.map((f) => ({
         COMPANY_ID: f.ID,
         SECTOR: f.SECTOR,
-        ANNUAL_TURNOVER: f.ANNUAL_TURNOVER ? f.ANNUAL_TURNOVER : 0,
+        ANNUAL_TURNOVER: f.ANNUAL_TURNOVER && f.ANNUAL_TURNOVER > 0 ? f.ANNUAL_TURNOVER : 0,
         FULLTIME_EMPLOYEE_COUNT: f.FULLTIME_EMPLOYEE_COUNT ? f.FULLTIME_EMPLOYEE_COUNT : 0,
         SME_CLASS: f.SME_CLASS ? f.SME_CLASS : 'N/A',
         ASSESSMENT_DONE: f.ASSESSMENT_DONE,
