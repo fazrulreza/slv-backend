@@ -445,10 +445,12 @@ module.exports = {
             ...resC,
             ...resQ1,
             ...resS1,
+            SURVEY_DONE: resQ.length,
+            ASSESSMENT_DONE: resS.length,
           };
         })
         .filter((cls) => cls.SME_CLASS && cls.SME_CLASS !== 'LARGE ENTERPRISE' && cls.SME_CLASS !== 'N/A')
-        .filter((as) => as.OH_OPERATING_HISTORY);
+        .filter((as) => as.SURVEY_DONE !== 0);
 
       resultCompany = getFilteredData(resultCompany, filter);
 

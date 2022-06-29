@@ -75,9 +75,11 @@ module.exports = {
           return {
             ...resC,
             ...resQ1,
+            SURVEY_DONE: resQ.length,
           };
         })
-        .filter((cls) => cls.SME_CLASS && cls.SME_CLASS !== 'LARGE ENTERPRISE' && cls.SME_CLASS !== 'N/A');
+        .filter((cls) => cls.SME_CLASS && cls.SME_CLASS !== 'LARGE ENTERPRISE' && cls.SME_CLASS !== 'N/A')
+        .filter((as) => as.SURVEY_DONE !== 0);
 
       resultCompany = getFilteredData(resultCompany, filter);
 
@@ -168,11 +170,12 @@ module.exports = {
             ...resC,
             ...resQ1,
             ...resS1,
+            SURVEY_DONE: resQ.length,
             ASSESSMENT_DONE: resS.length,
           };
         })
         .filter((cls) => cls.SME_CLASS && cls.SME_CLASS !== 'LARGE ENTERPRISE' && cls.SME_CLASS !== 'N/A')
-        .filter(((as) => as.ASSESSMENT_DONE !== 0));
+        .filter(((as) => as.SURVEY_DONE !== 0));
 
       resultCompany = getFilteredData(resultCompany, filter);
 
@@ -646,9 +649,7 @@ module.exports = {
       });
 
       // store in DB if default 1000
-      if (input.ASSESSMENT_YEAR === 1000
-        && !input.PUBLIC
-        && checkPermission('ELSA-CREATE', userRoleList)) {
+      if (input.ASSESSMENT_YEAR === 1000 && checkPermission('ELSA-CREATE', userRoleList)) {
         // get elsa
         logger.debug('oneAll --> storing calculated ELSA score in DB');
 
