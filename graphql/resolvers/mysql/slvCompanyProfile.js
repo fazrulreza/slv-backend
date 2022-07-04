@@ -638,7 +638,7 @@ module.exports = {
         user: { mail, userRoleList },
       },
     ) => {
-      logger.info(`updateCompany --> by ${mail} input ${ID}: ${input}`);
+      logger.info(`updateCompany --> by ${mail} input ${ID}: ${JSON.stringify(input)}`);
 
       if (!checkPermission('COMPANY-UPDATE', userRoleList)) {
         logger.error('updateCompany --> Permission check failed');
