@@ -21,8 +21,8 @@ CREATE TABLE `getx_attachment` (
 	PRIMARY KEY (`ID`) USING BTREE,
 	INDEX `FK_getx_attachment_company_profile` (`COMPANY_ID`) USING BTREE,
 	INDEX `FK_getx_attachment_getx_kpi` (`GETX_ID`) USING BTREE,
-	CONSTRAINT `FK_getx_attachment_company_profile` FOREIGN KEY (`COMPANY_ID`) REFERENCES `slv`.`company_profile` (`ID`) ON UPDATE NO ACTION ON DELETE NO ACTION,
-	CONSTRAINT `FK_getx_attachment_getx_kpi` FOREIGN KEY (`GETX_ID`) REFERENCES `slv`.`getx_kpi` (`ID`) ON UPDATE NO ACTION ON DELETE NO ACTION
+	CONSTRAINT `FK_getx_attachment_company_profile` FOREIGN KEY (`COMPANY_ID`) REFERENCES `company_profile` (`ID`) ON UPDATE NO ACTION ON DELETE NO ACTION,
+	CONSTRAINT `FK_getx_attachment_getx_kpi` FOREIGN KEY (`GETX_ID`) REFERENCES `getx_kpi` (`ID`) ON UPDATE NO ACTION ON DELETE NO ACTION
 )
 COLLATE='utf8mb4_0900_ai_ci'
 ENGINE=InnoDB

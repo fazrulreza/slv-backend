@@ -131,6 +131,7 @@ const processInput = (input) => {
     FULLTIME_EMPLOYEE_COUNT: parsedInput.EMPLOYEE_COUNT_DETAIL.FULLTIME,
     PARTTIME_EMPLOYEE_COUNT: parsedInput.EMPLOYEE_COUNT_DETAIL.PARTTIME,
     OWNER_MANAGED_100: ownerManaged100Flag,
+    MODULE: JSON.stringify(parsedInput.MODULE),
   };
 
   // handle missing class
@@ -170,11 +171,14 @@ module.exports = {
         throw new ForbiddenError();
       }
       logger.debug('allSurvey --> Permission check passed');
-
-      let result = [];
       // company
       const resCompany = await MysqlSlvCompanyProfile.findById(COMPANY_ID);
       logger.debug(`allSurvey --> company found: ${JSON.stringify(resCompany)}`);
+
+      let result = [{
+        SECTOR: resCompany.dataValues.SECTOR,
+        MODULE: JSON.parse(resCompany.dataValues.MODULE),
+      }];
 
       // survey
       const searchOpts = { where: { COMPANY_ID } };
@@ -192,6 +196,7 @@ module.exports = {
             ...result2,
             ...processedResult,
             SECTOR: resCompany.dataValues.SECTOR,
+            MODULE: JSON.parse(resCompany.dataValues.MODULE),
           };
 
           return newResult;
@@ -253,9 +258,9 @@ module.exports = {
           const resS1 = resS.length !== 0 ? resS[0] : null;
 
           return {
-            ...resC,
             ...resQ1,
             ...resS1,
+            ...resC,
             SURVEY_DONE: resQ.length,
             ASSESSMENT_DONE: resS.length,
           };
@@ -407,7 +412,6 @@ module.exports = {
         ID: generateId(),
         ...history,
         COMPANY_ID: input.COMPANY_ID,
-        MODULE: userRoleList.MODULE === 'ALL' ? 'SME' : userRoleList.MODULE,
         ASSESSMENT_YEAR: 1000,
       };
       const resSurvey = await MysqlSlvSurvey.create(newInput);

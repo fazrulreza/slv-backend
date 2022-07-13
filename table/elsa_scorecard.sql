@@ -16,7 +16,7 @@ CREATE TABLE `elsa_scorecard` (
 	`CREATED_BY` VARCHAR(255) NULL DEFAULT NULL COLLATE 'utf8mb4_0900_ai_ci',
 	PRIMARY KEY (`ID`) USING BTREE,
 	INDEX `FK_elsa_scorecard_company_profile` (`COMPANY_ID`) USING BTREE,
-	CONSTRAINT `FK_elsa_scorecard_company_profile` FOREIGN KEY (`COMPANY_ID`) REFERENCES `slv`.`company_profile` (`ID`) ON UPDATE NO ACTION ON DELETE NO ACTION
+	CONSTRAINT `FK_elsa_scorecard_company_profile` FOREIGN KEY (`COMPANY_ID`) REFERENCES `company_profile` (`ID`) ON UPDATE NO ACTION ON DELETE NO ACTION
 )
 COLLATE='utf8mb4_0900_ai_ci'
 ENGINE=InnoDB

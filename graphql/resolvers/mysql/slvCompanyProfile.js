@@ -11,6 +11,42 @@ const {
 const logger = require('../../../packages/logger');
 
 /**
+ * Helper function for simple update in DB
+ * @param {string} ID ID
+ * @param {Object} updateTable Sequelize object for table to be updated
+ * @param {string} module module of the company
+ * @param {string} mail mail for update
+ * @returns {string} update status
+ */
+const updateModuleinDB = async (ID, updateTable, module, mail) => {
+  const searchOpts2 = {
+    where: { COMPANY_ID: ID },
+  };
+
+  const resUpdate = updateTable.findOne(searchOpts2);
+  if (!resUpdate) return 'does not exist';
+
+  const resultUpdate = resUpdate.dataValues;
+
+  if (resultUpdate.MODULE !== module) {
+    const history = generateHistory(mail, 'UPDATE', resultUpdate.CREATED_AT);
+    const searchOpts = {
+      object: {
+        ...resultUpdate,
+        MODULE: module,
+        ...history,
+      },
+      where: { COMPANY_ID: ID },
+    };
+
+    await updateTable.update(searchOpts);
+    return 'update complete';
+  }
+
+  return 'no update required';
+};
+
+/**
  * Check if date is valid or not
  * @param {string} dateString date String
  * @returns {Boolean} valid date or not
@@ -169,13 +205,49 @@ const checkValidSection = async (SECTION, MysqlSlvMSIC, process) => {
 module.exports = {
   Query: {
     /**
+     * Retrieve modules with msic
+     * @param {Object} param0 main input object
+     */
+    modulesAndMSIC: async (
+      parent, param, {
+        connectors: { MysqlSlvModule, MysqlSlvMSIC },
+        user: { mail },
+      },
+    ) => {
+      logger.info(`modulesAndMSIC --> by ${mail}`);
+
+      // get MSIC list
+      const searchOptsMsic = {
+        where: null,
+        order: [['MSIC']],
+      };
+      const resMSIC = await MysqlSlvMSIC.findAll(searchOptsMsic);
+      const resultMSIC = resMSIC.map((x) => x.dataValues);
+      logger.debug('modulesAndMSIC --> MSIC data found');
+
+      // get Modules list
+      const searchOptsModules = { where: null };
+      const resModules = await MysqlSlvModule.findAll(searchOptsModules);
+      const resultModules = resModules.map((x) => x.dataValues);
+      logger.debug('modulesAndMSIC --> Module data found');
+
+      const finalResult = {
+        allMSIC: resultMSIC,
+        allModuls: resultModules,
+      };
+
+      logger.debug(`modulesAndMSIC --> output: ${JSON.stringify(finalResult)}`);
+      logger.info(`modulesAndMSIC --> by ${mail} completed`);
+      return finalResult;
+    },
+    /**
      * Retrieve one by ID
      * @param {Object} param0 main input object
      * @param {String} param0.id company id
      */
     oneCompany: isAuthenticatedResolver.createResolver(async (
       parent, { ID }, {
-        connectors: { MysqlSlvCompanyProfile, MysqlSlvMSIC },
+        connectors: { MysqlSlvCompanyProfile, MysqlSlvModule, MysqlSlvMSIC },
         user: { mail, userRoleList },
       },
     ) => {
@@ -187,14 +259,22 @@ module.exports = {
       }
       logger.debug('oneCompany --> Permission check passed');
 
-      const searchOpts = {
+      // get MSIC list
+      const searchOptsMsic = {
         where: null,
         order: [['MSIC']],
       };
-      const result = await MysqlSlvMSIC.findAll(searchOpts);
-      const result2 = result.map((x) => x.dataValues);
+      const resMSIC = await MysqlSlvMSIC.findAll(searchOptsMsic);
+      const resultMSIC = resMSIC.map((x) => x.dataValues);
       logger.debug('oneCompany --> MSIC data found');
 
+      // get Modules list
+      const searchOptsModules = { where: null };
+      const resModules = await MysqlSlvModule.findAll(searchOptsModules);
+      const resultModules = resModules.map((x) => x.dataValues);
+      logger.debug('oneCompany --> Module data found');
+
+      // get company (if any)
       const res = await MysqlSlvCompanyProfile.findById(ID);
       if (!res) {
         logger.error(`oneCompany --> No record found for ${ID}`);
@@ -203,11 +283,13 @@ module.exports = {
       const newCompany = {
         ...res.dataValues,
         LOGO: JSON.parse(res.dataValues.LOGO),
+        MODULE: JSON.parse(res.dataValues.MODULE),
       };
       logger.debug(`oneCompany --> Company data found: ${JSON.stringify(newCompany)}`);
 
       const finalResult = {
-        allMSIC: result2,
+        allMSIC: resultMSIC,
+        allModuls: resultModules,
         company: newCompany,
       };
       logger.debug(`oneCompany --> output: ${JSON.stringify(finalResult)}`);
@@ -272,6 +354,7 @@ module.exports = {
         const resC1 = {
           ...resC,
           LOGO: JSON.parse(resC.LOGO),
+          MODULE: JSON.parse(resC.MODULE),
         };
         const resQ = resultQuest.filter((y) => y.COMPANY_ID === x.ID);
         const resS = resultScore.filter((z) => z.COMPANY_ID === x.ID);
@@ -286,10 +369,10 @@ module.exports = {
         const resK1 = resK.length !== 0 ? resK[0] : null;
 
         return {
-          ...resC1,
           ...resQ1,
           ...resS1,
           ...resK1,
+          ...resC1,
           SURVEY_DONE,
           ASSESSMENT_DONE,
           KPI_DONE,
@@ -442,9 +525,9 @@ module.exports = {
           const resS1 = resS.length !== 0 ? resS[0] : null;
 
           return {
-            ...resC,
             ...resQ1,
             ...resS1,
+            ...resC,
             SURVEY_DONE: resQ.length,
             ASSESSMENT_DONE: resS.length,
           };
@@ -527,16 +610,14 @@ module.exports = {
       await checkCompanyExist(parsedInput.ENTITY_NAME, MysqlSlvCompanyProfile, 'createCompany');
 
       // check for MSIC
-      const MSICObject = await checkValidSection(
-        parsedInput.SECTION, MysqlSlvMSIC, 'createCompany',
-      );
+      const MSICObject = await checkValidSection(parsedInput.SECTION, MysqlSlvMSIC, 'createCompany');
 
       const history = generateHistory(mail, 'CREATE');
       const newInput = {
         ...parsedInput,
         LOGO: JSON.stringify(parsedInput.LOGO),
+        MODULE: JSON.stringify(parsedInput.MODULE),
         ID: generateId(),
-        MODULE: userRoleList.MODULE === 'ALL' ? 'SME' : userRoleList.MODULE,
         OWNER: mail,
         ENTRY_DATE: moment().format('YYYY-MM-DD'),
         ...MSICObject,
@@ -634,7 +715,10 @@ module.exports = {
     }),
     updateCompany: isAuthenticatedResolver.createResolver(async (
       parent, { ID, input }, {
-        connectors: { MysqlSlvCompanyProfile, MysqlSlvMSIC },
+        connectors: {
+          MysqlSlvCompanyProfile, MysqlSlvMSIC, MysqlSlvSurvey, MysqlSlvAssessment,
+          MysqlSlvELSAScorecard, MysqlGetxKPI, MysqlGetxSign, MysqlGetxAttachment,
+        },
         user: { mail, userRoleList },
       },
     ) => {
@@ -657,17 +741,39 @@ module.exports = {
         parsedInput.SECTION, MysqlSlvMSIC, 'createCompany',
       );
 
+      const MODULE = JSON.stringify(parsedInput.MODULE);
+
       const history = generateHistory(mail, 'UPDATE', parsedInput.CREATED_AT);
       const searchOpts = {
         object: {
           ...parsedInput,
           LOGO: JSON.stringify(parsedInput.LOGO),
+          MODULE,
           ...MSICObject,
           ...history,
         },
         where: { ID },
       };
       const result = await MysqlSlvCompanyProfile.update(searchOpts);
+
+      const updateSurvey = await updateModuleinDB(ID, MysqlSlvSurvey, MODULE, mail);
+      logger.debug(`updateCompany --> Survey ${updateSurvey}`);
+
+      const updateAssessment = await updateModuleinDB(ID, MysqlSlvAssessment, MODULE, mail);
+      logger.debug(`updateCompany --> Assessment ${updateAssessment}`);
+
+      const updateElsa = await updateModuleinDB(ID, MysqlSlvELSAScorecard, MODULE, mail);
+      logger.debug(`updateCompany --> ELSA Scorecard ${updateElsa}`);
+
+      const updateKPI = await updateModuleinDB(ID, MysqlGetxKPI, MODULE, mail);
+      logger.debug(`updateCompany --> GETX KPI ${updateKPI}`);
+
+      const updateSign = await updateModuleinDB(ID, MysqlGetxSign, MODULE, mail);
+      logger.debug(`updateCompany --> GETX Sign ${updateSign}`);
+
+      const updateAttach = await updateModuleinDB(ID, MysqlGetxAttachment, MODULE, mail);
+      logger.debug(`updateCompany --> GETX Attachment ${updateAttach}`);
+
       const result2 = {
         ID,
         updated: result[0],

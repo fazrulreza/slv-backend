@@ -26,6 +26,7 @@ const USER_ROLE = 'user_role';
 const ELSA_SCORECARD = 'elsa_scorecard';
 const ELSA_WEIGHTAGE = 'elsa_weightage';
 const TOKEN_BLACKLIST = 'token_blacklist';
+const MODULE = 'module';
 
 const GETX_KPI = 'getx_kpi';
 const GETX_SIGN = 'getx_sign';
@@ -48,6 +49,7 @@ module.exports = {
   COMPANY_PROFILE,
   ELSA_SCORECARD,
   ELSA_WEIGHTAGE,
+  MODULE,
   MSIC,
   PREDICTION,
   SURVEY,

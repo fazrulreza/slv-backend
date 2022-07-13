@@ -17,6 +17,7 @@ const processInput = (data) => {
     ROLES_MODULE: parsedInput.ROLES_MODULE ? JSON.stringify(parsedInput.ROLES_MODULE) : '[]',
     GETX_MODULE: parsedInput.GETX_MODULE ? JSON.stringify(parsedInput.GETX_MODULE) : '[]',
     ELSA_MODULE: parsedInput.ELSA_MODULE ? JSON.stringify(parsedInput.ELSA_MODULE) : '[]',
+    MODULE_MODULE: parsedInput.MODULE_MODULE ? JSON.stringify(parsedInput.MODULE_MODULE) : '[]',
   };
   return processedInput;
 };
@@ -30,8 +31,8 @@ module.exports = {
          */
     allUserRole: isAuthenticatedResolver.createResolver(async (
       parent, param, {
-        connectors: { MysqlSlvUserRole },
-        user: { mail, userRoleList },
+        connectors: { MysqlSlvUserRole, MysqlSlvModule },
+        user: { mail, userRoleList, userType },
       },
     ) => {
       logger.info(`allUserRole --> by ${mail} called with no input`);
@@ -46,10 +47,17 @@ module.exports = {
       let where = { MODULE: { [Op.substring]: userRoleList.MODULE } };
 
       // check admin
-      if (userRoleList.MODULE === 'ALL') {
+      if (userRoleList.MODULE === 'SME' && userType === 1) {
         where = null;
       }
 
+      // get Modules list
+      const searchOptsModules = { where: null };
+      const resModules = await MysqlSlvModule.findAll(searchOptsModules);
+      const resultModules = resModules.map((x) => x.dataValues);
+      logger.debug('oneUserRole --> Module data found');
+
+      // get all roles
       const searchOpts = {
         where,
         order: [['MODULE'], ['NAME']],
@@ -57,10 +65,15 @@ module.exports = {
       const result = await MysqlSlvUserRole.findAll(searchOpts);
       const result2 = result.map((x) => processUserRolesOutput(x));
 
-      logger.debug(`allUserRole --> output: ${JSON.stringify(result2)}`);
+      const finalResult = {
+        userRole: result2,
+        allModuls: resultModules,
+      };
+
+      logger.debug(`allUserRole --> output: ${JSON.stringify(finalResult)}`);
       logger.info(`allUserRole --> by ${mail} completed`);
 
-      return result2;
+      return finalResult;
     }),
     /**
          * Retrieve all
@@ -69,7 +82,7 @@ module.exports = {
          */
     oneUserRole: isAuthenticatedResolver.createResolver(async (
       parent, { ID }, {
-        connectors: { MysqlSlvUserRole },
+        connectors: { MysqlSlvUserRole, MysqlSlvModule },
         user: { mail, userRoleList },
       },
     ) => {
@@ -81,15 +94,27 @@ module.exports = {
       }
       logger.debug('oneUserRole --> Permission check passed');
 
+      // get Modules list
+      const searchOptsModules = { where: null };
+      const resModules = await MysqlSlvModule.findAll(searchOptsModules);
+      const resultModules = resModules.map((x) => x.dataValues);
+      logger.debug('oneUserRole --> Module data found');
+
+      // get role
       const searchOpts = {
         where: { ID },
       };
       const result = await MysqlSlvUserRole.findOne(searchOpts);
       const result2 = result ? processUserRolesOutput(result) : {};
 
-      logger.debug(`oneUserRole --> output: ${JSON.stringify(result2)}`);
+      const finalResult = {
+        userRole: result2,
+        allModuls: resultModules,
+      };
+
+      logger.debug(`oneUserRole --> output: ${JSON.stringify(finalResult)}`);
       logger.info(`oneUserRole --> by ${mail} completed`);
-      return result2;
+      return finalResult;
     }),
   },
   Mutation: {

@@ -127,7 +127,7 @@ type GetXKPI {
   # Refers to ID generated in CompanyProfile
     COMPANY_ID: String
   # Indicates current record belongs to which module
-    MODULE: String
+    MODULE: [String]
   # Indicates current record belongs to which assessment year. Current year value is 1000
     ASSESSMENT_YEAR: Int
   # Created timestamp. Auto generated in database. Not needed for create / update mutation

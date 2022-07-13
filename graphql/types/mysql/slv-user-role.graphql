@@ -26,6 +26,7 @@ type UserRole {
   GETX_MODULE: [String]
   ROLES_MODULE: [String]
   ELSA_MODULE: [String]
+  MODULE_MODULE: [String]
   # Created timestamp. Auto generated in database. Not needed for create / update mutation
   CREATED_AT: String
   # Creator. Auto generated in database. Not needed for create / update mutation
@@ -36,15 +37,25 @@ type UserRole {
   UPDATED_BY: String
 }
 
+type UserRoleWithModule {
+  userRole: UserRole!
+  allModuls: [Modul!]!
+}
+
+type UserRolesAllWithModule {
+  userRole: [UserRole!]!
+  allModuls: [Modul!]!
+}
+
 type Query {
 """
     - retrieve user roles
 """
-  allUserRole: [UserRole!]!
+  allUserRole: UserRolesAllWithModule!
 """
     - retrieve one user role based on its ID
 """
-  oneUserRole(ID: Int!): UserRole!
+  oneUserRole(ID: Int!): UserRoleWithModule!
 }
 
 type Mutation {

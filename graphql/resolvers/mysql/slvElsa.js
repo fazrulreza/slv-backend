@@ -73,8 +73,8 @@ module.exports = {
           const resQ1 = resQ.length !== 0 ? resQ[0] : null;
 
           return {
-            ...resC,
             ...resQ1,
+            ...resC,
             SURVEY_DONE: resQ.length,
           };
         })
@@ -167,9 +167,9 @@ module.exports = {
           const resS1 = resS.length !== 0 ? resS[0] : null;
 
           return {
-            ...resC,
             ...resQ1,
             ...resS1,
+            ...resC,
             SURVEY_DONE: resQ.length,
             ASSESSMENT_DONE: resS.length,
           };
@@ -300,6 +300,7 @@ module.exports = {
       const resultCompany = {
         ...resCompany.dataValues,
         LOGO: JSON.parse(resCompany.dataValues.LOGO),
+        MODULE: JSON.parse(resCompany.dataValues.MODULE),
       };
       logger.debug(`oneAll --> company found: ${JSON.stringify(resultCompany)}`);
 
@@ -382,7 +383,12 @@ module.exports = {
             logger.debug(`oneAll --> Survey found: ${JSON.stringify(resultQuest)}`);
 
             // assessment
-            const resultScorePre = resScore.filter((w) => w.ASSESSMENT_YEAR === 1000);
+            const resultScorePre = resScore
+              .map((as) => ({
+                ...as,
+                MODULE: JSON.parse(as.MODULE),
+              }))
+              .filter((w) => w.ASSESSMENT_YEAR === 1000);
             resultScore = resultScorePre.length !== 0 ? resultScorePre[0] : null;
             logger.debug(`oneAll --> Assessment found: ${JSON.stringify(resultScore)}`);
 
@@ -615,7 +621,12 @@ module.exports = {
           [resultScore] = resScore.filter((y) => y.ASSESSMENT_YEAR === yr);
 
           // ELSA
-          const resultElsa = resElsa.filter((e) => e.ASSESSMENT_YEAR === yr);
+          const resultElsa = resElsa
+            .map((as) => ({
+              ...as,
+              MODULE: JSON.parse(as.MODULE),
+            }))
+            .filter((e) => e.ASSESSMENT_YEAR === yr);
           scorecard = resultElsa.map((d) => {
             const nextDesiredScore = d.NEXT_DESIRED_SCORE === 'N/A'
               ? d.NEXT_DESIRED_SCORE
@@ -665,7 +676,7 @@ module.exports = {
             ...history,
             ID: generateId(),
             COMPANY_ID: input.COMPANY_ID,
-            MODULE: userRoleList.MODULE === 'ALL' ? 'SME' : userRoleList.MODULE,
+            MODULE: JSON.stringify(resultCompany.MODULE),
           };
           return newB;
         });
@@ -757,7 +768,7 @@ module.exports = {
           ID: generateId(),
           ASSESSMENT_YEAR: input.ASSESSMENT_YEAR,
           COMPANY_ID: input.COMPANY_ID,
-          MODULE: userRoleList.MODULE === 'ALL' ? 'SME' : userRoleList.MODULE,
+          MODULE: surveyInput.MODULE,
         };
         return newB;
       });

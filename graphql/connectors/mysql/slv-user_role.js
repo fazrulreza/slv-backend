@@ -20,6 +20,7 @@ const attributes = {
   GETX_MODULE: Sequelize.STRING,
   ROLES_MODULE: Sequelize.STRING,
   ELSA_MODULE: Sequelize.STRING,
+  MODULE_MODULE: Sequelize.STRING,
   CREATED_AT: Sequelize.STRING,
   CREATED_BY: Sequelize.STRING,
   UPDATED_AT: Sequelize.STRING,

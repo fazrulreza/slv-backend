@@ -12,6 +12,7 @@ const MysqlSlvPrediction = require('./slv-prediction');
 const MysqlSlvUserRole = require('./slv-user_role');
 const MysqlSlvUserPublic = require('./slv-user_public');
 const MysqlSlvTokenBlacklist = require('./slv-token_blacklist');
+const MysqlSlvModule = require('./slv-module');
 
 const mysqlConnectors = {
   // elsa
@@ -22,6 +23,7 @@ const mysqlConnectors = {
   MysqlSlvAssessment,
   MysqlSlvELSAScorecard,
   MysqlSlvELSAWeightage,
+  MysqlSlvModule,
 
   // user
   MysqlSlvUser,

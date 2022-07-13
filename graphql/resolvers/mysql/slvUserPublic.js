@@ -62,7 +62,7 @@ module.exports = {
     allUserPublic: isAuthenticatedResolver.createResolver(async (
       parent, param, {
         connectors: { MysqlSlvUserPublic, MysqlSlvUserRole },
-        user: { mail, userRoleList },
+        user: { mail, userRoleList, userType },
       },
     ) => {
       logger.info(`allUserPublic --> by ${mail} called with no input`);
@@ -102,7 +102,7 @@ module.exports = {
         });
       logger.debug(`allUserPublic --> user with user roles found: ${JSON.stringify(resultPreUser)}`);
 
-      const resultUser = userRoleList.MODULE === 'ALL'
+      const resultUser = userRoleList.MODULE === 'SME' && userType === 1
         ? resultPreUser
         : resultPreUser.filter((w) => w.MODULE === userRoleList.MODULE);
 

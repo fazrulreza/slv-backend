@@ -30,6 +30,7 @@ const checkAssessmentExist = async (COMPANY_ID, MysqlSlvAssessment) => {
  * @param {Object} input main input object
  */
 const checkAssessmentDetails = (input) => {
+  // eslint-disable-next-line no-unused-vars
   const flagCheckObj = assessmentIntObj.map((y) => {
     const regexIntValue = /^[1-6]/gi;
     if (!input[y] || !regexIntValue.test(input[y])) {
@@ -88,7 +89,10 @@ module.exports = {
       // assessment
       const resScore = await MysqlSlvAssessment.findAll(searchOpts);
       if (resScore.length !== 0) {
-        resultScore = resScore.map((asmt) => asmt.dataValues);
+        resultScore = resScore.map((asmt) => ({
+          ...asmt.dataValues,
+          MODULE: JSON.parse(asmt.dataValues.MODULE),
+        }));
         logger.debug(`allAssessment --> Assessment data found for ${COMPANY_ID}`);
       }
 
@@ -130,7 +134,7 @@ module.exports = {
         ID: generateId(),
         ...history,
         COMPANY_ID: input.COMPANY_ID,
-        MODULE: userRoleList.MODULE === 'ALL' ? 'SME' : userRoleList.MODULE,
+        MODULE: JSON.stringify(parsedInput.MODULE),
         ASSESSMENT_YEAR: 1000,
       };
       // console.log(newInput);

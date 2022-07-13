@@ -91,11 +91,14 @@ const processSurveyResult = (result) => {
     ? JSON.parse(result.CUSTOMER_PAYMENT_METHODS)
     : [];
 
+  const MODULE = JSON.parse(result.MODULE);
+
   const FULLTIME = result.FULLTIME_EMPLOYEE_COUNT || 0;
   const PARTTIME = result.PARTTIME_EMPLOYEE_COUNT || 0;
   const OWNER_MANAGED_100 = result.OWNER_MANAGED_100 || 0;
 
   return {
+    MODULE,
     AVAILABLE_SYSTEM,
     MARKETING_TYPE,
     ONLINE_MARKETING_TYPE,
@@ -234,12 +237,13 @@ const processUserRolesOutput = (data) => {
     ROLES_MODULE: JSON.parse(preOutput.ROLES_MODULE),
     GETX_MODULE: JSON.parse(preOutput.GETX_MODULE),
     ELSA_MODULE: JSON.parse(preOutput.ELSA_MODULE),
+    MODULE_MODULE: JSON.parse(preOutput.MODULE_MODULE),
   };
   return processedOutput;
 };
 
 /**
- * Check user access
+ * Check user access, compare permission with user role
  * @param {string} permission Permission requested
  * @param {Object} userRoleList Contains list of all available access right
  * @returns {Boolean} has access or vice versa

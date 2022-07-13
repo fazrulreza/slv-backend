@@ -58,7 +58,7 @@ const processGetxData = (input, mail, modul, create = true) => {
     ...others,
     ...history,
     COMPANY_ID: input.COMPANY_ID,
-    MODULE: modul,
+    MODULE: JSON.stringify(modul),
     ASSESSMENT_YEAR: 1000,
   };
 
@@ -74,7 +74,7 @@ const processGetxData = (input, mail, modul, create = true) => {
     CHECKER_DATE,
     CHECKER,
     COMPANY_ID: input.COMPANY_ID,
-    MODULE: modul,
+    MODULE: JSON.stringify(modul),
     ASSESSMENT_YEAR: 1000,
     GETX_TYPE: 'KPI',
     ...history,
@@ -92,7 +92,7 @@ const processGetxData = (input, mail, modul, create = true) => {
     CHECKER_DATE: CHECKER_ACTUAL_DATE,
     CHECKER: CHECKER_ACTUAL,
     COMPANY_ID: input.COMPANY_ID,
-    MODULE: modul,
+    MODULE: JSON.stringify(modul),
     ASSESSMENT_YEAR: 1000,
     GETX_TYPE: 'ACHIEVEMENT',
     ...history,
@@ -110,7 +110,7 @@ const processGetxData = (input, mail, modul, create = true) => {
     NG_ATTACHMENT: JSON.stringify(NG_ATTACHMENT),
     FILE_ATTACHMENT: JSON.stringify(FILE_ATTACHMENT),
     COMPANY_ID: input.COMPANY_ID,
-    MODULE: modul,
+    MODULE: JSON.stringify(modul),
     ASSESSMENT_YEAR: 1000,
     GETX_TYPE: 'ACHIEVEMENT',
     ...history,
@@ -312,6 +312,7 @@ module.exports = {
       const resultCompany = {
         ...resCompany.dataValues,
         LOGO: JSON.parse(resCompany.dataValues.LOGO),
+        MODULE: JSON.parse(resCompany.dataValues.MODULE),
       };
       logger.debug(`scorecardKPI --> total company found: ${resCompany.length}`);
 
@@ -446,14 +447,20 @@ module.exports = {
 
           // elsa
           const resElsa2 = resElsa
-            .map((e1) => e1.dataValues)
+            .map((e1) => ({
+              ...e1.dataValues,
+              MODULE: JSON.parse(e1.dataValues.MODULE),
+            }))
             .filter((e2) => e2.COMPANY_ID === result2.COMPANY_ID
               && e2.ASSESSMENT_YEAR === result2.ASSESSMENT_YEAR);
           logger.debug(`allGetXKPI --> filtered ELSA found: ${JSON.stringify(resElsa2)}`);
 
           // assessment
           const resScore2 = resScore
-            .map((s1) => s1.dataValues)
+            .map((s1) => ({
+              ...s1.dataValues,
+              MODULE: JSON.parse(s1.dataValues.MODULE),
+            }))
             .filter((s2) => s2.COMPANY_ID === result2.COMPANY_ID
               && s2.ASSESSMENT_YEAR === result2.ASSESSMENT_YEAR);
           logger.debug(`allGetXKPI --> filtered Assessment found: ${JSON.stringify(resScore2)}`);
@@ -522,6 +529,7 @@ module.exports = {
               ...resSignKPI2,
               ...resSignActual2,
               ...resAttachment3,
+              MODULE: JSON.parse(result2.MODULE),
             },
             ELSA: resElsa2,
             assessment: resScore2[0],
@@ -537,7 +545,10 @@ module.exports = {
         const resElsa4 = resElsa.length === 0
           ? []
           : resElsa
-            .map((e1) => e1.dataValues)
+            .map((e1) => ({
+              ...e1.dataValues,
+              MODULE: JSON.parse(e1.dataValues.MODULE),
+            }))
             .filter((e2) => e2.COMPANY_ID === COMPANY_ID
               && e2.ASSESSMENT_YEAR === 1000);
 
@@ -545,7 +556,10 @@ module.exports = {
         const resScore4 = resScore.length === 0
           ? [{}]
           : resScore
-            .map((s1) => s1.dataValues)
+            .map((s1) => ({
+              ...s1.dataValues,
+              MODULE: JSON.parse(s1.dataValues.MODULE),
+            }))
             .filter((s2) => s2.COMPANY_ID === COMPANY_ID
               && s2.ASSESSMENT_YEAR === 1000);
 
