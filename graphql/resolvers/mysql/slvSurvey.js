@@ -271,7 +271,7 @@ module.exports = {
       resultCompany = getFilteredData(resultCompany, filter);
 
       const resultFinal = resultCompany.map((f) => ({
-        COMPANY_ID: f.ID,
+        COMPANY_ID: f.COMPANY_ID,
         SECTOR: f.SECTOR,
         ANNUAL_TURNOVER: f.ANNUAL_TURNOVER && f.ANNUAL_TURNOVER > 0 ? f.ANNUAL_TURNOVER : 0,
         FULLTIME_EMPLOYEE_COUNT: f.FULLTIME_EMPLOYEE_COUNT ? f.FULLTIME_EMPLOYEE_COUNT : 0,
