@@ -525,10 +525,10 @@ module.exports = {
 
           newResult = {
             KPI: {
-              ...result2,
               ...resSignKPI2,
               ...resSignActual2,
               ...resAttachment3,
+              ...result2,
               MODULE: JSON.parse(result2.MODULE),
             },
             ELSA: resElsa2,
