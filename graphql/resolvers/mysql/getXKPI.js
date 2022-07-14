@@ -6,11 +6,13 @@ const { isAuthenticatedResolver } = require('../../permissions/acl');
 const { ForbiddenError } = require('../../permissions/errors');
 const logger = require('../../../packages/logger');
 
-const processGetxData = (input, mail, modul, create = true) => {
+const processGetxData = (input, mail, create = true) => {
   const parsedInput = JSON.parse(input.data);
 
   // separate KPI and achievement fields
   const {
+    //
+    MODULE,
     // kpi
     BUS_OWNER_NAME,
     BUS_OWNER_DATE,
@@ -58,7 +60,7 @@ const processGetxData = (input, mail, modul, create = true) => {
     ...others,
     ...history,
     COMPANY_ID: input.COMPANY_ID,
-    MODULE: JSON.stringify(modul),
+    MODULE: JSON.stringify(MODULE),
     ASSESSMENT_YEAR: 1000,
   };
 
@@ -74,7 +76,7 @@ const processGetxData = (input, mail, modul, create = true) => {
     CHECKER_DATE,
     CHECKER,
     COMPANY_ID: input.COMPANY_ID,
-    MODULE: JSON.stringify(modul),
+    MODULE: JSON.stringify(MODULE),
     ASSESSMENT_YEAR: 1000,
     GETX_TYPE: 'KPI',
     ...history,
@@ -92,7 +94,7 @@ const processGetxData = (input, mail, modul, create = true) => {
     CHECKER_DATE: CHECKER_ACTUAL_DATE,
     CHECKER: CHECKER_ACTUAL,
     COMPANY_ID: input.COMPANY_ID,
-    MODULE: JSON.stringify(modul),
+    MODULE: JSON.stringify(MODULE),
     ASSESSMENT_YEAR: 1000,
     GETX_TYPE: 'ACHIEVEMENT',
     ...history,
@@ -110,7 +112,7 @@ const processGetxData = (input, mail, modul, create = true) => {
     NG_ATTACHMENT: JSON.stringify(NG_ATTACHMENT),
     FILE_ATTACHMENT: JSON.stringify(FILE_ATTACHMENT),
     COMPANY_ID: input.COMPANY_ID,
-    MODULE: JSON.stringify(modul),
+    MODULE: JSON.stringify(MODULE),
     ASSESSMENT_YEAR: 1000,
     GETX_TYPE: 'ACHIEVEMENT',
     ...history,
@@ -575,7 +577,7 @@ module.exports = {
         const totalFinalScore2 = resElsa4.length === 0 ? 0 : getTotalScore(resElsa4);
 
         newResult = {
-          KPI: {},
+          KPI: { MODULE: JSON.parse(resQuest4[0].MODULE) },
           ELSA: resElsa4,
           assessment: resScore4[0],
           TOTAL_FINAL_SCORE: totalFinalScore2,
@@ -611,7 +613,7 @@ module.exports = {
       // process input
       const {
         kpiInput, signKPIInput, signActualInput, attachmentInput,
-      } = processGetxData(input, mail, userRoleList.MODULE);
+      } = processGetxData(input, mail);
 
       // main KPI
       const getXKPIInput = {
@@ -673,7 +675,7 @@ module.exports = {
       const {
         kpiInput, signKPIInput, signActualInput, attachmentInput,
         SIGN_KPI_ID, SIGN_ACTUAL_ID, ATTACHMENT_ID,
-      } = processGetxData(input, mail, userRoleList.MODULE, false);
+      } = processGetxData(input, mail, false);
 
       const createHistory = generateHistory(mail, 'CREATE');
 
