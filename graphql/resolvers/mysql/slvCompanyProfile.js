@@ -23,7 +23,7 @@ const updateModuleinDB = async (ID, updateTable, module, mail) => {
     where: { COMPANY_ID: ID },
   };
 
-  const resUpdate = updateTable.findOne(searchOpts2);
+  const resUpdate = await updateTable.findOne(searchOpts2);
   if (!resUpdate) return 'does not exist';
 
   const resultUpdate = resUpdate.dataValues;
