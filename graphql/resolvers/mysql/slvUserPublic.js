@@ -39,13 +39,13 @@ const checkUserExist = async (EMAIL, MysqlSlvUserPublic, process, register = fal
 };
 
 /**
- * Validation for company profile fields
+ * Validation for user profile fields
  * @param {Object} input Main input object
  */
 const checkUserPublicDetails = (input) => {
   // check not empty
   Object.keys(requiredUserFields).forEach((y) => {
-    if (!input[y]) {
+    if (!input[y] && !(input.SOURCE !== 'PORTAL' && y === 'PWD')) {
       logger.error(`checkUserPublicDetails --> Invalid ${requiredUserFields[y]}`);
       throw new InvalidDataError({ message: `Invalid ${requiredUserFields[y]}` });
     }
@@ -211,6 +211,11 @@ module.exports = {
 
       return result;
     }),
+    /**
+     * Create user public without login needed
+     * @param {Object} param0 main input object
+     * @param {String} param0.input input
+     */
     registerUserPublic: async (
       parent, { input }, { connectors: { MysqlSlvUserPublic } },
     ) => {
@@ -265,6 +270,12 @@ module.exports = {
 
       return result;
     },
+    /**
+     * Update user public
+     * @param {Object} param0 main input object
+     * @param {String} param0.email email to be updated
+     * @param {String} param0.input input
+     */
     updateUserPublic: isAuthenticatedResolver.createResolver(async (
       parent, { email, input }, {
         connectors: { MysqlSlvUserPublic },
@@ -282,7 +293,7 @@ module.exports = {
 
       const parsedInput = verifyToken(input);
       checkUserPublicDetails(parsedInput);
-      await checkUserExist(parsedInput.EMAIL, MysqlSlvUserPublic, 'updateUserPublic', true);
+      await checkUserExist(parsedInput.EMAIL, MysqlSlvUserPublic, 'updateUserPublic');
 
       let newPwd = parsedInput.PWD;
 
@@ -313,6 +324,11 @@ module.exports = {
 
       return result2;
     }),
+    /**
+     * Delete user public
+     * @param {Object} param0 main input object
+     * @param {String} param0.email email to be updated
+     */
     deleteUserPublic: isAuthenticatedResolver.createResolver(async (
       parent, { email }, {
         connectors: { MysqlSlvUserPublic },

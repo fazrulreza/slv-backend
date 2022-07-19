@@ -126,7 +126,7 @@ module.exports = {
             logger.debug('ldapLogin --> No data found in DB. Creating...');
             const history = generateHistory(EMAIL, 'CREATE');
             const newInput = {
-              SOURCE: 'APP',
+              SOURCE: userData.source,
               EMAIL,
               NAME,
               AVATAR,
@@ -217,11 +217,11 @@ module.exports = {
             mail: resultUser.EMAIL,
             mobile: resultUser.PHONE,
             photo: resultUser.AVATAR,
-            userType: 10,
+            userType: resultUser.ROLE || 10,
           };
           mini = {
             mail: resultUser.EMAIL,
-            userType: 10,
+            userType: resultUser.ROLE || 10,
           };
           expire = '1y';
 
