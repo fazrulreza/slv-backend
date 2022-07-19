@@ -280,6 +280,12 @@ module.exports = {
 
       // company
       const searchOpts = { where: { COMPANY_ID: input.COMPANY_ID } };
+      const searchOptsElsa = {
+        where: {
+          COMPANY_ID: input.COMPANY_ID,
+          PREDICTION: input.PUBLIC ? 'YES' : 'NO',
+        },
+      };
       const searchOptsAll = { where: null };
 
       const resCompany = await MysqlSlvCompanyProfile.findById(input.COMPANY_ID);
@@ -327,7 +333,7 @@ module.exports = {
       logger.debug(`oneAll --> assessment found: ${JSON.stringify(resScore)}`);
 
       // ELSA
-      const resElsaPre = await MysqlSlvELSAScorecard.findAll(searchOpts);
+      const resElsaPre = await MysqlSlvELSAScorecard.findAll(searchOptsElsa);
       const resElsa = resElsaPre.length !== 0
         ? resElsaPre.map((a) => a.dataValues)
         : resElsaPre;
@@ -618,7 +624,12 @@ module.exports = {
           };
 
           // assessment
-          [resultScore] = resScore.filter((y) => y.ASSESSMENT_YEAR === yr);
+          [resultScore] = resScore
+            .map((as) => ({
+              ...as,
+              MODULE: JSON.parse(as.MODULE),
+            }))
+            .filter((y) => y.ASSESSMENT_YEAR === yr);
 
           // ELSA
           const resultElsa = resElsa
@@ -663,6 +674,7 @@ module.exports = {
       if (input.ASSESSMENT_YEAR === 1000 && checkPermission('ELSA-CREATE', userRoleList)) {
         // get elsa
         logger.debug('oneAll --> storing calculated ELSA score in DB');
+        const PREDICTION = input.PUBLIC ? 'YES' : 'NO';
 
         const [toStore] = finalResult
           .filter((i) => i.ASSESSMENT_YEAR === 1000)
@@ -676,6 +688,7 @@ module.exports = {
             ...history,
             ID: generateId(),
             COMPANY_ID: input.COMPANY_ID,
+            PREDICTION,
             MODULE: JSON.stringify(resultCompany.MODULE),
           };
           return newB;
@@ -686,6 +699,7 @@ module.exports = {
           where: {
             COMPANY_ID: input.COMPANY_ID,
             ASSESSMENT_YEAR: input.ASSESSMENT_YEAR,
+            PREDICTION,
           },
         };
         const resElsaScore = await MysqlSlvELSAScorecard.findAll(searchOptsElsa);
@@ -717,9 +731,9 @@ module.exports = {
       }
       logger.debug('createElsa --> Permission check passed');
 
+      const searchOpts = { where: { COMPANY_ID: input.COMPANY_ID } };
       // survey
-      const searchOptsSurvey = { where: { COMPANY_ID: input.COMPANY_ID } };
-      const resSurvey = await MysqlSlvSurvey.findOne(searchOptsSurvey);
+      const resSurvey = await MysqlSlvSurvey.findOne(searchOpts);
       const surveyInput = resSurvey.dataValues;
       logger.debug(`createElsa --> survey found: ${JSON.stringify(surveyInput)}`);
 
@@ -734,26 +748,28 @@ module.exports = {
       logger.debug(`createElsa --> created survey: ${JSON.stringify(resultCreateSurvey)}`);
 
       // assessment
-      const searchOptsAssess = { where: { COMPANY_ID: input.COMPANY_ID } };
-      const resAssess = await MysqlSlvAssessment.findOne(searchOptsAssess);
-      const assessInput = resAssess.dataValues;
-      logger.debug(`createElsa --> assessment found: ${JSON.stringify(assessInput)}`);
+      const resAssess = await MysqlSlvAssessment.findOne(searchOpts);
+      if (resAssess) {
+        const assessInput = resAssess.dataValues;
+        logger.debug(`createElsa --> assessment found: ${JSON.stringify(assessInput)}`);
 
-      const assessHist = generateHistory(mail, 'CREATE');
-      const finalAssess = {
-        ...assessInput,
-        ...assessHist,
-        ASSESSMENT_YEAR: input.ASSESSMENT_YEAR,
-        ID: generateId(),
-      };
-      const resultCreateAssess = await MysqlSlvAssessment.create(finalAssess);
-      logger.debug(`createElsa --> created assessment: ${JSON.stringify(resultCreateAssess)}`);
+        const assessHist = generateHistory(mail, 'CREATE');
+        const finalAssess = {
+          ...assessInput,
+          ...assessHist,
+          ASSESSMENT_YEAR: input.ASSESSMENT_YEAR,
+          ID: generateId(),
+        };
+        const resultCreateAssess = await MysqlSlvAssessment.create(finalAssess);
+        logger.debug(`createElsa --> created assessment: ${JSON.stringify(resultCreateAssess)}`);
+      }
 
       // scorecard
       const searchOptsElsa = {
         where: {
           COMPANY_ID: input.COMPANY_ID,
           ASSESSMENT_YEAR: 1000,
+          PREDICTION: input.PUBLIC ? 'YES' : 'NO',
         },
       };
       const resElsa = await MysqlSlvELSAScorecard.findAll(searchOptsElsa);

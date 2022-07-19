@@ -19,6 +19,7 @@ const attributes = {
   COMPANY_ID: Sequelize.STRING,
   MODULE: Sequelize.STRING,
   ASSESSMENT_YEAR: Sequelize.INTEGER.UNSIGNED,
+  PREDICTION: Sequelize.STRING,
   CREATED_AT: Sequelize.STRING,
   CREATED_BY: Sequelize.STRING,
   UPDATED_AT: Sequelize.STRING,
