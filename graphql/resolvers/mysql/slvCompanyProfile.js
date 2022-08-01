@@ -20,19 +20,21 @@ const logger = require('../../../packages/logger');
  */
 const updateModuleinDB = async (ID, updateTable, module, mail) => {
   const searchOpts2 = {
-    where: { COMPANY_ID: ID },
+    where: {
+      ASSESSMENT_YEAR: 1000,
+      COMPANY_ID: ID,
+    },
   };
 
-  const resUpdate = await updateTable.findOne(searchOpts2);
+  const resUpdate = await updateTable.findAll(searchOpts2);
   if (!resUpdate) return 'does not exist';
 
-  const resultUpdate = resUpdate.dataValues;
+  const resultUpdate = resUpdate[0].dataValues;
 
   if (resultUpdate.MODULE !== module) {
     const history = generateHistory(mail, 'UPDATE', resultUpdate.CREATED_AT);
     const searchOpts = {
       object: {
-        ...resultUpdate,
         MODULE: module,
         ...history,
       },

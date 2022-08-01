@@ -99,7 +99,9 @@ module.exports = {
 
           break;
         }
-        case (userData.source === 'GOOGLE' || userData.source === 'FACEBOOK' || userData.source === 'FIREBASE'): {
+        case (userData.source === 'GOOGLE'
+        || userData.source === 'FACEBOOK'
+        || userData.source === 'FIREBASE'): {
           logger.debug('ldapLogin --> Login from public using GOOGLE / FACEBOOK / FIREBASE');
 
           let EMAIL = userData.email ? userData.email : userData.username;
