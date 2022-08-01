@@ -38,7 +38,10 @@ const updateModuleinDB = async (ID, updateTable, module, mail) => {
         MODULE: module,
         ...history,
       },
-      where: { COMPANY_ID: ID },
+      where: {
+        ASSESSMENT_YEAR: 1000,
+        COMPANY_ID: ID,
+      },
     };
 
     await updateTable.update(searchOpts);
