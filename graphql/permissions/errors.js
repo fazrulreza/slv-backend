@@ -10,6 +10,10 @@ const NotFoundError = createError('NotFoundError', {
   message: 'No record found',
 });
 
+const NetworkError = createError('NetworkError', {
+  message: 'Something is wrong with the network. Please try again later',
+});
+
 const WrongPasswordError = createError('WrongPasswordError', {
   message: 'Wrong password',
 });
@@ -123,4 +127,5 @@ module.exports = {
   AssessmentExistsError,
   NoSurveyError,
   NoAssessmentError,
+  NetworkError,
 };
