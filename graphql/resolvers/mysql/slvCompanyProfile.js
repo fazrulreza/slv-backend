@@ -725,6 +725,7 @@ module.exports = {
         connectors: {
           MysqlSlvCompanyProfile, MysqlSlvMSIC, MysqlSlvSurvey, MysqlSlvAssessment,
           MysqlSlvELSAScorecard, MysqlGetxKPI, MysqlGetxSign, MysqlGetxAttachment,
+          MysqlGetxAchievement,
         },
         user: { mail, userRoleList },
       },
@@ -774,6 +775,9 @@ module.exports = {
 
       const updateKPI = await updateModuleinDB(ID, MysqlGetxKPI, MODULE, mail);
       logger.debug(`updateCompany --> GETX KPI ${updateKPI}`);
+
+      const updateKPIAchievement = await updateModuleinDB(ID, MysqlGetxAchievement, MODULE, mail);
+      logger.debug(`updateCompany --> GETX KPI Achievement ${updateKPIAchievement}`);
 
       const updateSign = await updateModuleinDB(ID, MysqlGetxSign, MODULE, mail);
       logger.debug(`updateCompany --> GETX Sign ${updateSign}`);

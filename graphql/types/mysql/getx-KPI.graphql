@@ -44,6 +44,10 @@ type GetXKPI {
     DIVERSIFY_Q2: String
     DIVERSIFY_Q3: String
     DIVERSIFY_Q4: String
+    DIVERSIFY_A1: String
+    DIVERSIFY_A2: String
+    DIVERSIFY_A3: String
+    DIVERSIFY_A4: String
     DIVERSIFY_TARGET: String
     DIVERSIFY_ACHIEVEMENT: String
     DIVERSIFY_PERCENT: String
@@ -54,6 +58,10 @@ type GetXKPI {
     EXPORT_REVENUE_Q2: Float
     EXPORT_REVENUE_Q3: Float
     EXPORT_REVENUE_Q4: Float
+    EXPORT_REVENUE_A1: Float
+    EXPORT_REVENUE_A2: Float
+    EXPORT_REVENUE_A3: Float
+    EXPORT_REVENUE_A4: Float
     EXPORT_REVENUE_TARGET: Float
     EXPORT_REVENUE_ACHIEVEMENT: Float
     EXPORT_REVENUE_COMMENT: String
@@ -71,6 +79,10 @@ type GetXKPI {
     PROFITABILITY_Q2: Float
     PROFITABILITY_Q3: Float
     PROFITABILITY_Q4: Float
+    PROFITABILITY_A1: Float
+    PROFITABILITY_A2: Float
+    PROFITABILITY_A3: Float
+    PROFITABILITY_A4: Float
     PROFITABILITY_TARGET: Float
     PROFITABILITY_ACHIEVEMENT: Float
     PROFITABILITY_COMMENT: String
@@ -82,6 +94,10 @@ type GetXKPI {
     SKILLED_Q2: Int
     SKILLED_Q3: Int
     SKILLED_Q4: Int
+    SKILLED_A1: Int
+    SKILLED_A2: Int
+    SKILLED_A3: Int
+    SKILLED_A4: Int
     SKILLED_TARGET: Int
     SKILLED_ACHIEVEMENT: Int
     SKILLED_COMMENT: String
@@ -94,6 +110,10 @@ type GetXKPI {
     TECHNOLOGY_Q2: String
     TECHNOLOGY_Q3: String
     TECHNOLOGY_Q4: String
+    TECHNOLOGY_A1: String
+    TECHNOLOGY_A2: String
+    TECHNOLOGY_A3: String
+    TECHNOLOGY_A4: String
     TECHNOLOGY_TARGET: String
     TECHNOLOGY_ACHIEVEMENT: String
     TECHNOLOGY_PERCENT: String
@@ -104,6 +124,10 @@ type GetXKPI {
     TURNOVER_Q2: Int
     TURNOVER_Q3: Int
     TURNOVER_Q4: Int
+    TURNOVER_A1: Int
+    TURNOVER_A2: Int
+    TURNOVER_A3: Int
+    TURNOVER_A4: Int
     TURNOVER_TARGET: Int
     TURNOVER_ACHIEVEMENT: Int
     TURNOVER_COMMENT: String
@@ -112,6 +136,10 @@ type GetXKPI {
     UNSKILLED_Q2: Int
     UNSKILLED_Q3: Int
     UNSKILLED_Q4: Int
+    UNSKILLED_A1: Int
+    UNSKILLED_A2: Int
+    UNSKILLED_A3: Int
+    UNSKILLED_A4: Int
     UNSKILLED_TARGET: Int
     UNSKILLED_ACHIEVEMENT: Int
     UNSKILLED_COMMENT: String
@@ -123,6 +151,10 @@ type GetXKPI {
     NG_Q2: String
     NG_Q3: String
     NG_Q4: String
+    NG_A1: String
+    NG_A2: String
+    NG_A3: String
+    NG_A4: String
     NG_COMMENT: String
   # Refers to ID generated in CompanyProfile
     COMPANY_ID: String

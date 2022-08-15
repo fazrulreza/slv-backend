@@ -11,9 +11,61 @@ const processGetxData = (input, mail, create = true) => {
 
   // separate KPI and achievement fields
   const {
-    //
     MODULE,
-    // kpi
+    // achievement fields
+    TURNOVER_ACHIEVEMENT,
+    TURNOVER_A1,
+    TURNOVER_A2,
+    TURNOVER_A3,
+    TURNOVER_A4,
+    TURNOVER_COMMENT,
+    PROFITABILITY_ACHIEVEMENT,
+    PROFITABILITY_A1,
+    PROFITABILITY_A2,
+    PROFITABILITY_A3,
+    PROFITABILITY_A4,
+    PROFITABILITY_COMMENT,
+    SKILLED_ACHIEVEMENT,
+    SKILLED_A1,
+    SKILLED_A2,
+    SKILLED_A3,
+    SKILLED_A4,
+    SKILLED_COMMENT,
+    UNSKILLED_ACHIEVEMENT,
+    UNSKILLED_A1,
+    UNSKILLED_A2,
+    UNSKILLED_A3,
+    UNSKILLED_A4,
+    UNSKILLED_COMMENT,
+    EXPORT_REVENUE_ACHIEVEMENT,
+    EXPORT_REVENUE_A1,
+    EXPORT_REVENUE_A2,
+    EXPORT_REVENUE_A3,
+    EXPORT_REVENUE_A4,
+    EXPORT_REVENUE_COMMENT,
+    DIVERSIFY_ACHIEVEMENT,
+    DIVERSIFY_PERCENT,
+    DIVERSIFY_A1,
+    DIVERSIFY_A2,
+    DIVERSIFY_A3,
+    DIVERSIFY_A4,
+    DIVERSIFY_COMMENT,
+    TECHNOLOGY_ACHIEVEMENT,
+    TECHNOLOGY_PERCENT,
+    TECHNOLOGY_A1,
+    TECHNOLOGY_A2,
+    TECHNOLOGY_A3,
+    TECHNOLOGY_A4,
+    TECHNOLOGY_COMMENT,
+    TECHNOLOGY_FOCUS,
+    NG_ACHIEVEMENT,
+    NG_PERCENT,
+    NG_A1,
+    NG_A2,
+    NG_A3,
+    NG_A4,
+    NG_COMMENT,
+    // kpi sign
     BUS_OWNER_NAME,
     BUS_OWNER_DATE,
     BUS_OWNER,
@@ -24,7 +76,7 @@ const processGetxData = (input, mail, create = true) => {
     CHECKER_DATE,
     CHECKER,
     SIGN_KPI_ID,
-    // achievement
+    // achievement sign
     BUS_OWNER_ACTUAL_NAME,
     BUS_OWNER_ACTUAL_DATE,
     BUS_OWNER_ACTUAL,
@@ -58,6 +110,65 @@ const processGetxData = (input, mail, create = true) => {
   // base KPI
   const kpiInput = {
     ...others,
+    ...history,
+    COMPANY_ID: input.COMPANY_ID,
+    MODULE: JSON.stringify(MODULE),
+    ASSESSMENT_YEAR: 1000,
+  };
+
+  const kpiAchievementInput = {
+    TURNOVER_ACHIEVEMENT,
+    TURNOVER_A1,
+    TURNOVER_A2,
+    TURNOVER_A3,
+    TURNOVER_A4,
+    TURNOVER_COMMENT,
+    PROFITABILITY_ACHIEVEMENT,
+    PROFITABILITY_A1,
+    PROFITABILITY_A2,
+    PROFITABILITY_A3,
+    PROFITABILITY_A4,
+    PROFITABILITY_COMMENT,
+    SKILLED_ACHIEVEMENT,
+    SKILLED_A1,
+    SKILLED_A2,
+    SKILLED_A3,
+    SKILLED_A4,
+    SKILLED_COMMENT,
+    UNSKILLED_ACHIEVEMENT,
+    UNSKILLED_A1,
+    UNSKILLED_A2,
+    UNSKILLED_A3,
+    UNSKILLED_A4,
+    UNSKILLED_COMMENT,
+    EXPORT_REVENUE_ACHIEVEMENT,
+    EXPORT_REVENUE_A1,
+    EXPORT_REVENUE_A2,
+    EXPORT_REVENUE_A3,
+    EXPORT_REVENUE_A4,
+    EXPORT_REVENUE_COMMENT,
+    DIVERSIFY_ACHIEVEMENT,
+    DIVERSIFY_PERCENT,
+    DIVERSIFY_A1,
+    DIVERSIFY_A2,
+    DIVERSIFY_A3,
+    DIVERSIFY_A4,
+    DIVERSIFY_COMMENT,
+    TECHNOLOGY_ACHIEVEMENT,
+    TECHNOLOGY_PERCENT,
+    TECHNOLOGY_A1,
+    TECHNOLOGY_A2,
+    TECHNOLOGY_A3,
+    TECHNOLOGY_A4,
+    TECHNOLOGY_COMMENT,
+    TECHNOLOGY_FOCUS,
+    NG_ACHIEVEMENT,
+    NG_PERCENT,
+    NG_A1,
+    NG_A2,
+    NG_A3,
+    NG_A4,
+    NG_COMMENT,
     ...history,
     COMPANY_ID: input.COMPANY_ID,
     MODULE: JSON.stringify(MODULE),
@@ -120,6 +231,7 @@ const processGetxData = (input, mail, create = true) => {
 
   return {
     kpiInput,
+    kpiAchievementInput,
     signKPIInput,
     signActualInput,
     attachmentInput,
@@ -221,7 +333,7 @@ module.exports = {
      */
     dashboardKPI: isAuthenticatedResolver.createResolver(async (
       parent, param, {
-        connectors: { MysqlGetxKPI, MysqlSlvUser },
+        connectors: { MysqlGetxKPI, MysqlGetxAchievement, MysqlSlvUser },
         user: { mail, userRoleList },
       },
     ) => {
@@ -245,7 +357,20 @@ module.exports = {
       // all KPI
       const searchOptsKPI = { where: null };
       const resKPI = await MysqlGetxKPI.findAll(searchOptsKPI);
-      const resultKPI = resKPI.map((x) => x.dataValues);
+      const resKPIAchievement = await MysqlGetxAchievement.findAll(searchOptsKPI);
+
+      const resultKPI = resKPI.map((x) => {
+        const result = x.dataValues;
+        const [resultAchievement] = resKPIAchievement
+          .map((k1) => k1.dataValues)
+          .filter((k2) => k2.GETX_ID === x.ID
+        && k2.ASSESSMENT_YEAR === x.ASSESSMENT_YEAR);
+
+        return {
+          ...resultAchievement,
+          ...result,
+        };
+      });
       logger.debug(`dashboardKPI --> Total KPI found: ${resultKPI.length}`);
 
       const result1 = resultUser.map((u) => {
@@ -290,7 +415,10 @@ module.exports = {
      */
     scorecardKPI: isAuthenticatedResolver.createResolver(async (
       parent, { COMPANY_ID }, {
-        connectors: { MysqlGetxKPI, MysqlSlvMSIC, MysqlSlvCompanyProfile },
+        connectors: {
+          MysqlGetxKPI, MysqlSlvMSIC, MysqlSlvCompanyProfile,
+          MysqlGetxAchievement,
+        },
         user: { mail, userRoleList },
       },
     ) => {
@@ -308,6 +436,8 @@ module.exports = {
       // KPI
       const resKPI = await MysqlGetxKPI.findAll(searchOpts);
       logger.debug(`scorecardKPI --> total KPI found: ${resKPI.length}`);
+      const resKPIAchievement = await MysqlGetxAchievement.findAll(searchOpts);
+      logger.debug(`scorecardKPI --> total KPI Achievement found: ${resKPIAchievement.length}`);
 
       // Company + MSIC
       const resCompany = await MysqlSlvCompanyProfile.findById(COMPANY_ID);
@@ -325,7 +455,17 @@ module.exports = {
 
       if (resKPI.length !== 0) {
         resultKPI = resKPI.map((k) => {
-          const resTemp = k.dataValues;
+          const res = k.dataValues;
+          const [resultAchievement] = resKPIAchievement
+            .map((k1) => k1.dataValues)
+            .filter((k2) => k2.GETX_ID === k.ID
+          && k2.ASSESSMENT_YEAR === k.ASSESSMENT_YEAR);
+
+          const resTemp = {
+            ...resultAchievement,
+            ...res,
+          };
+
           const TURNOVER = getKPIscores(resTemp, 'TURNOVER_');
           const PROFITABILITY = getKPIscores(resTemp, 'PROFITABILITY_');
           const SKILLED = getKPIscores(resTemp, 'SKILLED_');
@@ -376,7 +516,7 @@ module.exports = {
     allGetXKPI: isAuthenticatedResolver.createResolver(async (
       parent, { COMPANY_ID }, {
         connectors: {
-          MysqlGetxKPI, MysqlGetxSign, MysqlGetxAttachment,
+          MysqlGetxKPI, MysqlGetxSign, MysqlGetxAttachment, MysqlGetxAchievement,
           MysqlSlvELSAScorecard, MysqlSlvAssessment, MysqlSlvSurvey,
         },
         user: { mail, userRoleList },
@@ -397,6 +537,9 @@ module.exports = {
       // KPI
       const resKPI = await MysqlGetxKPI.findAll(searchOpts);
       logger.debug(`allGetXKPI --> KPI found: ${JSON.stringify(resKPI)}`);
+
+      const resKPIAchievement = await MysqlGetxAchievement.findAll(searchOpts);
+      logger.debug(`allGetXKPI --> KPI Achievement found: ${JSON.stringify(resKPIAchievement)}`);
 
       const resSign = await MysqlGetxSign.findAll(searchOpts);
       logger.debug(`allGetXKPI --> KPI Signature found: ${JSON.stringify(resSign)}`);
@@ -419,7 +562,17 @@ module.exports = {
       if (resKPI.length !== 0) {
         logger.debug(`allGetXKPI --> total KPI found: ${resKPI.length}`);
         result = resKPI.map((kpi) => {
-          const result2 = kpi.dataValues;
+          const resTemp = kpi.dataValues;
+          const [resultAchievement] = resKPIAchievement
+            .map((k1) => k1.dataValues)
+            .filter((k2) => k2.GETX_ID === kpi.ID
+          && k2.ASSESSMENT_YEAR === kpi.ASSESSMENT_YEAR);
+
+          const result2 = {
+            ...resultAchievement,
+            ...resTemp,
+          };
+
           let resSignKPI2 = {};
           let resSignActual2 = {};
           let resAttachment3 = {};
@@ -597,7 +750,10 @@ module.exports = {
   Mutation: {
     createGetXKPI: isAuthenticatedResolver.createResolver(async (
       parent, { input }, {
-        connectors: { MysqlGetxKPI, MysqlGetxSign, MysqlGetxAttachment },
+        connectors: {
+          MysqlGetxKPI, MysqlGetxSign, MysqlGetxAttachment,
+          MysqlGetxAchievement,
+        },
         user: { mail, userRoleList },
       },
     ) => {
@@ -612,7 +768,7 @@ module.exports = {
 
       // process input
       const {
-        kpiInput, signKPIInput, signActualInput, attachmentInput,
+        kpiInput, kpiAchievementInput, signKPIInput, signActualInput, attachmentInput,
       } = processGetxData(input, mail);
 
       // main KPI
@@ -622,6 +778,14 @@ module.exports = {
       };
       const resultKPI = await MysqlGetxKPI.create(getXKPIInput);
       logger.debug(`createGetXKPI --> KPI created: ${JSON.stringify(resultKPI)}`);
+
+      const getXKPIAchievementInput = {
+        ...kpiAchievementInput,
+        ID: getXKPIInput.ID,
+        GETX_ID: getXKPIInput.ID,
+      };
+      const resultKPIAchievement = await MysqlGetxAchievement.create(getXKPIAchievementInput);
+      logger.debug(`createGetXKPI --> KPI Achievement created: ${JSON.stringify(resultKPIAchievement)}`);
 
       // KPI sign
       const getXSignKPIInput = {
@@ -658,7 +822,9 @@ module.exports = {
 
     updateGetXKPI: isAuthenticatedResolver.createResolver(async (
       parent, { input }, {
-        connectors: { MysqlGetxKPI, MysqlGetxSign, MysqlGetxAttachment },
+        connectors: {
+          MysqlGetxKPI, MysqlGetxSign, MysqlGetxAttachment, MysqlGetxAchievement,
+        },
         user: { mail, userRoleList },
       },
     ) => {
@@ -673,7 +839,7 @@ module.exports = {
 
       // process input
       const {
-        kpiInput, signKPIInput, signActualInput, attachmentInput,
+        kpiInput, kpiAchievementInput, signKPIInput, signActualInput, attachmentInput,
         SIGN_KPI_ID, SIGN_ACTUAL_ID, ATTACHMENT_ID,
       } = processGetxData(input, mail, false);
 
@@ -689,6 +855,16 @@ module.exports = {
       };
       const resultKPI = await MysqlGetxKPI.update(searchOptsKPI);
       logger.debug(`updateGetXKPI --> KPI updated: ${JSON.stringify(resultKPI)}`);
+
+      const searchOptsKPIAchievement = {
+        object: kpiAchievementInput,
+        where: {
+          COMPANY_ID: input.COMPANY_ID,
+          ASSESSMENT_YEAR: 1000,
+        },
+      };
+      const resultKPIAchievement = await MysqlGetxAchievement.update(searchOptsKPIAchievement);
+      logger.debug(`updateGetXKPI --> KPI Achievement updated: ${JSON.stringify(resultKPIAchievement)}`);
 
       // Sign
       if (SIGN_KPI_ID) {
@@ -784,7 +960,9 @@ module.exports = {
     }),
     finalizeKPI: isAuthenticatedResolver.createResolver(async (
       parent, { input }, {
-        connectors: { MysqlGetxKPI, MysqlGetxSign, MysqlGetxAttachment },
+        connectors: {
+          MysqlGetxKPI, MysqlGetxAchievement, MysqlGetxSign, MysqlGetxAttachment,
+        },
         user: { mail, userRoleList },
       },
     ) => {
@@ -813,6 +991,23 @@ module.exports = {
       };
       const resFinalKPI = await MysqlGetxKPI.create(finalKPI);
       logger.debug(`finalizeKPI --> KPI created: ${JSON.stringify(resFinalKPI)}`);
+
+      // kpi achievement
+      const searchOptsKPIAchievement = { where: { COMPANY_ID: input.COMPANY_ID } };
+
+      const resKPIAchievement = await MysqlGetxAchievement.findOne(searchOptsKPIAchievement);
+      const KPIAchievementInput = resKPIAchievement.dataValues;
+
+      const KPIAchievementHist = generateHistory(mail, 'CREATE');
+      const finalKPIAchievement = {
+        ...KPIAchievementInput,
+        ...KPIAchievementHist,
+        KPI_DATE: moment(KPIAchievementInput.KPI_DATE, 'x').add(-8, 'hours').format('YYYY-MM-DD HH:mm:ss'),
+        ASSESSMENT_YEAR: input.ASSESSMENT_YEAR,
+        ID: generateId(),
+      };
+      const resFinalKPIAchievement = await MysqlGetxKPI.create(finalKPIAchievement);
+      logger.debug(`finalizeKPI --> KPI Achievement created: ${JSON.stringify(resFinalKPIAchievement)}`);
 
       // attachment
       const searchOptsAtt = { where: { COMPANY_ID: input.COMPANY_ID } };

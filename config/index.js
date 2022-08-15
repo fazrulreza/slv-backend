@@ -29,6 +29,7 @@ const TOKEN_BLACKLIST = 'token_blacklist';
 const MODULE = 'module';
 
 const GETX_KPI = 'getx_kpi';
+const GETX_ACHIEVEMENT = 'getx_achievement';
 const GETX_SIGN = 'getx_sign';
 const GETX_ATTACHMENT = 'getx_attachment';
 
@@ -58,6 +59,7 @@ module.exports = {
   USER_ROLE,
   TOKEN_BLACKLIST,
   GETX_KPI,
+  GETX_ACHIEVEMENT,
   GETX_SIGN,
   GETX_ATTACHMENT,
   ADMIN,
