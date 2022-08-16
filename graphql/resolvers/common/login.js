@@ -10,6 +10,7 @@ const {
 const { isAuthenticatedResolver } = require('../../permissions/acl');
 const {
   SessionExpiredError, JsonWebTokenError, NotFoundError, WrongPasswordError,
+  UnknownError, NetworkError,
 } = require('../../permissions/errors');
 const logger = require('../../../packages/logger');
 const wrapper = require('../../../packages/wrapper');
@@ -203,13 +204,26 @@ module.exports = {
           logger.debug(`ldapLogin --> User data from DB: ${JSON.stringify(resultUser)}`);
 
           // if not exist in firebase, check password
-          if (!fireData || (error && error.code === 'auth/user-not-found')) {
-            const pass = await comparePasswordAsync(userData.password, resultUser.PWD);
-            logger.debug(`ldapLogin --> Password match : ${pass}`);
+          if (!fireData || error) {
+            logger.error(`ldapLogin --> firebase error: ${error.code}`);
+            switch (true) {
+              case resultUser.SOURCE === 'PORTAL':
+              case error.code === 'auth/user-not-found': {
+                const pass = await comparePasswordAsync(userData.password, resultUser.PWD);
+                logger.debug(`ldapLogin --> Password match : ${pass}`);
 
-            if (!pass) {
-              logger.error(`ldapLogin --> Password match = ${pass}`);
-              throw new WrongPasswordError();
+                if (!pass) {
+                  logger.error(`ldapLogin --> Password match = ${pass}`);
+                  throw new WrongPasswordError();
+                }
+                break;
+              }
+              case error.code === 'auth/network-request-failed': {
+                throw new NetworkError();
+              }
+              default: {
+                throw new UnknownError({ message: error.code });
+              }
             }
           }
 
