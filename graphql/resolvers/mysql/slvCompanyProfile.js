@@ -286,10 +286,10 @@ module.exports = {
         const resK1 = resK.length !== 0 ? resK[0] : null;
 
         return {
-          ...resC1,
           ...resQ1,
           ...resS1,
           ...resK1,
+          ...resC1,
           SURVEY_DONE,
           ASSESSMENT_DONE,
           KPI_DONE,
@@ -442,9 +442,9 @@ module.exports = {
           const resS1 = resS.length !== 0 ? resS[0] : null;
 
           return {
-            ...resC,
             ...resQ1,
             ...resS1,
+            ...resC,
             SURVEY_DONE: resQ.length,
             ASSESSMENT_DONE: resS.length,
           };

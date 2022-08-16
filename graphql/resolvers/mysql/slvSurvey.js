@@ -253,9 +253,9 @@ module.exports = {
           const resS1 = resS.length !== 0 ? resS[0] : null;
 
           return {
-            ...resC,
             ...resQ1,
             ...resS1,
+            ...resC,
             SURVEY_DONE: resQ.length,
             ASSESSMENT_DONE: resS.length,
           };

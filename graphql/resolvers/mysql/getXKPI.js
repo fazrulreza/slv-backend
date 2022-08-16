@@ -518,10 +518,10 @@ module.exports = {
 
           newResult = {
             KPI: {
-              ...result2,
               ...resSignKPI2,
               ...resSignActual2,
               ...resAttachment3,
+              ...result2,
             },
             ELSA: resElsa2,
             assessment: resScore2[0],
