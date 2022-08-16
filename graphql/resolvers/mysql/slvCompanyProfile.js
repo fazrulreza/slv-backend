@@ -125,12 +125,14 @@ const checkCompanyExist = async (ENTITY_NAME, MysqlSlvCompanyProfile, process, I
     where: { ENTITY_NAME },
   };
   const resCompany = await MysqlSlvCompanyProfile.findOne(searchExistOpts);
-  const resultCompany = resCompany ? resCompany.dataValues.ENTITY_NAME : 'N/A';
+  const resultCompany = resCompany ? resCompany.dataValues : 'N/A';
 
   // checkCompany @ createCompany ? N/A = Good
   // updateCompany ? N/A = Bad, ID not equal to DB ID = Bad
-  if (((process === 'checkCompany' || process === 'createCompany') && resultCompany !== 'N/A')
-    || (process === 'updateCompany' && (resultCompany === 'N/A' || ID !== resultCompany.ID))) {
+  if (
+    ((process === 'checkCompany' || process === 'createCompany') && resultCompany !== 'N/A')
+    || (process === 'updateCompany' && (resultCompany === 'N/A' || ID !== resCompany.dataValues.ID))
+  ) {
     logger.error(`${process} --> Company already exist`);
     throw new CompanyExistsError();
   }
