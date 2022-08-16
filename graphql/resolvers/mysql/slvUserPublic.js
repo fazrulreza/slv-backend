@@ -39,13 +39,13 @@ const checkUserExist = async (EMAIL, MysqlSlvUserPublic, process, register = fal
 };
 
 /**
- * Validation for company profile fields
+ * Validation for user profile fields
  * @param {Object} input Main input object
  */
 const checkUserPublicDetails = (input) => {
   // check not empty
   Object.keys(requiredUserFields).forEach((y) => {
-    if (!input[y]) {
+    if (!input[y] && !(input.SOURCE !== 'PORTAL' && y === 'PWD')) {
       logger.error(`checkUserPublicDetails --> Invalid ${requiredUserFields[y]}`);
       throw new InvalidDataError({ message: `Invalid ${requiredUserFields[y]}` });
     }
@@ -282,7 +282,7 @@ module.exports = {
 
       const parsedInput = verifyToken(input);
       checkUserPublicDetails(parsedInput);
-      await checkUserExist(parsedInput.EMAIL, MysqlSlvUserPublic, 'updateUserPublic', true);
+      await checkUserExist(parsedInput.EMAIL, MysqlSlvUserPublic, 'updateUserPublic');
 
       let newPwd = parsedInput.PWD;
 

@@ -217,11 +217,11 @@ module.exports = {
             mail: resultUser.EMAIL,
             mobile: resultUser.PHONE,
             photo: resultUser.AVATAR,
-            userType: 10,
+            userType: resultUser.ROLE || 10,
           };
           mini = {
             mail: resultUser.EMAIL,
-            userType: 10,
+            userType: resultUser.ROLE || 10,
           };
           expire = '1y';
 
