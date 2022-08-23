@@ -601,13 +601,19 @@ module.exports = {
           logger.debug(`allGetXKPI --> filtered KPI attachment found: ${JSON.stringify(resAttachment2)}`);
 
           // elsa
-          const resElsa2 = resElsa
+          const resElsaPre1 = resElsa
             .map((e1) => ({
               ...e1.dataValues,
               MODULE: JSON.parse(e1.dataValues.MODULE),
             }))
             .filter((e2) => e2.COMPANY_ID === result2.COMPANY_ID
               && e2.ASSESSMENT_YEAR === result2.ASSESSMENT_YEAR);
+
+          const elsaPrediction = resElsaPre1.filter((e3) => e3.PREDICTION === 'YES');
+          const elsaActual = resElsaPre1.filter((e3) => e3.PREDICTION === 'NO');
+
+          const resElsa2 = elsaActual.length !== 0 ? elsaActual : elsaPrediction;
+
           logger.debug(`allGetXKPI --> filtered ELSA found: ${JSON.stringify(resElsa2)}`);
 
           // assessment
@@ -697,15 +703,26 @@ module.exports = {
         });
       } else {
         // elsa
-        const resElsa4 = resElsa.length === 0
-          ? []
-          : resElsa
+
+        let resElsa4 = [];
+
+        if (resElsa.length !== 0) {
+          const resElsaPre2 = resElsa
             .map((e1) => ({
               ...e1.dataValues,
               MODULE: JSON.parse(e1.dataValues.MODULE),
             }))
             .filter((e2) => e2.COMPANY_ID === COMPANY_ID
-              && e2.ASSESSMENT_YEAR === 1000);
+            && e2.ASSESSMENT_YEAR === 1000);
+
+          const elsaPrediction2 = resElsaPre2.filter((e3) => e3.PREDICTION === 'YES');
+          const elsaActual2 = resElsaPre2.filter((e3) => e3.PREDICTION === 'NO');
+
+          resElsa4 = elsaActual2.length !== 0 ? elsaActual2 : elsaPrediction2;
+        }
+
+        // calculate total score
+        const totalFinalScore2 = resElsa4.length === 0 ? 0 : getTotalScore(resElsa4);
 
         // assessment
         const resScore4 = resScore.length === 0
@@ -725,9 +742,6 @@ module.exports = {
             .map((q1) => q1.dataValues)
             .filter((q2) => q2.COMPANY_ID === COMPANY_ID
               && q2.ASSESSMENT_YEAR === 1000);
-
-        // calculate total score
-        const totalFinalScore2 = resElsa4.length === 0 ? 0 : getTotalScore(resElsa4);
 
         newResult = {
           KPI: { MODULE: JSON.parse(resQuest4[0].MODULE) },
