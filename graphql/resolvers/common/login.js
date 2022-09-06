@@ -9,7 +9,8 @@ const {
 } = require('../../helper/common');
 const { isAuthenticatedResolver } = require('../../permissions/acl');
 const {
-  SessionExpiredError, JsonWebTokenError, NotFoundError, WrongPasswordError, UnknownError, NetworkError,
+  SessionExpiredError, JsonWebTokenError, NotFoundError,
+  WrongPasswordError, UnknownError, NetworkError,
 } = require('../../permissions/errors');
 const logger = require('../../../packages/logger');
 const wrapper = require('../../../packages/wrapper');
@@ -26,7 +27,8 @@ const auth = getAuth(app);
 module.exports = {
   Mutation: {
     ldapLogin: async (
-      parent, { input },
+      parent,
+      { input },
       {
         connectors: {
           MysqlSlvUser, MysqlSlvUserRole, MysqlSlvUserPublic,
@@ -110,7 +112,7 @@ module.exports = {
 
           if (userData.source === 'GOOGLE') {
             const ticket = await client.verifyIdToken({
-              idToken: userData.username,
+              idToken: NAME,
               audience: process.env.CLIENT_ID,
             });
             const { name, email, picture } = ticket.getPayload();
@@ -305,11 +307,9 @@ module.exports = {
 
       return finalResult;
     },
-    tokenBlacklist: isAuthenticatedResolver.createResolver(async (
-      parent, { input }, {
-        connectors: { MysqlSlvTokenBlacklist },
-      },
-    ) => {
+    tokenBlacklist: isAuthenticatedResolver.createResolver(async (parent, { input }, {
+      connectors: { MysqlSlvTokenBlacklist },
+    }) => {
       logger.info(`tokenBlacklist --> input: ${input}`);
       const newInput = {
         TOKEN: input,
