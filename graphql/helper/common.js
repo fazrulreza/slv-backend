@@ -385,9 +385,7 @@ const getSMERevenue = (sector, value) => {
  * @param {number} ANNUAL_TURNOVER annual turnover
  * @returns {Object} sales turnover and sme class
  */
-const getSMEClass = (
-  SECTOR, FULLTIME, BUSINESS_OWNER_INVOLVE_PERCENTAGE, ANNUAL_TURNOVER,
-) => {
+const getSMEClass = (SECTOR, FULLTIME, BUSINESS_OWNER_INVOLVE_PERCENTAGE, ANNUAL_TURNOVER) => {
   let classValue;
   let salesValue;
 

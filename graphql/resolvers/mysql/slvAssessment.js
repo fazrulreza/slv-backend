@@ -30,6 +30,7 @@ const checkAssessmentExist = async (COMPANY_ID, MysqlSlvAssessment) => {
  * @param {Object} input main input object
  */
 const checkAssessmentDetails = (input) => {
+  // eslint-disable-next-line no-unused-vars
   const flagCheckObj = assessmentIntObj.map((y) => {
     const regexIntValue = /^[1-6]/gi;
     if (!input[y] || !regexIntValue.test(input[y])) {
@@ -47,12 +48,10 @@ module.exports = {
          * @param {Object} param0 main input object
          * @param {String} param0.id id
          */
-    allAssessment: isAuthenticatedResolver.createResolver(async (
-      parent, { COMPANY_ID }, {
-        connectors: { MysqlSlvSurvey, MysqlSlvAssessment },
-        user: { mail, userRoleList },
-      },
-    ) => {
+    allAssessment: isAuthenticatedResolver.createResolver(async (parent, { COMPANY_ID }, {
+      connectors: { MysqlSlvSurvey, MysqlSlvAssessment },
+      user: { mail, userRoleList },
+    }) => {
       logger.info(`allAssessment --> by ${mail} input: ${COMPANY_ID}`);
 
       if (!checkPermission('ASSESSMENT-READ', userRoleList)) {
@@ -104,12 +103,10 @@ module.exports = {
     }),
   },
   Mutation: {
-    createAssessment: isAuthenticatedResolver.createResolver(async (
-      parent, { input }, {
-        connectors: { MysqlSlvAssessment },
-        user: { mail, userRoleList },
-      },
-    ) => {
+    createAssessment: isAuthenticatedResolver.createResolver(async (parent, { input }, {
+      connectors: { MysqlSlvAssessment },
+      user: { mail, userRoleList },
+    }) => {
       logger.info(`createAssessment --> by ${mail} input: ${JSON.stringify(input)}`);
 
       if (!checkPermission('ASSESSMENT-CREATE', userRoleList)) {
@@ -140,12 +137,10 @@ module.exports = {
       logger.info(`createAssessment --> by ${mail} completed`);
       return result;
     }),
-    updateAssessment: isAuthenticatedResolver.createResolver(async (
-      parent, { input }, {
-        connectors: { MysqlSlvAssessment },
-        user: { mail, userRoleList },
-      },
-    ) => {
+    updateAssessment: isAuthenticatedResolver.createResolver(async (parent, { input }, {
+      connectors: { MysqlSlvAssessment },
+      user: { mail, userRoleList },
+    }) => {
       logger.info(`updateAssessment --> by ${mail} input: ${JSON.stringify(input)}`);
 
       if (!checkPermission('ASSESSMENT-UPDATE', userRoleList)) {

@@ -59,12 +59,10 @@ module.exports = {
          * @param {Object} param0 main input object
          * @param {String} param0.id id
          */
-    allUserPublic: isAuthenticatedResolver.createResolver(async (
-      parent, param, {
-        connectors: { MysqlSlvUserPublic, MysqlSlvUserRole },
-        user: { mail, userRoleList },
-      },
-    ) => {
+    allUserPublic: isAuthenticatedResolver.createResolver(async (parent, param, {
+      connectors: { MysqlSlvUserPublic, MysqlSlvUserRole },
+      user: { mail, userRoleList },
+    }) => {
       logger.info(`allUserPublic --> by ${mail} called with no input`);
 
       if (!checkPermission('USER-READ', userRoleList)) {
@@ -116,12 +114,10 @@ module.exports = {
          * @param {Object} param0 main input object
          * @param {String} param0.id id
          */
-    oneUserPublic: isAuthenticatedResolver.createResolver(async (
-      parent, { email }, {
-        connectors: { MysqlSlvUserPublic, MysqlSlvUserRole },
-        user: { mail, userRoleList },
-      },
-    ) => {
+    oneUserPublic: isAuthenticatedResolver.createResolver(async (parent, { email }, {
+      connectors: { MysqlSlvUserPublic, MysqlSlvUserRole },
+      user: { mail, userRoleList },
+    }) => {
       logger.info(`oneUserPublic --> by ${mail} input: ${email}`);
 
       if (!checkPermission('USER-READ', userRoleList)) {
@@ -159,9 +155,7 @@ module.exports = {
      * @param {Object} param0 main input object
      * @param {String} param0.NAME company name
      */
-    checkUserPublic: async (
-      parent, { EMAIL }, { connectors: { MysqlSlvUserPublic } },
-    ) => {
+    checkUserPublic: async (parent, { EMAIL }, { connectors: { MysqlSlvUserPublic } }) => {
       logger.info(`checkUserPublic --> by public with input: ${EMAIL}`);
 
       const result = await checkUserExist(EMAIL, MysqlSlvUserPublic, 'checkUserPublic');
@@ -177,7 +171,9 @@ module.exports = {
      * @param {String} param0.input input
      */
     createUserPublic: isAuthenticatedResolver.createResolver(async (
-      parent, { input }, { connectors: { MysqlSlvUserPublic }, user: { mail, userRoleList } },
+      parent,
+      { input },
+      { connectors: { MysqlSlvUserPublic }, user: { mail, userRoleList } },
     ) => {
       // logger.info(`createUserPublic --> by ${mail} input: ${JSON.stringify(input)}`);
       logger.info(`createUserPublic --> by ${mail}`);
@@ -211,9 +207,7 @@ module.exports = {
 
       return result;
     }),
-    registerUserPublic: async (
-      parent, { input }, { connectors: { MysqlSlvUserPublic } },
-    ) => {
+    registerUserPublic: async (parent, { input }, { connectors: { MysqlSlvUserPublic } }) => {
       logger.info('registerUserPublic --> for public');
       logger.debug(`registerUserPublic --> for public with input: ${input}`);
 
@@ -265,12 +259,10 @@ module.exports = {
 
       return result;
     },
-    updateUserPublic: isAuthenticatedResolver.createResolver(async (
-      parent, { email, input }, {
-        connectors: { MysqlSlvUserPublic },
-        user: { mail, userRoleList },
-      },
-    ) => {
+    updateUserPublic: isAuthenticatedResolver.createResolver(async (parent, { email, input }, {
+      connectors: { MysqlSlvUserPublic },
+      user: { mail, userRoleList },
+    }) => {
       logger.info(`updateUserPublic --> by ${mail} input for ${email}`);
 
       if (!checkPermission('USER-UPDATE', userRoleList)
@@ -313,12 +305,10 @@ module.exports = {
 
       return result2;
     }),
-    deleteUserPublic: isAuthenticatedResolver.createResolver(async (
-      parent, { email }, {
-        connectors: { MysqlSlvUserPublic },
-        user: { mail, userRoleList },
-      },
-    ) => {
+    deleteUserPublic: isAuthenticatedResolver.createResolver(async (parent, { email }, {
+      connectors: { MysqlSlvUserPublic },
+      user: { mail, userRoleList },
+    }) => {
       logger.info(`deleteUserPublic --> by ${mail} input: ${email}`);
 
       if (!checkPermission('USER-DELETE', userRoleList)

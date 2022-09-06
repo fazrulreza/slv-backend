@@ -87,7 +87,9 @@ const Login = (input) => {
             if (needAdmin) {
               const attribute = 'userPassword';
               client.compare(
-                userDN, attribute, password,
+                userDN,
+                attribute,
+                password,
                 (err, matched) =>
                   // console.log('password OK', err);
                   (matched === true ? resolve() : reject({ code: 49 })),
@@ -101,7 +103,8 @@ const Login = (input) => {
             let searchresult;
             // console.log('searching');
             client.search(
-              userDN, searchOpts,
+              userDN,
+              searchOpts,
               (err, res) => {
                 res.on('searchEntry', (entry) => {
                   // console.log(entry.object);

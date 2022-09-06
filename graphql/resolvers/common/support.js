@@ -4,9 +4,7 @@ const { generateHistory, generateId } = require('../../../packages/mysql-model')
 
 module.exports = {
   Mutation: {
-    sendSupportMail: async (
-      parent, { input },
-    ) => {
+    sendSupportMail: async (parent, { input }) => {
       logger.info(`sendSupportMail --> for public with input ${JSON.stringify(input)}`);
 
       const {

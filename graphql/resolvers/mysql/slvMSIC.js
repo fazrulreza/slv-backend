@@ -14,9 +14,7 @@ module.exports = {
          * @param {Object} param0 main input object
          * @param {String} param0.msic msic
          */
-    allMSIC: async (
-      parent, { msic }, { connectors: { MysqlSlvMSIC }, user: { mail } },
-    ) => {
+    allMSIC: async (parent, { msic }, { connectors: { MysqlSlvMSIC }, user: { mail } }) => {
       logger.info(`allMSIC --> by ${mail} input: ${msic}`);
       const where = getWhere(msic);
 

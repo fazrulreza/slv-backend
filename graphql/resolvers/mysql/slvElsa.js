@@ -30,7 +30,8 @@ module.exports = {
      * @param {Object} param0.filter filter to be applied
      */
     fullElsaList: isAuthenticatedResolver.createResolver(async (
-      parent, { filter },
+      parent,
+      { filter },
       {
         connectors: { MysqlSlvCompanyProfile, MysqlSlvELSAScorecard, MysqlSlvSurvey },
         user: { mail, userRoleList },
@@ -52,14 +53,10 @@ module.exports = {
       const searchOptsAll = { where: null };
 
       // survey
-      const resultQuest = await getCurrentData(
-        MysqlSlvSurvey, searchOptsAll, 'fullElsaList', 'survey',
-      );
+      const resultQuest = await getCurrentData(MysqlSlvSurvey, searchOptsAll, 'fullElsaList', 'survey');
 
       // ELSA
-      const resultElsa = await getCurrentData(
-        MysqlSlvELSAScorecard, searchOptsAll, 'fullElsaList', 'ELSA Scorecard',
-      );
+      const resultElsa = await getCurrentData(MysqlSlvELSAScorecard, searchOptsAll, 'fullElsaList', 'ELSA Scorecard');
 
       // company
       const resCompany = await MysqlSlvCompanyProfile.findAll(searchOpts);
@@ -115,7 +112,8 @@ module.exports = {
          * @param {Object} param0.filter filter to be applied
          */
     elsaPriority: isAuthenticatedResolver.createResolver(async (
-      parent, { filter },
+      parent,
+      { filter },
       {
         connectors: {
           MysqlSlvELSAScorecard, MysqlSlvCompanyProfile, MysqlSlvSurvey, MysqlSlvAssessment,
@@ -139,19 +137,13 @@ module.exports = {
       const searchOptsAll = { where: null };
 
       // ELSA
-      resultELSA = await getCurrentData(
-        MysqlSlvELSAScorecard, searchOptsAll, 'elsaPriority', 'ELSA Scorecard',
-      );
+      resultELSA = await getCurrentData(MysqlSlvELSAScorecard, searchOptsAll, 'elsaPriority', 'ELSA Scorecard');
 
       // Assessment
-      const resultScore = await getCurrentData(
-        MysqlSlvAssessment, searchOptsAll, 'elsaPriority', 'assessment',
-      );
+      const resultScore = await getCurrentData(MysqlSlvAssessment, searchOptsAll, 'elsaPriority', 'assessment');
 
       // Survey
-      const resultQuest = await getCurrentData(
-        MysqlSlvSurvey, searchOptsAll, 'elsaPriority', 'survey',
-      );
+      const resultQuest = await getCurrentData(MysqlSlvSurvey, searchOptsAll, 'elsaPriority', 'survey');
 
       // company
       const resCompany = await MysqlSlvCompanyProfile.findAll(searchOpts);
@@ -211,12 +203,10 @@ module.exports = {
      * @param {Object} param0 main input object
      * @param {String} param0.input contains company id and assessment year
      */
-    oneElsa: isAuthenticatedResolver.createResolver(async (
-      parent, { input }, {
-        connectors: { MysqlSlvAssessment, MysqlSlvELSAScorecard },
-        user: { mail, userRoleList },
-      },
-    ) => {
+    oneElsa: isAuthenticatedResolver.createResolver(async (parent, { input }, {
+      connectors: { MysqlSlvAssessment, MysqlSlvELSAScorecard },
+      user: { mail, userRoleList },
+    }) => {
       logger.info(`oneElsa --> by ${mail} input: ${JSON.stringify(input)}`);
 
       if (!checkPermission('ELSA-READ', userRoleList)) {
@@ -260,7 +250,8 @@ module.exports = {
      * @param {String} param0.id id
      */
     oneAll: isAuthenticatedResolver.createResolver(async (
-      parent, { input },
+      parent,
+      { input },
       {
         connectors:
         {
@@ -390,7 +381,8 @@ module.exports = {
             if (input.PUBLIC) {
               logger.debug('oneAll --> public detected, using prediction data...');
               const IG_INDUSTRY_POTENTIAL = getPrediction(
-                resultPredict, [
+                resultPredict,
+                [
                   resultQuest.YEARLY_BUSINESS_PERFORMANCE,
                   resultQuest.YEARLY_INDUSTRY_PERFORMANCE,
                 ],
@@ -399,7 +391,8 @@ module.exports = {
               logger.debug(`oneAll --> IG_INDUSTRY_POTENTIAL: ${JSON.stringify(IG_INDUSTRY_POTENTIAL)}`);
 
               const BR_PRODUCT_LINE = getPrediction(
-                resultPredict, [
+                resultPredict,
+                [
                   resultQuest.PRODUCT_COUNT,
                   resultQuest.PRODUCT_PERFORMANCE_2YEARS,
                   resultQuest.PRODUCT_MARKET_LOCATION,
@@ -409,7 +402,8 @@ module.exports = {
               logger.debug(`oneAll --> BR_PRODUCT_LINE: ${JSON.stringify(BR_PRODUCT_LINE)}`);
 
               const BR_PRODUCT_QUALITY = getPrediction(
-                resultPredict, [
+                resultPredict,
+                [
                   resultQuest.PRODUCT_FEEDBACK_COLLECTION_FLAG,
                 ],
                 'BR_PRODUCT_QUALITY',
@@ -417,7 +411,8 @@ module.exports = {
               logger.debug(`oneAll --> BR_PRODUCT_QUALITY: ${JSON.stringify(BR_PRODUCT_QUALITY)}`);
 
               const BR_TECHNOLOGY = getPrediction(
-                resultPredict, [
+                resultPredict,
+                [
                   resultQuest.AVAILABLE_SYSTEM.length,
                 ],
                 'BR_TECHNOLOGY',
@@ -429,7 +424,8 @@ module.exports = {
               logger.debug(`oneAll --> pre BR_DEVELOPMENT_CAPACITY check: ${JSON.stringify(preBRDCheck2)}`);
 
               const BR_DEVELOPMENT_CAPACITY = getPrediction(
-                resultPredict, [
+                resultPredict,
+                [
                   JSON.stringify(resultQuest.MARKETING_TYPE),
                   preBRDCheck2,
                 ],
@@ -438,7 +434,8 @@ module.exports = {
               logger.debug(`oneAll --> BR_DEVELOPMENT_CAPACITY: ${JSON.stringify(BR_DEVELOPMENT_CAPACITY)}`);
 
               const LC_ORGANIZATION = getPrediction(
-                resultPredict, [
+                resultPredict,
+                [
                   resultQuest.OWNER_MANAGED_FLAG,
                   resultQuest.ORGANIZATION_STRUCTURE_FLAG,
                   resultQuest.EMPLOYEE_COUNT,
@@ -448,7 +445,8 @@ module.exports = {
               logger.debug(`oneAll --> LC_ORGANIZATION: ${JSON.stringify(LC_ORGANIZATION)}`);
 
               const LC_PLANNING = getPrediction(
-                resultPredict, [
+                resultPredict,
+                [
                   resultQuest.SME_CLASS,
                   resultQuest.BUSINESS_OWNER_INVOLVE_PERCENTAGE,
                 ],
@@ -457,7 +455,8 @@ module.exports = {
               logger.debug(`oneAll --> LC_PLANNING: ${JSON.stringify(LC_PLANNING)}`);
 
               const PR_STAFFING = getPrediction(
-                resultPredict, [
+                resultPredict,
+                [
                   resultQuest.EMPLOYEE_OJT_FLAG,
                   resultQuest.EMPLOYEE_SOP_FLAG,
                   resultQuest.EMPLOYEE_WRITTEN_CONTRACT_FLAG,
@@ -468,7 +467,8 @@ module.exports = {
               logger.debug(`oneAll --> PR_STAFFING: ${JSON.stringify(PR_STAFFING)}`);
 
               const PR_STAFF_PERFORMANCE = getPrediction(
-                resultPredict, [
+                resultPredict,
+                [
                   resultQuest.EMPLOYEE_JD_KPI_FLAG,
                 ],
                 'PR_STAFF_PERFORMANCE',
@@ -476,7 +476,8 @@ module.exports = {
               logger.debug(`oneAll --> PR_STAFF_PERFORMANCE: ${JSON.stringify(PR_STAFF_PERFORMANCE)}`);
 
               const SR_EXECUTION_CAPACITY = getPrediction(
-                resultPredict, [
+                resultPredict,
+                [
                   resultQuest.OPERATIONAL_GUIDELINE_FLAG,
                 ],
                 'SR_EXECUTION_CAPACITY',
@@ -484,7 +485,8 @@ module.exports = {
               logger.debug(`oneAll --> SR_EXECUTION_CAPACITY: ${JSON.stringify(SR_EXECUTION_CAPACITY)}`);
 
               const SR_BUDGETTING = getPrediction(
-                resultPredict, [
+                resultPredict,
+                [
                   resultQuest.BUSINESS_PLAN_FLAG,
                   resultQuest.BUSINESS_FUTURE_PLAN.length,
                 ],
@@ -497,7 +499,8 @@ module.exports = {
               logger.debug(`oneAll --> pre FR_FINANCE check: ${JSON.stringify(preFICheck2)}`);
 
               const FR_FINANCE = getPrediction(
-                resultPredict, [
+                resultPredict,
+                [
                   resultQuest.SEEK_FINANCING_2YEARS_FLAG,
                   resultQuest.LATE_PAYMENT_CUSTOMER,
                   preFICheck2,
@@ -508,7 +511,8 @@ module.exports = {
               logger.debug(`oneAll --> FR_FINANCE: ${JSON.stringify(FR_FINANCE)}`);
 
               const FR_FINANCIAL_SYSTEM = getPrediction(
-                resultPredict, [
+                resultPredict,
+                [
                   resultQuest.REGISTERED_BANK_ACCOUNT_FLAG,
                   resultQuest.AUDIT_BUSINESS_ACCOUNT_FLAG,
                   resultQuest.SST_FLAG,
@@ -692,12 +696,10 @@ module.exports = {
     }),
   },
   Mutation: {
-    createElsa: isAuthenticatedResolver.createResolver(async (
-      parent, { input }, {
-        connectors: { MysqlSlvSurvey, MysqlSlvAssessment, MysqlSlvELSAScorecard },
-        user: { mail, userRoleList },
-      },
-    ) => {
+    createElsa: isAuthenticatedResolver.createResolver(async (parent, { input }, {
+      connectors: { MysqlSlvSurvey, MysqlSlvAssessment, MysqlSlvELSAScorecard },
+      user: { mail, userRoleList },
+    }) => {
       logger.info(`createElsa --> by ${mail} input: ${JSON.stringify(input)}`);
 
       if (!checkPermission('ELSA-CREATE', userRoleList)) {

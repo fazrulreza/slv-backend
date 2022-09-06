@@ -157,12 +157,10 @@ module.exports = {
          * @param {Object} param0 main input object
          * @param {String} param0.id id
          */
-    allSurvey: isAuthenticatedResolver.createResolver(async (
-      parent, { COMPANY_ID }, {
-        connectors: { MysqlSlvSurvey, MysqlSlvCompanyProfile },
-        user: { mail, userRoleList },
-      },
-    ) => {
+    allSurvey: isAuthenticatedResolver.createResolver(async (parent, { COMPANY_ID }, {
+      connectors: { MysqlSlvSurvey, MysqlSlvCompanyProfile },
+      user: { mail, userRoleList },
+    }) => {
       logger.info(`allSurvey --> by ${mail} input: ${COMPANY_ID}`);
 
       if (!checkPermission('SURVEY-READ', userRoleList)) {
@@ -209,7 +207,8 @@ module.exports = {
          * @param {String} param0.filter filter to be applied
          */
     smeScatter: isAuthenticatedResolver.createResolver(async (
-      parent, { filter },
+      parent,
+      { filter },
       {
         connectors: { MysqlSlvSurvey, MysqlSlvCompanyProfile, MysqlSlvAssessment },
         user: { mail, userRoleList },
@@ -230,14 +229,10 @@ module.exports = {
       const searchOptsAll = { where: null };
 
       // Assessment
-      const resultScore = await getCurrentData(
-        MysqlSlvAssessment, searchOptsAll, 'smeScatter', 'assessment',
-      );
+      const resultScore = await getCurrentData(MysqlSlvAssessment, searchOptsAll, 'smeScatter', 'assessment');
 
       // Survey
-      const resultQuest = await getCurrentData(
-        MysqlSlvSurvey, searchOptsAll, 'smeScatter', 'survey',
-      );
+      const resultQuest = await getCurrentData(MysqlSlvSurvey, searchOptsAll, 'smeScatter', 'survey');
 
       // company
       const resCompany = await MysqlSlvCompanyProfile.findAll(searchOpts);
@@ -286,7 +281,8 @@ module.exports = {
          * @param {Object} param0.filter filter to be applied
          */
     surveyField: isAuthenticatedResolver.createResolver(async (
-      parent, { COLUMN, filter },
+      parent,
+      { COLUMN, filter },
       {
         connectors: {
           MysqlSlvSurvey, MysqlSlvCompanyProfile, MysqlSlvAssessment, MysqlSlvMSIC,
@@ -320,14 +316,10 @@ module.exports = {
       }
 
       // Assessment
-      const resultScore = await getCurrentData(
-        MysqlSlvAssessment, searchOptsAll, 'surveyField', 'assessment',
-      );
+      const resultScore = await getCurrentData(MysqlSlvAssessment, searchOptsAll, 'surveyField', 'assessment');
 
       // Survey
-      const resultQuest = await getCurrentData(
-        MysqlSlvSurvey, searchOptsAll, 'surveyField', 'survey',
-      );
+      const resultQuest = await getCurrentData(MysqlSlvSurvey, searchOptsAll, 'surveyField', 'survey');
 
       // company
       const resCompany = await MysqlSlvCompanyProfile.findAll(searchOpts);
@@ -382,12 +374,10 @@ module.exports = {
     }),
   },
   Mutation: {
-    createSurvey: isAuthenticatedResolver.createResolver(async (
-      parent, { input }, {
-        connectors: { MysqlSlvSurvey, MysqlSlvUserPublic },
-        user: { mail, userType, userRoleList },
-      },
-    ) => {
+    createSurvey: isAuthenticatedResolver.createResolver(async (parent, { input }, {
+      connectors: { MysqlSlvSurvey, MysqlSlvUserPublic },
+      user: { mail, userType, userRoleList },
+    }) => {
       logger.info(`createSurvey --> by ${mail} input: ${JSON.stringify(input)}`);
 
       if (!checkPermission('SURVEY-CREATE', userRoleList)) {
@@ -443,12 +433,10 @@ module.exports = {
 
       return resultSurvey;
     }),
-    updateSurvey: isAuthenticatedResolver.createResolver(async (
-      parent, { input }, {
-        connectors: { MysqlSlvSurvey },
-        user: { mail, userRoleList },
-      },
-    ) => {
+    updateSurvey: isAuthenticatedResolver.createResolver(async (parent, { input }, {
+      connectors: { MysqlSlvSurvey },
+      user: { mail, userRoleList },
+    }) => {
       logger.info(`updateSurvey --> by ${mail} input: ${JSON.stringify(input)}`);
 
       if (!checkPermission('SURVEY-UPDATE', userRoleList)) {

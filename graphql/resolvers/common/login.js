@@ -27,7 +27,8 @@ const auth = getAuth(app);
 module.exports = {
   Mutation: {
     ldapLogin: async (
-      parent, { input },
+      parent,
+      { input },
       {
         connectors: {
           MysqlSlvUser, MysqlSlvUserRole, MysqlSlvUserPublic,
@@ -304,11 +305,9 @@ module.exports = {
 
       return finalResult;
     },
-    tokenBlacklist: isAuthenticatedResolver.createResolver(async (
-      parent, { input }, {
-        connectors: { MysqlSlvTokenBlacklist },
-      },
-    ) => {
+    tokenBlacklist: isAuthenticatedResolver.createResolver(async (parent, { input }, {
+      connectors: { MysqlSlvTokenBlacklist },
+    }) => {
       logger.info(`tokenBlacklist --> input: ${input}`);
       const newInput = {
         TOKEN: input,

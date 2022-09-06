@@ -28,12 +28,10 @@ module.exports = {
          * @param {Object} param0 main input object
          * @param {String} param0.id id
          */
-    allUserRole: isAuthenticatedResolver.createResolver(async (
-      parent, param, {
-        connectors: { MysqlSlvUserRole },
-        user: { mail, userRoleList },
-      },
-    ) => {
+    allUserRole: isAuthenticatedResolver.createResolver(async (parent, param, {
+      connectors: { MysqlSlvUserRole },
+      user: { mail, userRoleList },
+    }) => {
       logger.info(`allUserRole --> by ${mail} called with no input`);
 
       if (!checkPermission('ROLES-READ', userRoleList)) {
@@ -67,12 +65,10 @@ module.exports = {
          * @param {Object} param0 main input object
          * @param {String} param0.id id
          */
-    oneUserRole: isAuthenticatedResolver.createResolver(async (
-      parent, { ID }, {
-        connectors: { MysqlSlvUserRole },
-        user: { mail, userRoleList },
-      },
-    ) => {
+    oneUserRole: isAuthenticatedResolver.createResolver(async (parent, { ID }, {
+      connectors: { MysqlSlvUserRole },
+      user: { mail, userRoleList },
+    }) => {
       logger.info(`oneUserRole --> by ${mail} input: ${ID}`);
 
       if (!checkPermission('ROLES-READ', userRoleList)) {
@@ -93,12 +89,10 @@ module.exports = {
     }),
   },
   Mutation: {
-    createUserRole: isAuthenticatedResolver.createResolver(async (
-      parent, { input }, {
-        connectors: { MysqlSlvUserRole },
-        user: { mail, userRoleList },
-      },
-    ) => {
+    createUserRole: isAuthenticatedResolver.createResolver(async (parent, { input }, {
+      connectors: { MysqlSlvUserRole },
+      user: { mail, userRoleList },
+    }) => {
       logger.info(`createUserRole --> by ${mail} input: ${JSON.stringify(input)}`);
 
       if (!checkPermission('ROLES-CREATE', userRoleList)) {
@@ -123,12 +117,10 @@ module.exports = {
 
       return result;
     }),
-    updateUserRole: isAuthenticatedResolver.createResolver(async (
-      parent, { ID, input }, {
-        connectors: { MysqlSlvUserRole },
-        user: { mail, userRoleList },
-      },
-    ) => {
+    updateUserRole: isAuthenticatedResolver.createResolver(async (parent, { ID, input }, {
+      connectors: { MysqlSlvUserRole },
+      user: { mail, userRoleList },
+    }) => {
       logger.info(`updateUserRole --> by ${mail} input for ${ID}: ${JSON.stringify(input)}`);
 
       if (!checkPermission('ROLES-UPDATE', userRoleList)) {
@@ -160,12 +152,10 @@ module.exports = {
 
       return result2;
     }),
-    deleteUserRole: isAuthenticatedResolver.createResolver(async (
-      parent, { ID }, {
-        connectors: { MysqlSlvUserRole },
-        user: { mail, userRoleList },
-      },
-    ) => {
+    deleteUserRole: isAuthenticatedResolver.createResolver(async (parent, { ID }, {
+      connectors: { MysqlSlvUserRole },
+      user: { mail, userRoleList },
+    }) => {
       logger.info(`deleteUserRole --> by ${mail} input: ${ID}`);
 
       if (!checkPermission('ROLES-DELETE', userRoleList)) {
