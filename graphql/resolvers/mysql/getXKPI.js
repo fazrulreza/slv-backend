@@ -331,12 +331,10 @@ module.exports = {
     /**
      * Get data for dashboard (aggregated)
      */
-    dashboardKPI: isAuthenticatedResolver.createResolver(async (
-      parent, param, {
-        connectors: { MysqlGetxKPI, MysqlGetxAchievement, MysqlSlvUser },
-        user: { mail, userRoleList },
-      },
-    ) => {
+    dashboardKPI: isAuthenticatedResolver.createResolver(async (parent, param, {
+      connectors: { MysqlGetxKPI, MysqlGetxAchievement, MysqlSlvUser },
+      user: { mail, userRoleList },
+    }) => {
       logger.info(`dashboardKPI --> by ${mail} called with no input`);
 
       if (!checkPermission('GETX-READ', userRoleList)) {
@@ -413,15 +411,13 @@ module.exports = {
     /**
      * Get data for score card (individual)
      */
-    scorecardKPI: isAuthenticatedResolver.createResolver(async (
-      parent, { COMPANY_ID }, {
-        connectors: {
-          MysqlGetxKPI, MysqlSlvMSIC, MysqlSlvCompanyProfile,
-          MysqlGetxAchievement,
-        },
-        user: { mail, userRoleList },
+    scorecardKPI: isAuthenticatedResolver.createResolver(async (parent, { COMPANY_ID }, {
+      connectors: {
+        MysqlGetxKPI, MysqlSlvMSIC, MysqlSlvCompanyProfile,
+        MysqlGetxAchievement,
       },
-    ) => {
+      user: { mail, userRoleList },
+    }) => {
       logger.info(`scorecardKPI --> by ${mail} input: ${COMPANY_ID}`);
 
       if (!checkPermission('GETX-READ', userRoleList)) {
@@ -513,15 +509,13 @@ module.exports = {
      * @param {Object} param0 main input object
      * @param {String} param0.id id
      */
-    allGetXKPI: isAuthenticatedResolver.createResolver(async (
-      parent, { COMPANY_ID }, {
-        connectors: {
-          MysqlGetxKPI, MysqlGetxSign, MysqlGetxAttachment, MysqlGetxAchievement,
-          MysqlSlvELSAScorecard, MysqlSlvAssessment, MysqlSlvSurvey,
-        },
-        user: { mail, userRoleList },
+    allGetXKPI: isAuthenticatedResolver.createResolver(async (parent, { COMPANY_ID }, {
+      connectors: {
+        MysqlGetxKPI, MysqlGetxSign, MysqlGetxAttachment, MysqlGetxAchievement,
+        MysqlSlvELSAScorecard, MysqlSlvAssessment, MysqlSlvSurvey,
       },
-    ) => {
+      user: { mail, userRoleList },
+    }) => {
       logger.info(`allGetXKPI --> by ${mail} input: ${COMPANY_ID}`);
 
       if (!checkPermission('GETX-READ', userRoleList)) {
@@ -762,15 +756,13 @@ module.exports = {
     }),
   },
   Mutation: {
-    createGetXKPI: isAuthenticatedResolver.createResolver(async (
-      parent, { input }, {
-        connectors: {
-          MysqlGetxKPI, MysqlGetxSign, MysqlGetxAttachment,
-          MysqlGetxAchievement,
-        },
-        user: { mail, userRoleList },
+    createGetXKPI: isAuthenticatedResolver.createResolver(async (parent, { input }, {
+      connectors: {
+        MysqlGetxKPI, MysqlGetxSign, MysqlGetxAttachment,
+        MysqlGetxAchievement,
       },
-    ) => {
+      user: { mail, userRoleList },
+    }) => {
       logger.info(`createGetXKPI --> by ${mail} input: ${input.COMPANY_ID}`);
       logger.debug(`createGetXKPI --> input: ${JSON.stringify(input)}`);
 
@@ -834,14 +826,12 @@ module.exports = {
       return resultKPI;
     }),
 
-    updateGetXKPI: isAuthenticatedResolver.createResolver(async (
-      parent, { input }, {
-        connectors: {
-          MysqlGetxKPI, MysqlGetxSign, MysqlGetxAttachment, MysqlGetxAchievement,
-        },
-        user: { mail, userRoleList },
+    updateGetXKPI: isAuthenticatedResolver.createResolver(async (parent, { input }, {
+      connectors: {
+        MysqlGetxKPI, MysqlGetxSign, MysqlGetxAttachment, MysqlGetxAchievement,
       },
-    ) => {
+      user: { mail, userRoleList },
+    }) => {
       logger.info(`updateGetXKPI --> by ${mail} input: ${input.COMPANY_ID}`);
       logger.debug(`updateGetXKPI --> input: ${JSON.stringify(input)}`);
 
@@ -972,14 +962,12 @@ module.exports = {
 
       return result2;
     }),
-    finalizeKPI: isAuthenticatedResolver.createResolver(async (
-      parent, { input }, {
-        connectors: {
-          MysqlGetxKPI, MysqlGetxAchievement, MysqlGetxSign, MysqlGetxAttachment,
-        },
-        user: { mail, userRoleList },
+    finalizeKPI: isAuthenticatedResolver.createResolver(async (parent, { input }, {
+      connectors: {
+        MysqlGetxKPI, MysqlGetxAchievement, MysqlGetxSign, MysqlGetxAttachment,
       },
-    ) => {
+      user: { mail, userRoleList },
+    }) => {
       logger.info(`finalizeKPI --> by ${mail} input: ${input.COMPANY_ID}`);
       logger.debug(`finalizeKPI --> input: ${JSON.stringify(input)}`);
 

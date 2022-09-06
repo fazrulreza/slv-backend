@@ -1,26 +1,9 @@
 const { Op } = require('sequelize');
 const { generateHistory } = require('../../../packages/mysql-model');
-const { processUserRolesOutput, checkPermission } = require('../../helper/common');
+const { checkPermission } = require('../../helper/common');
 const { isAuthenticatedResolver } = require('../../permissions/acl');
 const { ForbiddenError } = require('../../permissions/errors');
 const logger = require('../../../packages/logger');
-
-const processInput = (data) => {
-  const parsedInput = JSON.parse(data);
-  const processedInput = {
-    ...parsedInput,
-    NAME: parsedInput.NAME.toUpperCase(),
-    COMPANY_MODULE: parsedInput.COMPANY_MODULE ? JSON.stringify(parsedInput.COMPANY_MODULE) : '[]',
-    SURVEY_MODULE: parsedInput.SURVEY_MODULE ? JSON.stringify(parsedInput.SURVEY_MODULE) : '[]',
-    ASSESSMENT_MODULE: parsedInput.ASSESSMENT_MODULE ? JSON.stringify(parsedInput.ASSESSMENT_MODULE) : '[]',
-    USER_MODULE: parsedInput.USER_MODULE ? JSON.stringify(parsedInput.USER_MODULE) : '[]',
-    ROLES_MODULE: parsedInput.ROLES_MODULE ? JSON.stringify(parsedInput.ROLES_MODULE) : '[]',
-    GETX_MODULE: parsedInput.GETX_MODULE ? JSON.stringify(parsedInput.GETX_MODULE) : '[]',
-    ELSA_MODULE: parsedInput.ELSA_MODULE ? JSON.stringify(parsedInput.ELSA_MODULE) : '[]',
-    MODULE_MODULE: parsedInput.MODULE_MODULE ? JSON.stringify(parsedInput.MODULE_MODULE) : '[]',
-  };
-  return processedInput;
-};
 
 module.exports = {
   Query: {
@@ -29,12 +12,10 @@ module.exports = {
          * @param {Object} param0 main input object
          * @param {String} param0.id id
          */
-    allModuls: isAuthenticatedResolver.createResolver(async (
-      parent, param, {
-        connectors: { MysqlSlvModule },
-        user: { mail, userRoleList, userType },
-      },
-    ) => {
+    allModuls: isAuthenticatedResolver.createResolver(async (parent, param, {
+      connectors: { MysqlSlvModule },
+      user: { mail, userRoleList, userType },
+    }) => {
       logger.info(`allModuls --> by ${mail} called with no input`);
 
       if (!checkPermission('MODULE-READ', userRoleList)) {
@@ -64,12 +45,10 @@ module.exports = {
     }),
   },
   Mutation: {
-    createModul: isAuthenticatedResolver.createResolver(async (
-      parent, { input }, {
-        connectors: { MysqlSlvModule },
-        user: { mail, userRoleList },
-      },
-    ) => {
+    createModul: isAuthenticatedResolver.createResolver(async (parent, { input }, {
+      connectors: { MysqlSlvModule },
+      user: { mail, userRoleList },
+    }) => {
       logger.info(`createModul --> by ${mail} input: ${JSON.stringify(input)}`);
 
       if (!checkPermission('MODULE-CREATE', userRoleList)) {
@@ -94,12 +73,10 @@ module.exports = {
 
       return result;
     }),
-    updateModul: isAuthenticatedResolver.createResolver(async (
-      parent, { NAME, input }, {
-        connectors: { MysqlSlvModule },
-        user: { mail, userRoleList },
-      },
-    ) => {
+    updateModul: isAuthenticatedResolver.createResolver(async (parent, { NAME, input }, {
+      connectors: { MysqlSlvModule },
+      user: { mail, userRoleList },
+    }) => {
       logger.info(`updateModul --> by ${mail} input for ${NAME}: ${JSON.stringify(input)}`);
 
       if (!checkPermission('MODULE-UPDATE', userRoleList)) {
@@ -131,12 +108,10 @@ module.exports = {
 
       return result2;
     }),
-    deleteModul: isAuthenticatedResolver.createResolver(async (
-      parent, { NAME }, {
-        connectors: { MysqlSlvModule },
-        user: { mail, userRoleList },
-      },
-    ) => {
+    deleteModul: isAuthenticatedResolver.createResolver(async (parent, { NAME }, {
+      connectors: { MysqlSlvModule },
+      user: { mail, userRoleList },
+    }) => {
       logger.info(`deleteModul --> by ${mail} input: ${NAME}`);
 
       if (!checkPermission('MODULE-DELETE', userRoleList)) {

@@ -215,12 +215,10 @@ module.exports = {
      * Retrieve modules with msic
      * @param {Object} param0 main input object
      */
-    modulesAndMSIC: async (
-      parent, param, {
-        connectors: { MysqlSlvModule, MysqlSlvMSIC },
-        user: { mail },
-      },
-    ) => {
+    modulesAndMSIC: async (parent, param, {
+      connectors: { MysqlSlvModule, MysqlSlvMSIC },
+      user: { mail },
+    }) => {
       logger.info(`modulesAndMSIC --> by ${mail}`);
 
       // get MSIC list
@@ -252,12 +250,10 @@ module.exports = {
      * @param {Object} param0 main input object
      * @param {String} param0.id company id
      */
-    oneCompany: isAuthenticatedResolver.createResolver(async (
-      parent, { ID }, {
-        connectors: { MysqlSlvCompanyProfile, MysqlSlvModule, MysqlSlvMSIC },
-        user: { mail, userRoleList },
-      },
-    ) => {
+    oneCompany: isAuthenticatedResolver.createResolver(async (parent, { ID }, {
+      connectors: { MysqlSlvCompanyProfile, MysqlSlvModule, MysqlSlvMSIC },
+      user: { mail, userRoleList },
+    }) => {
       logger.info(`oneCompany --> by ${mail} input: ${ID}`);
 
       if (!checkPermission('COMPANY-READ', userRoleList)) {
@@ -308,14 +304,12 @@ module.exports = {
      * @param {Object} param0 main input object
      * @param {String} param0.filter filter to be applied
      */
-    allCompanies: isAuthenticatedResolver.createResolver(async (
-      parent, { filter }, {
-        connectors: {
-          MysqlSlvCompanyProfile, MysqlSlvSurvey, MysqlSlvAssessment, MysqlGetxKPI,
-        },
-        user: { mail, userRoleList },
+    allCompanies: isAuthenticatedResolver.createResolver(async (parent, { filter }, {
+      connectors: {
+        MysqlSlvCompanyProfile, MysqlSlvSurvey, MysqlSlvAssessment, MysqlGetxKPI,
       },
-    ) => {
+      user: { mail, userRoleList },
+    }) => {
       logger.info(`allCompanies --> by ${mail} called with no input`);
 
       if (!checkPermission('COMPANY-READ', userRoleList)) {
@@ -338,19 +332,13 @@ module.exports = {
       const searchOptsAll = { where: null };
 
       // survey
-      const resultQuest = await getCurrentData(
-        MysqlSlvSurvey, searchOptsAll, 'allCompanies', 'survey',
-      );
+      const resultQuest = await getCurrentData(MysqlSlvSurvey, searchOptsAll, 'allCompanies', 'survey');
 
       // assessment
-      const resultScore = await getCurrentData(
-        MysqlSlvAssessment, searchOptsAll, 'allCompanies', 'assessment',
-      );
+      const resultScore = await getCurrentData(MysqlSlvAssessment, searchOptsAll, 'allCompanies', 'assessment');
 
       // getx
-      const resultKPI = await getCurrentData(
-        MysqlGetxKPI, searchOptsAll, 'allCompanies', 'getx',
-      );
+      const resultKPI = await getCurrentData(MysqlGetxKPI, searchOptsAll, 'allCompanies', 'getx');
 
       const resCompany = await MysqlSlvCompanyProfile.findAll(searchOpts);
       logger.debug(`allCompanies --> total company found: ${resultCompany.length}`);
@@ -406,15 +394,13 @@ module.exports = {
      * Retrieve completed process by user
      * @param {Object} param0 main input object
      */
-    userReports: isAuthenticatedResolver.createResolver(async (
-      parent, param, {
-        connectors: {
-          MysqlSlvCompanyProfile, MysqlSlvSurvey, MysqlSlvAssessment,
-          MysqlSlvUser, MysqlSlvUserRole,
-        },
-        user: { mail, userRoleList },
+    userReports: isAuthenticatedResolver.createResolver(async (parent, param, {
+      connectors: {
+        MysqlSlvCompanyProfile, MysqlSlvSurvey, MysqlSlvAssessment,
+        MysqlSlvUser, MysqlSlvUserRole,
       },
-    ) => {
+      user: { mail, userRoleList },
+    }) => {
       logger.info(`userReports --> by ${mail} called with no input`);
       if (!checkPermission('COMPANY-READ', userRoleList)) {
         logger.error('userReports --> Permission check failed');
@@ -487,12 +473,10 @@ module.exports = {
      * @param {Object} param0 main input object
      * @param {Object} param0.filter filter to be applied
      */
-    stateReports: isAuthenticatedResolver.createResolver(async (
-      parent, { filter }, {
-        connectors: { MysqlSlvCompanyProfile, MysqlSlvSurvey, MysqlSlvAssessment },
-        user: { mail, userRoleList },
-      },
-    ) => {
+    stateReports: isAuthenticatedResolver.createResolver(async (parent, { filter }, {
+      connectors: { MysqlSlvCompanyProfile, MysqlSlvSurvey, MysqlSlvAssessment },
+      user: { mail, userRoleList },
+    }) => {
       logger.info(`stateReports --> by ${mail} called with filter ${JSON.stringify(filter)}`);
 
       if (!checkPermission('COMPANY-READ', userRoleList)) {
@@ -509,14 +493,10 @@ module.exports = {
       const searchOptsAll = { where: null };
 
       // Survey
-      const resultQuest = await getCurrentData(
-        MysqlSlvSurvey, searchOptsAll, 'stateReports', 'survey',
-      );
+      const resultQuest = await getCurrentData(MysqlSlvSurvey, searchOptsAll, 'stateReports', 'survey');
 
       // Assessment
-      const resultScore = await getCurrentData(
-        MysqlSlvAssessment, searchOptsAll, 'stateReports', 'assessment',
-      );
+      const resultScore = await getCurrentData(MysqlSlvAssessment, searchOptsAll, 'stateReports', 'assessment');
 
       // company
       const resCompany = await MysqlSlvCompanyProfile.findAll(searchOpts);
@@ -579,7 +559,9 @@ module.exports = {
      * @param {String} param0.NAME company name
      */
     checkCompany: isAuthenticatedResolver.createResolver(async (
-      parent, { NAME }, { connectors: { MysqlSlvCompanyProfile }, user: { mail, userRoleList } },
+      parent,
+      { NAME },
+      { connectors: { MysqlSlvCompanyProfile }, user: { mail, userRoleList } },
     ) => {
       logger.info(`checkCompany --> by ${mail} input: ${NAME}`);
 
@@ -596,12 +578,10 @@ module.exports = {
 
       return result;
     }),
-    createCompany: isAuthenticatedResolver.createResolver(async (
-      parent, { input }, {
-        connectors: { MysqlSlvCompanyProfile, MysqlSlvUserPublic, MysqlSlvMSIC },
-        user: { mail, userRoleList, userType },
-      },
-    ) => {
+    createCompany: isAuthenticatedResolver.createResolver(async (parent, { input }, {
+      connectors: { MysqlSlvCompanyProfile, MysqlSlvUserPublic, MysqlSlvMSIC },
+      user: { mail, userRoleList, userType },
+    }) => {
       logger.info(`createCompany --> by ${mail} input: ${JSON.stringify(input)}`);
 
       if (!checkPermission('COMPANY-CREATE', userRoleList)) {
@@ -663,15 +643,13 @@ module.exports = {
 
       return resultCompany;
     }),
-    deleteCompany: isAuthenticatedResolver.createResolver(async (
-      parent, { ID }, {
-        connectors: {
-          MysqlSlvCompanyProfile, MysqlSlvSurvey, MysqlSlvAssessment, MysqlSlvELSAScorecard,
-          MysqlGetxKPI, MysqlGetxSign, MysqlGetxAttachment,
-        },
-        user: { mail, userRoleList },
+    deleteCompany: isAuthenticatedResolver.createResolver(async (parent, { ID }, {
+      connectors: {
+        MysqlSlvCompanyProfile, MysqlSlvSurvey, MysqlSlvAssessment, MysqlSlvELSAScorecard,
+        MysqlGetxKPI, MysqlGetxSign, MysqlGetxAttachment,
       },
-    ) => {
+      user: { mail, userRoleList },
+    }) => {
       logger.info(`deleteCompany --> by ${mail} input: ${ID}`);
 
       if (!checkPermission('COMPANY-DELETE', userRoleList)) {
@@ -720,16 +698,14 @@ module.exports = {
 
       return result2;
     }),
-    updateCompany: isAuthenticatedResolver.createResolver(async (
-      parent, { ID, input }, {
-        connectors: {
-          MysqlSlvCompanyProfile, MysqlSlvMSIC, MysqlSlvSurvey, MysqlSlvAssessment,
-          MysqlSlvELSAScorecard, MysqlGetxKPI, MysqlGetxSign, MysqlGetxAttachment,
-          MysqlGetxAchievement,
-        },
-        user: { mail, userRoleList },
+    updateCompany: isAuthenticatedResolver.createResolver(async (parent, { ID, input }, {
+      connectors: {
+        MysqlSlvCompanyProfile, MysqlSlvMSIC, MysqlSlvSurvey, MysqlSlvAssessment,
+        MysqlSlvELSAScorecard, MysqlGetxKPI, MysqlGetxSign, MysqlGetxAttachment,
+        MysqlGetxAchievement,
       },
-    ) => {
+      user: { mail, userRoleList },
+    }) => {
       logger.info(`updateCompany --> by ${mail} input ${ID}: ${JSON.stringify(input)}`);
 
       if (!checkPermission('COMPANY-UPDATE', userRoleList)) {
@@ -745,9 +721,7 @@ module.exports = {
       await checkCompanyExist(parsedInput.ENTITY_NAME, MysqlSlvCompanyProfile, 'updateCompany', ID);
 
       // check for MSIC
-      const MSICObject = await checkValidSection(
-        parsedInput.SECTION, MysqlSlvMSIC, 'createCompany',
-      );
+      const MSICObject = await checkValidSection(parsedInput.SECTION, MysqlSlvMSIC, 'createCompany');
 
       const MODULE = JSON.stringify(parsedInput.MODULE);
 
@@ -795,12 +769,10 @@ module.exports = {
 
       return result2;
     }),
-    unlistCompany: isAuthenticatedResolver.createResolver(async (
-      parent, { ID }, {
-        connectors: { MysqlSlvCompanyProfile },
-        user: { mail, userRoleList },
-      },
-    ) => {
+    unlistCompany: isAuthenticatedResolver.createResolver(async (parent, { ID }, {
+      connectors: { MysqlSlvCompanyProfile },
+      user: { mail, userRoleList },
+    }) => {
       logger.info(`unlistCompany --> by ${mail} input: ${ID}`);
 
       if (!checkPermission('GETX-DELETE', userRoleList)) {

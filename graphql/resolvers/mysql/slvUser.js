@@ -11,12 +11,10 @@ module.exports = {
          * @param {Object} param0 main input object
          * @param {String} param0.id id
          */
-    allUser: isAuthenticatedResolver.createResolver(async (
-      parent, param, {
-        connectors: { MysqlSlvUser, MysqlSlvUserRole },
-        user: { mail, userRoleList, userType },
-      },
-    ) => {
+    allUser: isAuthenticatedResolver.createResolver(async (parent, param, {
+      connectors: { MysqlSlvUser, MysqlSlvUserRole },
+      user: { mail, userRoleList, userType },
+    }) => {
       logger.info(`allUser --> by ${mail} called with no input`);
 
       if (!checkPermission('USER-READ', userRoleList)) {
@@ -63,7 +61,9 @@ module.exports = {
   },
   Mutation: {
     createUser: isAuthenticatedResolver.createResolver(async (
-      parent, { input }, { connectors: { MysqlSlvUser }, user: { mail, userRoleList } },
+      parent,
+      { input },
+      { connectors: { MysqlSlvUser }, user: { mail, userRoleList } },
     ) => {
       logger.info(`createUser --> by ${mail} input: ${JSON.stringify(input)}`);
 
@@ -89,12 +89,10 @@ module.exports = {
 
       return result;
     }),
-    updateUser: isAuthenticatedResolver.createResolver(async (
-      parent, { USER, input }, {
-        connectors: { MysqlSlvUser },
-        user: { mail, userRoleList },
-      },
-    ) => {
+    updateUser: isAuthenticatedResolver.createResolver(async (parent, { USER, input }, {
+      connectors: { MysqlSlvUser },
+      user: { mail, userRoleList },
+    }) => {
       logger.info(`updateUser --> by ${mail} input for ${USER}: ${JSON.stringify(input)}`);
 
       if (!checkPermission('USER-UPDATE', userRoleList)) {
@@ -125,12 +123,10 @@ module.exports = {
 
       return result2;
     }),
-    deleteUser: isAuthenticatedResolver.createResolver(async (
-      parent, { USER }, {
-        connectors: { MysqlSlvUser },
-        user: { mail, userRoleList },
-      },
-    ) => {
+    deleteUser: isAuthenticatedResolver.createResolver(async (parent, { USER }, {
+      connectors: { MysqlSlvUser },
+      user: { mail, userRoleList },
+    }) => {
       logger.info(`deleteUser --> by ${mail} input: ${USER}`);
 
       if (!checkPermission('USER-DELETE', userRoleList)) {
