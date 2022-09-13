@@ -79,5 +79,5 @@ const server = https.createServer(
 // This `listen` method launches a web-server.  Existing apps
 // can utilize middleware options, which we'll discuss later.
 server.listen({ port }, () => {
-  console.log(`🚀  Server ready at https://localhost:${port}${apolloServer.graphqlPath}`);
+  logger.info(`🚀  Server ready at https://localhost:${port}${apolloServer.graphqlPath}`);
 });

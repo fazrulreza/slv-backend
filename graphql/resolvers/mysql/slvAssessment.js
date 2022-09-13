@@ -153,12 +153,14 @@ module.exports = {
       logger.debug('updateAssessment --> Permission check passed');
 
       const parsedInput = JSON.parse(input.data);
+      checkAssessmentDetails(parsedInput);
 
       // store new entry
       const history = generateHistory(mail, 'UPDATE', parsedInput.CREATED_AT);
       const searchOpts = {
         object: {
           ...parsedInput,
+          MODULE: JSON.stringify(parsedInput.MODULE),
           ...history,
         },
         where: {
