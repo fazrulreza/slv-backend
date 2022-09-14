@@ -262,6 +262,19 @@ module.exports = {
       }
       logger.debug('oneCompany --> Permission check passed');
 
+      // get company (if any)
+      const res = await MysqlSlvCompanyProfile.findById(ID);
+      if (!res) {
+        logger.error(`oneCompany --> No record found for ${ID}`);
+        throw new Error(`No record found with for ${ID}`);
+      }
+      const newCompany = {
+        ...res.dataValues,
+        LOGO: JSON.parse(res.dataValues.LOGO),
+        MODULE: JSON.parse(res.dataValues.MODULE),
+      };
+      logger.debug(`oneCompany --> Company data found: ${JSON.stringify(newCompany)}`);
+
       // get MSIC list
       const searchOptsMsic = {
         where: null,
@@ -277,24 +290,12 @@ module.exports = {
       const resultModules = resModules.map((x) => x.dataValues);
       logger.debug('oneCompany --> Module data found');
 
-      // get company (if any)
-      const res = await MysqlSlvCompanyProfile.findById(ID);
-      if (!res) {
-        logger.error(`oneCompany --> No record found for ${ID}`);
-        throw new Error(`No record found with for ${ID}`);
-      }
-      const newCompany = {
-        ...res.dataValues,
-        LOGO: JSON.parse(res.dataValues.LOGO),
-        MODULE: JSON.parse(res.dataValues.MODULE),
-      };
-      logger.debug(`oneCompany --> Company data found: ${JSON.stringify(newCompany)}`);
-
       const finalResult = {
         allMSIC: resultMSIC,
         allModuls: resultModules,
         company: newCompany,
       };
+
       logger.debug(`oneCompany --> output: ${JSON.stringify(finalResult)}`);
       logger.info(`oneCompany --> by ${mail} completed`);
       return finalResult;
