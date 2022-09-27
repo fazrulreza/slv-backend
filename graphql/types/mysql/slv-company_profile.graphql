@@ -107,11 +107,6 @@ type StateList {
 
 type Query {
 """
-    - retrieve modules and MSIC list
-    - usually used for create data
-"""
-    modulesAndMSIC: ModulesWithMSIC!
-"""
     - retrieve company data for a single company
     - usually used for view / update data
 """

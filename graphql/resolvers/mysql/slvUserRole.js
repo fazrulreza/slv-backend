@@ -2,8 +2,10 @@ const { Op } = require('sequelize');
 const { generateHistory } = require('../../../packages/mysql-model');
 const { processUserRolesOutput, checkPermission } = require('../../helper/common');
 const { isAuthenticatedResolver } = require('../../permissions/acl');
-const { ForbiddenError } = require('../../permissions/errors');
 const logger = require('../../../packages/logger');
+const {
+  allUserRoleRule, oneUserRoleRule, createUserRoleRule, updateUserRoleRule, deleteUserRoleRule,
+} = require('../../permissions/rule');
 
 const processInput = (data) => {
   const parsedInput = JSON.parse(data);
@@ -34,12 +36,7 @@ module.exports = {
       user: { mail, userRoleList, userType },
     }) => {
       logger.info(`allUserRole --> by ${mail} called with no input`);
-
-      if (!checkPermission('ROLES-READ', userRoleList)) {
-        logger.error('allUserRole --> Permission check failed');
-        throw new ForbiddenError();
-      }
-      logger.debug('allUserRole --> Permission check passed');
+      checkPermission(allUserRoleRule, userRoleList, userType, 'allUserRole');
 
       // default to module view
       let where = { MODULE: { [Op.substring]: userRoleList.MODULE } };
@@ -53,7 +50,7 @@ module.exports = {
       const searchOptsModules = { where: null };
       const resModules = await MysqlSlvModule.findAll(searchOptsModules);
       const resultModules = resModules.map((x) => x.dataValues);
-      logger.debug('oneUserRole --> Module data found');
+      logger.debug('allUserRole --> Module data found');
 
       // get all roles
       const searchOpts = {
@@ -80,15 +77,10 @@ module.exports = {
          */
     oneUserRole: isAuthenticatedResolver.createResolver(async (parent, { ID }, {
       connectors: { MysqlSlvUserRole, MysqlSlvModule },
-      user: { mail, userRoleList },
+      user: { mail, userRoleList, userType },
     }) => {
       logger.info(`oneUserRole --> by ${mail} input: ${ID}`);
-
-      if (!checkPermission('ROLES-READ', userRoleList)) {
-        logger.error('oneUserRole --> Permission check failed');
-        throw new ForbiddenError();
-      }
-      logger.debug('oneUserRole --> Permission check passed');
+      checkPermission(oneUserRoleRule, userRoleList, userType, 'oneUserRole');
 
       // get Modules list
       const searchOptsModules = { where: null };
@@ -116,15 +108,10 @@ module.exports = {
   Mutation: {
     createUserRole: isAuthenticatedResolver.createResolver(async (parent, { input }, {
       connectors: { MysqlSlvUserRole },
-      user: { mail, userRoleList },
+      user: { mail, userRoleList, userType },
     }) => {
       logger.info(`createUserRole --> by ${mail} input: ${JSON.stringify(input)}`);
-
-      if (!checkPermission('ROLES-CREATE', userRoleList)) {
-        logger.error('createUserRole --> Permission check failed');
-        throw new ForbiddenError();
-      }
-      logger.debug('createUserRole --> Permission check passed');
+      checkPermission(createUserRoleRule, userRoleList, userType, 'createUserRole');
 
       // process input
       const processedInput = processInput(input.data);
@@ -144,15 +131,10 @@ module.exports = {
     }),
     updateUserRole: isAuthenticatedResolver.createResolver(async (parent, { ID, input }, {
       connectors: { MysqlSlvUserRole },
-      user: { mail, userRoleList },
+      user: { mail, userRoleList, userType },
     }) => {
       logger.info(`updateUserRole --> by ${mail} input for ${ID}: ${JSON.stringify(input)}`);
-
-      if (!checkPermission('ROLES-UPDATE', userRoleList)) {
-        logger.error('updateUserRole --> Permission check failed');
-        throw new ForbiddenError();
-      }
-      logger.debug('updateUserRole --> Permission check passed');
+      checkPermission(updateUserRoleRule, userRoleList, userType, 'updateUserRole');
 
       const processedInput = processInput(input.data);
 
@@ -179,15 +161,10 @@ module.exports = {
     }),
     deleteUserRole: isAuthenticatedResolver.createResolver(async (parent, { ID }, {
       connectors: { MysqlSlvUserRole },
-      user: { mail, userRoleList },
+      user: { mail, userRoleList, userType },
     }) => {
       logger.info(`deleteUserRole --> by ${mail} input: ${ID}`);
-
-      if (!checkPermission('ROLES-DELETE', userRoleList)) {
-        logger.error('deleteUserRole --> Permission check failed');
-        throw new ForbiddenError();
-      }
-      logger.debug('deleteUserRole --> Permission check passed');
+      checkPermission(deleteUserRoleRule, userRoleList, userType, 'deleteUserRole');
 
       // remove user
       const searchOpts = {

@@ -29,6 +29,11 @@ type Modul {
 
 type Query {
 """
+    - retrieve modules and MSIC list
+    - usually used for create data
+"""
+  modulesAndMSIC: ModulesWithMSIC!
+"""
     - retrieve all Moduls
 """
   allModuls: [Modul!]!

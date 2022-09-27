@@ -5,10 +5,11 @@ const {
 } = require('../../helper/common');
 const { profileGroup, factorOrder } = require('../../helper/parameter');
 const { isAuthenticatedResolver } = require('../../permissions/acl');
-const {
-  ForbiddenError, LargeEnterpriseError, NoSurveyError, NoAssessmentError,
-} = require('../../permissions/errors');
+const { LargeEnterpriseError, NoSurveyError, NoAssessmentError } = require('../../permissions/errors');
 const logger = require('../../../packages/logger');
+const {
+  fullElsaListRule, elsaPriorityRule, oneElsaRule, oneAllRule, createElsaRule,
+} = require('../../permissions/rule');
 
 const getPrediction = (resultPredict, fields, factor) => {
   // prepare key
@@ -20,6 +21,166 @@ const getPrediction = (resultPredict, fields, factor) => {
     .filter((x) => x.FACTOR === factor && x.KEY === keySearch);
   const keyData = keyDataPre.length !== 0 ? keyDataPre[0].VALUE : 2;
   return keyData;
+};
+
+const generatePredictionData = (resultPredict, resultQuest, process) => {
+  logger.debug(`${process} --> public detected, using prediction data...`);
+  const IG_INDUSTRY_POTENTIAL = getPrediction(
+    resultPredict,
+    [
+      resultQuest.YEARLY_BUSINESS_PERFORMANCE,
+      resultQuest.YEARLY_INDUSTRY_PERFORMANCE,
+    ],
+    'IG_INDUSTRY_POTENTIAL',
+  );
+  logger.debug(`${process} --> IG_INDUSTRY_POTENTIAL: ${JSON.stringify(IG_INDUSTRY_POTENTIAL)}`);
+
+  const BR_PRODUCT_LINE = getPrediction(
+    resultPredict,
+    [
+      resultQuest.PRODUCT_COUNT,
+      resultQuest.PRODUCT_PERFORMANCE_2YEARS,
+      resultQuest.PRODUCT_MARKET_LOCATION,
+    ],
+    'BR_PRODUCT_LINE',
+  );
+  logger.debug(`${process} --> BR_PRODUCT_LINE: ${JSON.stringify(BR_PRODUCT_LINE)}`);
+
+  const BR_PRODUCT_QUALITY = getPrediction(
+    resultPredict,
+    [
+      resultQuest.PRODUCT_FEEDBACK_COLLECTION_FLAG,
+    ],
+    'BR_PRODUCT_QUALITY',
+  );
+  logger.debug(`${process} --> BR_PRODUCT_QUALITY: ${JSON.stringify(BR_PRODUCT_QUALITY)}`);
+
+  const BR_TECHNOLOGY = getPrediction(
+    resultPredict,
+    [
+      resultQuest.AVAILABLE_SYSTEM.length,
+    ],
+    'BR_TECHNOLOGY',
+  );
+  logger.debug(`${process} --> BR_TECHNOLOGY: ${JSON.stringify(BR_TECHNOLOGY)}`);
+
+  const preBRDCheck1 = JSON.stringify(resultQuest.MARKETING_TYPE).includes('Online Marketing');
+  const preBRDCheck2 = preBRDCheck1 ? resultQuest.ONLINE_MARKETING_TYPE.length : 0;
+  logger.debug(`${process} --> pre BR_DEVELOPMENT_CAPACITY check: ${JSON.stringify(preBRDCheck2)}`);
+
+  const BR_DEVELOPMENT_CAPACITY = getPrediction(
+    resultPredict,
+    [
+      JSON.stringify(resultQuest.MARKETING_TYPE),
+      preBRDCheck2,
+    ],
+    'BR_DEVELOPMENT_CAPACITY',
+  );
+  logger.debug(`${process} --> BR_DEVELOPMENT_CAPACITY: ${JSON.stringify(BR_DEVELOPMENT_CAPACITY)}`);
+
+  const LC_ORGANIZATION = getPrediction(
+    resultPredict,
+    [
+      resultQuest.OWNER_MANAGED_FLAG,
+      resultQuest.ORGANIZATION_STRUCTURE_FLAG,
+      resultQuest.EMPLOYEE_COUNT,
+    ],
+    'LC_ORGANIZATION',
+  );
+  logger.debug(`${process} --> LC_ORGANIZATION: ${JSON.stringify(LC_ORGANIZATION)}`);
+
+  const LC_PLANNING = getPrediction(
+    resultPredict,
+    [
+      resultQuest.SME_CLASS,
+      resultQuest.BUSINESS_OWNER_INVOLVE_PERCENTAGE,
+    ],
+    'LC_PLANNING',
+  );
+  logger.debug(`${process} --> LC_PLANNING: ${JSON.stringify(LC_PLANNING)}`);
+
+  const PR_STAFFING = getPrediction(
+    resultPredict,
+    [
+      resultQuest.EMPLOYEE_OJT_FLAG,
+      resultQuest.EMPLOYEE_SOP_FLAG,
+      resultQuest.EMPLOYEE_WRITTEN_CONTRACT_FLAG,
+      resultQuest.EMPLOYEE_COUNT_2YEARS,
+    ],
+    'PR_STAFFING',
+  );
+  logger.debug(`${process} --> PR_STAFFING: ${JSON.stringify(PR_STAFFING)}`);
+
+  const PR_STAFF_PERFORMANCE = getPrediction(
+    resultPredict,
+    [
+      resultQuest.EMPLOYEE_JD_KPI_FLAG,
+    ],
+    'PR_STAFF_PERFORMANCE',
+  );
+  logger.debug(`${process} --> PR_STAFF_PERFORMANCE: ${JSON.stringify(PR_STAFF_PERFORMANCE)}`);
+
+  const SR_EXECUTION_CAPACITY = getPrediction(
+    resultPredict,
+    [
+      resultQuest.OPERATIONAL_GUIDELINE_FLAG,
+    ],
+    'SR_EXECUTION_CAPACITY',
+  );
+  logger.debug(`${process} --> SR_EXECUTION_CAPACITY: ${JSON.stringify(SR_EXECUTION_CAPACITY)}`);
+
+  const SR_BUDGETTING = getPrediction(
+    resultPredict,
+    [
+      resultQuest.BUSINESS_PLAN_FLAG,
+      resultQuest.BUSINESS_FUTURE_PLAN.length,
+    ],
+    'SR_BUDGETTING',
+  );
+  logger.debug(`${process} --> SR_BUDGETTING: ${JSON.stringify(SR_BUDGETTING)}`);
+
+  const preFICheck1 = resultQuest.SEEK_FINANCING_2YEARS_FLAG === 'YES';
+  const preFICheck2 = preFICheck1 ? resultQuest.SEEK_FINANCING_METHOD.length : 0;
+  logger.debug(`${process} --> pre FR_FINANCE check: ${JSON.stringify(preFICheck2)}`);
+
+  const FR_FINANCE = getPrediction(
+    resultPredict,
+    [
+      resultQuest.SEEK_FINANCING_2YEARS_FLAG,
+      resultQuest.LATE_PAYMENT_CUSTOMER,
+      preFICheck2,
+      resultQuest.CUSTOMER_PAYMENT_METHODS.length,
+    ],
+    'FR_FINANCE',
+  );
+  logger.debug(`${process} --> FR_FINANCE: ${JSON.stringify(FR_FINANCE)}`);
+
+  const FR_FINANCIAL_SYSTEM = getPrediction(
+    resultPredict,
+    [
+      resultQuest.REGISTERED_BANK_ACCOUNT_FLAG,
+      resultQuest.AUDIT_BUSINESS_ACCOUNT_FLAG,
+      resultQuest.SST_FLAG,
+    ],
+    'FR_FINANCIAL_SYSTEM',
+  );
+  logger.debug(`${process} --> FR_FINANCIAL_SYSTEM: ${JSON.stringify(FR_FINANCIAL_SYSTEM)}`);
+
+  return {
+    IG_INDUSTRY_POTENTIAL,
+    BR_PRODUCT_LINE,
+    BR_PRODUCT_QUALITY,
+    BR_TECHNOLOGY,
+    BR_DEVELOPMENT_CAPACITY,
+    LC_ORGANIZATION,
+    LC_PLANNING,
+    PR_STAFFING,
+    PR_STAFF_PERFORMANCE,
+    SR_EXECUTION_CAPACITY,
+    SR_BUDGETTING,
+    FR_FINANCE,
+    FR_FINANCIAL_SYSTEM,
+  };
 };
 
 module.exports = {
@@ -34,16 +195,11 @@ module.exports = {
       { filter },
       {
         connectors: { MysqlSlvCompanyProfile, MysqlSlvELSAScorecard, MysqlSlvSurvey },
-        user: { mail, userRoleList },
+        user: { mail, userRoleList, userType },
       },
     ) => {
       logger.info(`fullElsaList --> by ${mail} called with filter ${JSON.stringify(filter)}`);
-
-      if (!checkPermission('ELSA-READ', userRoleList)) {
-        logger.error('fullElsaList --> Permission check failed');
-        throw new ForbiddenError();
-      }
-      logger.debug('fullElsaList --> Permission check passed');
+      checkPermission(fullElsaListRule, userRoleList, userType, 'fullElsaList');
 
       let result = [];
       let resultCompany = [];
@@ -118,16 +274,11 @@ module.exports = {
         connectors: {
           MysqlSlvELSAScorecard, MysqlSlvCompanyProfile, MysqlSlvSurvey, MysqlSlvAssessment,
         },
-        user: { mail, userRoleList },
+        user: { mail, userRoleList, userType },
       },
     ) => {
       logger.info(`elsaPriority --> by ${mail} called with filter ${JSON.stringify(filter)}`);
-
-      if (!checkPermission('ELSA-READ', userRoleList)) {
-        logger.error('elsaPriority --> Permission check failed');
-        throw new ForbiddenError();
-      }
-      logger.debug('elsaPriority --> Permission check passed');
+      checkPermission(elsaPriorityRule, userRoleList, userType, 'elsaPriority');
 
       let resultCompany = [];
       let resultELSA = [];
@@ -204,16 +355,13 @@ module.exports = {
      * @param {String} param0.input contains company id and assessment year
      */
     oneElsa: isAuthenticatedResolver.createResolver(async (parent, { input }, {
-      connectors: { MysqlSlvAssessment, MysqlSlvELSAScorecard },
-      user: { mail, userRoleList },
+      connectors: {
+        MysqlSlvSurvey, MysqlSlvAssessment, MysqlSlvELSAScorecard, MysqlSlvPrediction,
+      },
+      user: { mail, userRoleList, userType },
     }) => {
       logger.info(`oneElsa --> by ${mail} input: ${JSON.stringify(input)}`);
-
-      if (!checkPermission('ELSA-READ', userRoleList)) {
-        logger.error('oneElsa --> Permission check failed');
-        throw new ForbiddenError();
-      }
-      logger.debug('oneElsa --> Permission check passed');
+      checkPermission(oneElsaRule, userRoleList, userType, 'oneElsa');
 
       const searchOpts = {
         where: {
@@ -221,13 +369,38 @@ module.exports = {
           ASSESSMENT_YEAR: input.ASSESSMENT_YEAR,
         },
       };
+      const searchOptsAll = { where: null };
+
+      // prediction
+      const resPredict = await MysqlSlvPrediction.findAll(searchOptsAll);
+      const resultPredict = resPredict.map((a) => a.dataValues);
+      logger.debug(`oneAll --> ELSA prediction found: ${JSON.stringify(resultPredict)}`);
+
+      // survey
+      const resQuest = await MysqlSlvSurvey.findAll(searchOpts);
+      const resultQuest = resQuest.length !== 0
+        ? resQuest.map((s) => s.dataValues)
+        : resQuest;
+      if (resultQuest.length === 0) {
+        logger.error('oneElsa --> No survey found');
+        throw new NoSurveyError();
+      }
+      logger.debug(`oneElsa --> total survey found: ${resultQuest.length}`);
 
       const resScore = await MysqlSlvAssessment.findAll(searchOpts);
-      const resultScore = resScore.length !== 0 ? resScore.map((a) => a.dataValues) : resScore;
+      let resultScore = resScore.length !== 0
+        ? resScore.map((a) => a.dataValues)[0]
+        : resScore;
       logger.debug(`oneElsa --> total assessment found: ${resultScore.length}`);
 
+      if (resultScore.length === 0) {
+        resultScore = generatePredictionData(resultPredict, resultQuest, 'oneAll');
+      }
+
       const resElsa = await MysqlSlvELSAScorecard.findAll(searchOpts);
-      const resultElsa = resElsa.length !== 0 ? resElsa.map((a) => a.dataValues) : resElsa;
+      const resultElsa = resElsa.length !== 0
+        ? resElsa.map((a) => a.dataValues)
+        : resElsa;
       logger.debug(`oneElsa --> total ELSA Scorecard found: ${resultElsa.length}`);
 
       // calculate total score
@@ -255,19 +428,14 @@ module.exports = {
       {
         connectors:
         {
-          MysqlSlvCompanyProfile, MysqlSlvSurvey, MysqlSlvAssessment,
-          MysqlSlvMSIC, MysqlSlvELSAScorecard, MysqlSlvPrediction, MysqlSlvELSAWeightage,
+          MysqlSlvCompanyProfile, MysqlSlvSurvey, MysqlSlvAssessment, MysqlSlvMSIC,
+          MysqlSlvELSAScorecard, MysqlSlvPrediction, MysqlSlvELSAWeightage,
         },
-        user: { mail, userRoleList },
+        user: { mail, userRoleList, userType },
       },
     ) => {
       logger.info(`oneAll --> by ${mail} input: ${JSON.stringify(input)}`);
-
-      if (!checkPermission('ELSA-READ', userRoleList)) {
-        logger.error('oneAll --> Permission check failed');
-        throw new ForbiddenError();
-      }
-      logger.debug('oneAll --> Permission check passed');
+      checkPermission(oneAllRule, userRoleList, userType, 'oneAll');
 
       // company
       const searchOpts = { where: { COMPANY_ID: input.COMPANY_ID } };
@@ -391,163 +559,7 @@ module.exports = {
 
             // intercept public here
             if (input.PUBLIC) {
-              logger.debug('oneAll --> public detected, using prediction data...');
-              const IG_INDUSTRY_POTENTIAL = getPrediction(
-                resultPredict,
-                [
-                  resultQuest.YEARLY_BUSINESS_PERFORMANCE,
-                  resultQuest.YEARLY_INDUSTRY_PERFORMANCE,
-                ],
-                'IG_INDUSTRY_POTENTIAL',
-              );
-              logger.debug(`oneAll --> IG_INDUSTRY_POTENTIAL: ${JSON.stringify(IG_INDUSTRY_POTENTIAL)}`);
-
-              const BR_PRODUCT_LINE = getPrediction(
-                resultPredict,
-                [
-                  resultQuest.PRODUCT_COUNT,
-                  resultQuest.PRODUCT_PERFORMANCE_2YEARS,
-                  resultQuest.PRODUCT_MARKET_LOCATION,
-                ],
-                'BR_PRODUCT_LINE',
-              );
-              logger.debug(`oneAll --> BR_PRODUCT_LINE: ${JSON.stringify(BR_PRODUCT_LINE)}`);
-
-              const BR_PRODUCT_QUALITY = getPrediction(
-                resultPredict,
-                [
-                  resultQuest.PRODUCT_FEEDBACK_COLLECTION_FLAG,
-                ],
-                'BR_PRODUCT_QUALITY',
-              );
-              logger.debug(`oneAll --> BR_PRODUCT_QUALITY: ${JSON.stringify(BR_PRODUCT_QUALITY)}`);
-
-              const BR_TECHNOLOGY = getPrediction(
-                resultPredict,
-                [
-                  resultQuest.AVAILABLE_SYSTEM.length,
-                ],
-                'BR_TECHNOLOGY',
-              );
-              logger.debug(`oneAll --> BR_TECHNOLOGY: ${JSON.stringify(BR_TECHNOLOGY)}`);
-
-              const preBRDCheck1 = JSON.stringify(resultQuest.MARKETING_TYPE).includes('Online Marketing');
-              const preBRDCheck2 = preBRDCheck1 ? resultQuest.ONLINE_MARKETING_TYPE.length : 0;
-              logger.debug(`oneAll --> pre BR_DEVELOPMENT_CAPACITY check: ${JSON.stringify(preBRDCheck2)}`);
-
-              const BR_DEVELOPMENT_CAPACITY = getPrediction(
-                resultPredict,
-                [
-                  JSON.stringify(resultQuest.MARKETING_TYPE),
-                  preBRDCheck2,
-                ],
-                'BR_DEVELOPMENT_CAPACITY',
-              );
-              logger.debug(`oneAll --> BR_DEVELOPMENT_CAPACITY: ${JSON.stringify(BR_DEVELOPMENT_CAPACITY)}`);
-
-              const LC_ORGANIZATION = getPrediction(
-                resultPredict,
-                [
-                  resultQuest.OWNER_MANAGED_FLAG,
-                  resultQuest.ORGANIZATION_STRUCTURE_FLAG,
-                  resultQuest.EMPLOYEE_COUNT,
-                ],
-                'LC_ORGANIZATION',
-              );
-              logger.debug(`oneAll --> LC_ORGANIZATION: ${JSON.stringify(LC_ORGANIZATION)}`);
-
-              const LC_PLANNING = getPrediction(
-                resultPredict,
-                [
-                  resultQuest.SME_CLASS,
-                  resultQuest.BUSINESS_OWNER_INVOLVE_PERCENTAGE,
-                ],
-                'LC_PLANNING',
-              );
-              logger.debug(`oneAll --> LC_PLANNING: ${JSON.stringify(LC_PLANNING)}`);
-
-              const PR_STAFFING = getPrediction(
-                resultPredict,
-                [
-                  resultQuest.EMPLOYEE_OJT_FLAG,
-                  resultQuest.EMPLOYEE_SOP_FLAG,
-                  resultQuest.EMPLOYEE_WRITTEN_CONTRACT_FLAG,
-                  resultQuest.EMPLOYEE_COUNT_2YEARS,
-                ],
-                'PR_STAFFING',
-              );
-              logger.debug(`oneAll --> PR_STAFFING: ${JSON.stringify(PR_STAFFING)}`);
-
-              const PR_STAFF_PERFORMANCE = getPrediction(
-                resultPredict,
-                [
-                  resultQuest.EMPLOYEE_JD_KPI_FLAG,
-                ],
-                'PR_STAFF_PERFORMANCE',
-              );
-              logger.debug(`oneAll --> PR_STAFF_PERFORMANCE: ${JSON.stringify(PR_STAFF_PERFORMANCE)}`);
-
-              const SR_EXECUTION_CAPACITY = getPrediction(
-                resultPredict,
-                [
-                  resultQuest.OPERATIONAL_GUIDELINE_FLAG,
-                ],
-                'SR_EXECUTION_CAPACITY',
-              );
-              logger.debug(`oneAll --> SR_EXECUTION_CAPACITY: ${JSON.stringify(SR_EXECUTION_CAPACITY)}`);
-
-              const SR_BUDGETTING = getPrediction(
-                resultPredict,
-                [
-                  resultQuest.BUSINESS_PLAN_FLAG,
-                  resultQuest.BUSINESS_FUTURE_PLAN.length,
-                ],
-                'SR_BUDGETTING',
-              );
-              logger.debug(`oneAll --> SR_BUDGETTING: ${JSON.stringify(SR_BUDGETTING)}`);
-
-              const preFICheck1 = resultQuest.SEEK_FINANCING_2YEARS_FLAG === 'YES';
-              const preFICheck2 = preFICheck1 ? resultQuest.SEEK_FINANCING_METHOD.length : 0;
-              logger.debug(`oneAll --> pre FR_FINANCE check: ${JSON.stringify(preFICheck2)}`);
-
-              const FR_FINANCE = getPrediction(
-                resultPredict,
-                [
-                  resultQuest.SEEK_FINANCING_2YEARS_FLAG,
-                  resultQuest.LATE_PAYMENT_CUSTOMER,
-                  preFICheck2,
-                  resultQuest.CUSTOMER_PAYMENT_METHODS.length,
-                ],
-                'FR_FINANCE',
-              );
-              logger.debug(`oneAll --> FR_FINANCE: ${JSON.stringify(FR_FINANCE)}`);
-
-              const FR_FINANCIAL_SYSTEM = getPrediction(
-                resultPredict,
-                [
-                  resultQuest.REGISTERED_BANK_ACCOUNT_FLAG,
-                  resultQuest.AUDIT_BUSINESS_ACCOUNT_FLAG,
-                  resultQuest.SST_FLAG,
-                ],
-                'FR_FINANCIAL_SYSTEM',
-              );
-              logger.debug(`oneAll --> FR_FINANCIAL_SYSTEM: ${JSON.stringify(FR_FINANCIAL_SYSTEM)}`);
-
-              resultScore = {
-                IG_INDUSTRY_POTENTIAL,
-                BR_PRODUCT_LINE,
-                BR_PRODUCT_QUALITY,
-                BR_TECHNOLOGY,
-                BR_DEVELOPMENT_CAPACITY,
-                LC_ORGANIZATION,
-                LC_PLANNING,
-                PR_STAFFING,
-                PR_STAFF_PERFORMANCE,
-                SR_EXECUTION_CAPACITY,
-                SR_BUDGETTING,
-                FR_FINANCE,
-                FR_FINANCIAL_SYSTEM,
-              };
+              resultScore = generatePredictionData(resultPredict, resultQuest, 'oneAll');
             }
 
             if (resultScore
@@ -675,7 +687,7 @@ module.exports = {
       });
 
       // store in DB if default 1000
-      if (input.ASSESSMENT_YEAR === 1000 && checkPermission('ELSA-CREATE', userRoleList)) {
+      if (input.ASSESSMENT_YEAR === 1000) {
         // get elsa
         logger.debug('oneAll --> storing calculated ELSA score in DB');
         const PREDICTION = input.PUBLIC ? 'YES' : 'NO';
@@ -723,15 +735,10 @@ module.exports = {
   Mutation: {
     createElsa: isAuthenticatedResolver.createResolver(async (parent, { input }, {
       connectors: { MysqlSlvSurvey, MysqlSlvAssessment, MysqlSlvELSAScorecard },
-      user: { mail, userRoleList },
+      user: { mail, userRoleList, userType },
     }) => {
       logger.info(`createElsa --> by ${mail} input: ${JSON.stringify(input)}`);
-
-      if (!checkPermission('ELSA-CREATE', userRoleList)) {
-        logger.error('createElsa --> Permission check failed');
-        throw new ForbiddenError();
-      }
-      logger.debug('createElsa --> Permission check passed');
+      checkPermission(createElsaRule, userRoleList, userType, 'createElsa');
 
       const searchOpts = { where: { COMPANY_ID: input.COMPANY_ID } };
       // survey

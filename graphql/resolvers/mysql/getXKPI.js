@@ -3,8 +3,11 @@ const moment = require('moment');
 const { generateId, generateHistory } = require('../../../packages/mysql-model');
 const { getTotalScore, checkPermission } = require('../../helper/common');
 const { isAuthenticatedResolver } = require('../../permissions/acl');
-const { ForbiddenError } = require('../../permissions/errors');
 const logger = require('../../../packages/logger');
+const {
+  dashboardKPIRule, scorecardKPIRule, allGetXKPIRule,
+  createGetXKPIRule, updateGetXKPIRule, finalizeKPIRule,
+} = require('../../permissions/rule');
 
 const processGetxData = (input, mail, create = true) => {
   const parsedInput = JSON.parse(input.data);
@@ -333,15 +336,10 @@ module.exports = {
      */
     dashboardKPI: isAuthenticatedResolver.createResolver(async (parent, param, {
       connectors: { MysqlGetxKPI, MysqlGetxAchievement, MysqlSlvUser },
-      user: { mail, userRoleList },
+      user: { mail, userRoleList, userType },
     }) => {
       logger.info(`dashboardKPI --> by ${mail} called with no input`);
-
-      if (!checkPermission('GETX-READ', userRoleList)) {
-        logger.error('dashboardKPI --> Permission check failed');
-        throw new ForbiddenError();
-      }
-      logger.debug('dashboardKPI --> Permission check passed');
+      checkPermission(dashboardKPIRule, userRoleList, userType, 'dashboardKPI');
 
       // user list
       const searchOptsUser = {
@@ -416,15 +414,10 @@ module.exports = {
         MysqlGetxKPI, MysqlSlvMSIC, MysqlSlvCompanyProfile,
         MysqlGetxAchievement,
       },
-      user: { mail, userRoleList },
+      user: { mail, userRoleList, userType },
     }) => {
       logger.info(`scorecardKPI --> by ${mail} input: ${COMPANY_ID}`);
-
-      if (!checkPermission('GETX-READ', userRoleList)) {
-        logger.error('scorecardKPI --> Permission check failed');
-        throw new ForbiddenError();
-      }
-      logger.debug('scorecardKPI --> Permission check passed');
+      checkPermission(scorecardKPIRule, userRoleList, userType, 'scorecardKPI');
 
       let resultKPI = [];
       const searchOpts = { where: { COMPANY_ID } };
@@ -514,15 +507,10 @@ module.exports = {
         MysqlGetxKPI, MysqlGetxSign, MysqlGetxAttachment, MysqlGetxAchievement,
         MysqlSlvELSAScorecard, MysqlSlvAssessment, MysqlSlvSurvey,
       },
-      user: { mail, userRoleList },
+      user: { mail, userRoleList, userType },
     }) => {
       logger.info(`allGetXKPI --> by ${mail} input: ${COMPANY_ID}`);
-
-      if (!checkPermission('GETX-READ', userRoleList)) {
-        logger.error('allGetXKPI --> Permission check failed');
-        throw new ForbiddenError();
-      }
-      logger.debug('allGetXKPI --> Permission check passed');
+      checkPermission(allGetXKPIRule, userRoleList, userType, 'allGetXKPI');
 
       let result = [];
       let newResult = [];
@@ -761,16 +749,11 @@ module.exports = {
         MysqlGetxKPI, MysqlGetxSign, MysqlGetxAttachment,
         MysqlGetxAchievement,
       },
-      user: { mail, userRoleList },
+      user: { mail, userRoleList, userType },
     }) => {
       logger.info(`createGetXKPI --> by ${mail} input: ${input.COMPANY_ID}`);
       logger.debug(`createGetXKPI --> input: ${JSON.stringify(input)}`);
-
-      if (!checkPermission('GETX-CREATE', userRoleList)) {
-        logger.error('createGetXKPI --> Permission check failed');
-        throw new ForbiddenError();
-      }
-      logger.debug('createGetXKPI --> Permission check passed');
+      checkPermission(createGetXKPIRule, userRoleList, userType, 'createGetXKPI');
 
       // process input
       const {
@@ -825,21 +808,15 @@ module.exports = {
 
       return resultKPI;
     }),
-
     updateGetXKPI: isAuthenticatedResolver.createResolver(async (parent, { input }, {
       connectors: {
         MysqlGetxKPI, MysqlGetxSign, MysqlGetxAttachment, MysqlGetxAchievement,
       },
-      user: { mail, userRoleList },
+      user: { mail, userRoleList, userType },
     }) => {
       logger.info(`updateGetXKPI --> by ${mail} input: ${input.COMPANY_ID}`);
       logger.debug(`updateGetXKPI --> input: ${JSON.stringify(input)}`);
-
-      if (!checkPermission('GETX-UPDATE', userRoleList)) {
-        logger.error('updateGetXKPI --> Permission check failed');
-        throw new ForbiddenError();
-      }
-      logger.debug('updateGetXKPI --> Permission check passed');
+      checkPermission(updateGetXKPIRule, userRoleList, userType, 'updateGetXKPI');
 
       // process input
       const {
@@ -966,16 +943,11 @@ module.exports = {
       connectors: {
         MysqlGetxKPI, MysqlGetxAchievement, MysqlGetxSign, MysqlGetxAttachment,
       },
-      user: { mail, userRoleList },
+      user: { mail, userRoleList, userType },
     }) => {
       logger.info(`finalizeKPI --> by ${mail} input: ${input.COMPANY_ID}`);
       logger.debug(`finalizeKPI --> input: ${JSON.stringify(input)}`);
-
-      if (!checkPermission('GETX-CREATE', userRoleList)) {
-        logger.error('finalizeKPI --> Permission check failed');
-        throw new ForbiddenError();
-      }
-      logger.debug('finalizeKPI --> Permission check passed');
+      checkPermission(finalizeKPIRule, userRoleList, userType, 'finalizeKPI');
 
       // kpi
       const searchOptsKPI = { where: { COMPANY_ID: input.COMPANY_ID } };

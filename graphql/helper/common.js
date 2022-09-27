@@ -7,6 +7,7 @@ const path = require('path');
 const bcrypt = require('bcrypt');
 const { profileGroup, tieredInterventionGroup, smeSizeChoice } = require('./parameter');
 const logger = require('../../packages/logger');
+const { ForbiddenError } = require('../permissions/errors');
 
 const SECRET = readFileSync(path.join(__dirname, process.env.SECRET));
 const SECRET_PUB = readFileSync(path.join(__dirname, process.env.SECRET_PUB));
@@ -244,15 +245,38 @@ const processUserRolesOutput = (data) => {
 
 /**
  * Check user access, compare permission with user role
- * @param {string} permission Permission requested
+ * @param {string[]} permission Permission requested
  * @param {Object} userRoleList Contains list of all available access right
- * @returns {Boolean} has access or vice versa
+ * @param {number} userType User Type
+ * @param {string} process Process name
+ * @param {boolean} [moreValidation=false] flag to determine has extra validation or not.
  */
-const checkPermission = (permission, userRoleList) => {
-  const [subModule, auth] = permission.split('-');
+const checkPermission = (permission, userRoleList, userType, process, moreValidation = false) => {
+  const publicByPass = ['MODULE-READ', 'ASSESSMENT-READ', 'ASSESSMENT-CREATE', 'GETX-READ'];
 
-  if (userRoleList.STATUS !== 'ACTIVE') return false;
-  return userRoleList[`${subModule}_MODULE`].includes(auth);
+  // check if user has permission to all in array
+  const allPermission = userRoleList.STATUS !== 'ACTIVE'
+    ? [false]
+    : permission.map((p) => {
+      const [subModule, auth] = p.split('-');
+
+      // bypass checking for certain scenario
+      if (userType === 10 && publicByPass.includes(p)) return true;
+
+      return userRoleList[`${subModule}_MODULE`].includes(auth);
+    });
+  // logger.debug(allPermission);
+
+  const noPermission = allPermission.includes(false);
+
+  if (noPermission) {
+    logger.error(`${process} --> Permission check failed`);
+    throw new ForbiddenError();
+  }
+  if (!moreValidation) logger.debug(`${process} --> Permission check passed`);
+
+  // if (userRoleList.STATUS !== 'ACTIVE') return false;
+  // return userRoleList[`${subModule}_MODULE`].includes(auth);
 };
 
 /**

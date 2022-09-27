@@ -1,9 +1,10 @@
 const { generateId, generateHistory } = require('../../../packages/mysql-model');
 const { processSurveyResult, checkPermission } = require('../../helper/common');
 const { isAuthenticatedResolver } = require('../../permissions/acl');
-const { ForbiddenError, AssessmentExistsError, InvalidDataError } = require('../../permissions/errors');
+const { AssessmentExistsError, InvalidDataError } = require('../../permissions/errors');
 const logger = require('../../../packages/logger');
 const { assessmentIntObj } = require('../../helper/parameter');
+const { allAssessmentRule, createAssessmentRule, updateAssessmentRule } = require('../../permissions/rule');
 
 /**
  * Check if assessment for current assessment year already exist in DB
@@ -50,15 +51,10 @@ module.exports = {
          */
     allAssessment: isAuthenticatedResolver.createResolver(async (parent, { COMPANY_ID }, {
       connectors: { MysqlSlvSurvey, MysqlSlvAssessment },
-      user: { mail, userRoleList },
+      user: { mail, userRoleList, userType },
     }) => {
       logger.info(`allAssessment --> by ${mail} input: ${COMPANY_ID}`);
-
-      if (!checkPermission('ASSESSMENT-READ', userRoleList)) {
-        logger.error('allAssessment --> Permission check failed');
-        throw new ForbiddenError();
-      }
-      logger.debug('allAssessment --> Permission check passed');
+      checkPermission(allAssessmentRule, userRoleList, userType, 'allAssessment');
 
       let resultQuest = [];
       let resultScore = [];
@@ -108,15 +104,10 @@ module.exports = {
   Mutation: {
     createAssessment: isAuthenticatedResolver.createResolver(async (parent, { input }, {
       connectors: { MysqlSlvAssessment },
-      user: { mail, userRoleList },
+      user: { mail, userRoleList, userType },
     }) => {
       logger.info(`createAssessment --> by ${mail} input: ${JSON.stringify(input)}`);
-
-      if (!checkPermission('ASSESSMENT-CREATE', userRoleList)) {
-        logger.error('createAssessment --> Permission check failed');
-        throw new ForbiddenError();
-      }
-      logger.debug('createAssessment --> Permission check passed');
+      checkPermission(createAssessmentRule, userRoleList, userType, 'createAssessment');
 
       await checkAssessmentExist(input.COMPANY_ID, MysqlSlvAssessment);
 
@@ -142,15 +133,10 @@ module.exports = {
     }),
     updateAssessment: isAuthenticatedResolver.createResolver(async (parent, { input }, {
       connectors: { MysqlSlvAssessment },
-      user: { mail, userRoleList },
+      user: { mail, userRoleList, userType },
     }) => {
       logger.info(`updateAssessment --> by ${mail} input: ${JSON.stringify(input)}`);
-
-      if (!checkPermission('ASSESSMENT-UPDATE', userRoleList)) {
-        logger.error('updateAssessment --> Permission check failed');
-        throw new ForbiddenError();
-      }
-      logger.debug('updateAssessment --> Permission check passed');
+      checkPermission(updateAssessmentRule, userRoleList, userType, 'updateAssessment');
 
       const parsedInput = JSON.parse(input.data);
       checkAssessmentDetails(parsedInput);
