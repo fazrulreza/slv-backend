@@ -9,13 +9,17 @@ const deleteCompanyRule = ['COMPANY-DELETE'];
 const updateCompanyRule = ['COMPANY-UPDATE'];
 const unlistCompanyRule = ['GETX-DELETE'];
 
-// getx
+// getx kpi
 const dashboardKPIRule = ['GETX-READ', 'USER-READ'];
 const scorecardKPIRule = ['COMPANY-READ', 'GETX-READ'];
 const allGetXKPIRule = ['ELSA-READ', 'GETX-READ', 'SURVEY-READ', 'ASSESSMENT-READ'];
 const createGetXKPIRule = ['GETX-CREATE'];
 const updateGetXKPIRule = ['GETX-UPDATE'];
-const finalizeKPIRule = ['GETX-CREATE'];
+const finalizeKPIRule = ['GETX-CREATE', 'SURVEY-READ'];
+
+// getx coach log
+const allGetXCoachLogRule = ['COMPANY-READ', 'GETX-READ', 'SURVEY-READ', 'ASSESSMENT-READ'];
+const updateGetXCoachRule = ['GETX-CREATE', 'GETX-UPDATE'];
 
 // assessment
 const allAssessmentRule = ['ASSESSMENT-READ', 'SURVEY-READ'];
@@ -73,13 +77,16 @@ module.exports = {
   deleteCompanyRule,
   updateCompanyRule,
   unlistCompanyRule,
-  // getx
+  // getx kpi
   dashboardKPIRule,
   scorecardKPIRule,
   allGetXKPIRule,
   createGetXKPIRule,
   updateGetXKPIRule,
   finalizeKPIRule,
+  // getx coach log
+  allGetXCoachLogRule,
+  updateGetXCoachRule,
   // assessment
   allAssessmentRule,
   createAssessmentRule,

@@ -74,6 +74,10 @@ const LargeEnterpriseError = createError('LargeEnterpriseError', {
   message: 'ELSA cannot be calculated for company with SME size of LARGE ENTERPRISE',
 });
 
+const ELSANotFinalizedError = createError('ELSANotFinalizedError', {
+  message: 'ELSA has not been finalized yet for input assessment year',
+});
+
 // ------------------
 
 // ------------------
@@ -128,4 +132,5 @@ module.exports = {
   NoSurveyError,
   NoAssessmentError,
   NetworkError,
+  ELSANotFinalizedError,
 };

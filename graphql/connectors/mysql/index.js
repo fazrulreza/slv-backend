@@ -14,6 +14,7 @@ const MysqlSlvUserPublic = require('./slv-user_public');
 const MysqlSlvTokenBlacklist = require('./slv-token_blacklist');
 const MysqlSlvModule = require('./slv-module');
 const MysqlGetxAchievement = require('./getx-achievement');
+const MysqlGetxCoachLog = require('./getx-coach-log');
 
 const mysqlConnectors = {
   // elsa
@@ -37,6 +38,7 @@ const mysqlConnectors = {
   MysqlGetxSign,
   MysqlGetxAttachment,
   MysqlGetxAchievement,
+  MysqlGetxCoachLog,
 };
 
 module.exports = mysqlConnectors;

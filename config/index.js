@@ -32,6 +32,7 @@ const GETX_KPI = 'getx_kpi';
 const GETX_ACHIEVEMENT = 'getx_achievement';
 const GETX_SIGN = 'getx_sign';
 const GETX_ATTACHMENT = 'getx_attachment';
+const GETX_COACH_LOG = 'getx_coach_log';
 
 const ADMIN = 'ADMIN';
 const BC = 'BC';
@@ -62,6 +63,7 @@ module.exports = {
   GETX_ACHIEVEMENT,
   GETX_SIGN,
   GETX_ATTACHMENT,
+  GETX_COACH_LOG,
   ADMIN,
   BC,
   PUBLIC,

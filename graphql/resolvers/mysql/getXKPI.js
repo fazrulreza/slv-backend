@@ -8,6 +8,7 @@ const {
   dashboardKPIRule, scorecardKPIRule, allGetXKPIRule,
   createGetXKPIRule, updateGetXKPIRule, finalizeKPIRule,
 } = require('../../permissions/rule');
+const { ELSANotFinalizedError } = require('../../permissions/errors');
 
 const processGetxData = (input, mail, create = true) => {
   const parsedInput = JSON.parse(input.data);
@@ -559,6 +560,37 @@ module.exports = {
           let resSignActual2 = {};
           let resAttachment3 = {};
 
+          // survey
+          const resQuest2 = resQuest
+            .map((q1) => q1.dataValues)
+            .filter((q2) => q2.COMPANY_ID === result2.COMPANY_ID
+              && q2.ASSESSMENT_YEAR === result2.ASSESSMENT_YEAR);
+          logger.debug(`allGetXKPI --> filtered Survey found: ${JSON.stringify(resQuest2)}`);
+
+          // assessment
+          const resScore2 = resScore
+            .map((s1) => ({
+              ...s1.dataValues,
+              MODULE: JSON.parse(s1.dataValues.MODULE),
+            }))
+            .filter((s2) => s2.COMPANY_ID === result2.COMPANY_ID
+              && s2.ASSESSMENT_YEAR === result2.ASSESSMENT_YEAR);
+          logger.debug(`allGetXKPI --> filtered Assessment found: ${JSON.stringify(resScore2)}`);
+
+          // elsa
+          const resElsaPre1 = resElsa
+            .map((e1) => ({
+              ...e1.dataValues,
+              MODULE: JSON.parse(e1.dataValues.MODULE),
+            }))
+            .filter((e2) => e2.COMPANY_ID === result2.COMPANY_ID
+              && e2.ASSESSMENT_YEAR === result2.ASSESSMENT_YEAR);
+
+          const elsaPrediction = resElsaPre1.filter((e3) => e3.PREDICTION === 'YES');
+          const elsaActual = resElsaPre1.filter((e3) => e3.PREDICTION === 'NO');
+          const resElsa2 = elsaActual.length !== 0 ? elsaActual : elsaPrediction;
+          logger.debug(`allGetXKPI --> filtered ELSA found: ${JSON.stringify(resElsa2)}`);
+
           // sign
           const resSignKPI = resSign
             .map((k1) => k1.dataValues)
@@ -581,39 +613,6 @@ module.exports = {
           && at2.ASSESSMENT_YEAR === result2.ASSESSMENT_YEAR)
             .filter((at3) => at3.GETX_TYPE === 'ACHIEVEMENT');
           logger.debug(`allGetXKPI --> filtered KPI attachment found: ${JSON.stringify(resAttachment2)}`);
-
-          // elsa
-          const resElsaPre1 = resElsa
-            .map((e1) => ({
-              ...e1.dataValues,
-              MODULE: JSON.parse(e1.dataValues.MODULE),
-            }))
-            .filter((e2) => e2.COMPANY_ID === result2.COMPANY_ID
-              && e2.ASSESSMENT_YEAR === result2.ASSESSMENT_YEAR);
-
-          const elsaPrediction = resElsaPre1.filter((e3) => e3.PREDICTION === 'YES');
-          const elsaActual = resElsaPre1.filter((e3) => e3.PREDICTION === 'NO');
-
-          const resElsa2 = elsaActual.length !== 0 ? elsaActual : elsaPrediction;
-
-          logger.debug(`allGetXKPI --> filtered ELSA found: ${JSON.stringify(resElsa2)}`);
-
-          // assessment
-          const resScore2 = resScore
-            .map((s1) => ({
-              ...s1.dataValues,
-              MODULE: JSON.parse(s1.dataValues.MODULE),
-            }))
-            .filter((s2) => s2.COMPANY_ID === result2.COMPANY_ID
-              && s2.ASSESSMENT_YEAR === result2.ASSESSMENT_YEAR);
-          logger.debug(`allGetXKPI --> filtered Assessment found: ${JSON.stringify(resScore2)}`);
-
-          // assessment
-          const resQuest2 = resQuest
-            .map((q1) => q1.dataValues)
-            .filter((q2) => q2.COMPANY_ID === result2.COMPANY_ID
-              && q2.ASSESSMENT_YEAR === result2.ASSESSMENT_YEAR);
-          logger.debug(`allGetXKPI --> filtered Survey found: ${JSON.stringify(resQuest2)}`);
 
           // kpi
           if (resSignKPI.length !== 0) {
@@ -942,6 +941,7 @@ module.exports = {
     finalizeKPI: isAuthenticatedResolver.createResolver(async (parent, { input }, {
       connectors: {
         MysqlGetxKPI, MysqlGetxAchievement, MysqlGetxSign, MysqlGetxAttachment,
+        MysqlGetxCoachLog, MysqlSlvSurvey,
       },
       user: { mail, userRoleList, userType },
     }) => {
@@ -949,16 +949,26 @@ module.exports = {
       logger.debug(`finalizeKPI --> input: ${JSON.stringify(input)}`);
       checkPermission(finalizeKPIRule, userRoleList, userType, 'finalizeKPI');
 
+      // check ELSA finalized or not
+      const searchOptsQuest = {
+        where: {
+          COMPANY_ID: input.COMPANY_ID,
+          ASSESSMENT_YEAR: input.ASSESSMENT_YEAR,
+        },
+      };
+      const resQuest = await MysqlSlvSurvey.findOne(searchOptsQuest);
+      if (!resQuest) throw new ELSANotFinalizedError();
+
       // kpi
       const searchOptsKPI = { where: { COMPANY_ID: input.COMPANY_ID } };
 
       const resKPI = await MysqlGetxKPI.findOne(searchOptsKPI);
       const KPIInput = resKPI.dataValues;
+      const KPIHistory = generateHistory(mail, 'CREATE');
 
-      const KPIHist = generateHistory(mail, 'CREATE');
       const finalKPI = {
         ...KPIInput,
-        ...KPIHist,
+        ...KPIHistory,
         KPI_DATE: moment(KPIInput.KPI_DATE, 'x').add(-8, 'hours').format('YYYY-MM-DD HH:mm:ss'),
         ASSESSMENT_YEAR: input.ASSESSMENT_YEAR,
         ID: generateId(),
@@ -971,36 +981,44 @@ module.exports = {
 
       const resKPIAchievement = await MysqlGetxAchievement.findOne(searchOptsKPIAchievement);
       const KPIAchievementInput = resKPIAchievement.dataValues;
+      const KPIAchievementHistory = generateHistory(mail, 'CREATE');
 
-      const KPIAchievementHist = generateHistory(mail, 'CREATE');
       const finalKPIAchievement = {
         ...KPIAchievementInput,
-        ...KPIAchievementHist,
-        KPI_DATE: moment(KPIAchievementInput.KPI_DATE, 'x').add(-8, 'hours').format('YYYY-MM-DD HH:mm:ss'),
+        ...KPIAchievementHistory,
         ASSESSMENT_YEAR: input.ASSESSMENT_YEAR,
+        GETX_ID: finalKPI.ID,
         ID: generateId(),
       };
-      const resFinalKPIAchievement = await MysqlGetxKPI.create(finalKPIAchievement);
+      const resFinalKPIAchievement = await MysqlGetxAchievement.create(finalKPIAchievement);
       logger.debug(`finalizeKPI --> KPI Achievement created: ${JSON.stringify(resFinalKPIAchievement)}`);
 
       // attachment
-      const searchOptsAtt = { where: { COMPANY_ID: input.COMPANY_ID } };
-
-      const resAtt = await MysqlGetxAttachment.findOne(searchOptsAtt);
-      const attInput = resAtt.dataValues;
-
-      const attHist = generateHistory(mail, 'CREATE');
-      const finalAtt = {
-        ...attInput,
-        ...attHist,
-        ASSESSMENT_YEAR: input.ASSESSMENT_YEAR,
-        ID: generateId(),
-        GETX_ID: finalKPI.ID,
+      const searchOptsAtt = {
+        where: {
+          COMPANY_ID: input.COMPANY_ID,
+          ASSESSMENT_YEAR: 1000,
+        },
       };
-      const resFinalKPIAttachment = await MysqlGetxAttachment.create(finalAtt);
+
+      const resAtt = await MysqlGetxAttachment.findAll(searchOptsAtt);
+      const attInput = resAtt.map((at) => {
+        const preAtt = at.dataValues;
+        const attHistory = generateHistory(mail, 'CREATE');
+
+        const finalAtt = {
+          ...preAtt,
+          ...attHistory,
+          ASSESSMENT_YEAR: input.ASSESSMENT_YEAR,
+          ID: generateId(),
+          GETX_ID: finalKPI.ID,
+        };
+        return finalAtt;
+      });
+      const resFinalKPIAttachment = await MysqlGetxAttachment.bulkCreate(attInput);
       logger.debug(`finalizeKPI --> KPI attachment created: ${JSON.stringify(resFinalKPIAttachment)}`);
 
-      // scorecard
+      // signature
       const searchOptsSign = {
         where: {
           COMPANY_ID: input.COMPANY_ID,
@@ -1011,10 +1029,11 @@ module.exports = {
       const resSign = await MysqlGetxSign.findAll(searchOptsSign);
       const signInput = resSign.map((b) => {
         const preSign = b.dataValues;
-        const history = generateHistory(mail, 'CREATE');
+        const signHistory = generateHistory(mail, 'CREATE');
+
         const newSign = {
           ...preSign,
-          ...history,
+          ...signHistory,
           // BUS_COACH_DATE: preSign.BUS_COACH_DATE.toISOString(),
           // BUS_OWNER_DATE: preSign.BUS_OWNER_DATE.toISOString(),
           // CHECKER_DATE: preSign.CHECKER_DATE.toISOString(),
@@ -1027,6 +1046,32 @@ module.exports = {
       });
       const resFinalKPISign = await MysqlGetxSign.bulkCreate(signInput);
       logger.debug(`finalizeKPI --> KPI Signature created: ${JSON.stringify(resFinalKPISign)}`);
+
+      // coach log
+      const searchOptsCoachLog = {
+        where: {
+          COMPANY_ID: input.COMPANY_ID,
+          ASSESSMENT_YEAR: 1000,
+        },
+      };
+
+      const resCoachLog = await MysqlGetxCoachLog.findAll(searchOptsCoachLog);
+      const coachLogInput = resCoachLog.map((b) => {
+        const preCoachLog = b.dataValues;
+        const coachLogHistory = generateHistory(mail, 'CREATE');
+
+        const newCoachLog = {
+          ...preCoachLog,
+          ...coachLogHistory,
+          ASSESSMENT_YEAR: input.ASSESSMENT_YEAR,
+          COMPANY_ID: input.COMPANY_ID,
+          ID: generateId(),
+          GETX_ID: finalKPI.ID,
+        };
+        return newCoachLog;
+      });
+      const resFinalKPICoachLog = await MysqlGetxCoachLog.bulkCreate(coachLogInput);
+      logger.debug(`finalizeKPI --> KPI Coach Log created: ${JSON.stringify(resFinalKPICoachLog)}`);
 
       logger.debug(`finalizeKPI --> output: ${JSON.stringify(input)}`);
       logger.info(`finalizeKPI --> by ${mail} completed`);
