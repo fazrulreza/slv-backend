@@ -5,12 +5,47 @@ const {
 } = require('../../helper/common');
 const { profileGroup, factorOrder } = require('../../helper/parameter');
 const { isAuthenticatedResolver } = require('../../permissions/acl');
-const { LargeEnterpriseError, NoSurveyError, NoAssessmentError } = require('../../permissions/errors');
+const { NoSurveyError, NoAssessmentError } = require('../../permissions/errors');
 const logger = require('../../../packages/logger');
 const {
   fullElsaListRule, elsaPriorityRule, oneElsaRule, oneAllRule, createElsaRule,
 } = require('../../permissions/rule');
 
+const emptyElsaData = {
+  company: null,
+  assessment: null,
+  survey: null,
+  msicDetails: null,
+  ELSA: null,
+  TOTAL_FINAL_SCORE: null,
+  ASSESSMENT_YEAR: null,
+};
+
+/**
+ * Generate data for Large Enterprise
+ * @param {object} resultCompany
+ * @param {object} resultQuest
+ * @param {object} resultMSIC
+ * @param {number} year
+ * @returns
+ */
+const largeEnterpriseData = (resultCompany, resultQuest, resultMSIC, year) => ({
+  company: resultCompany,
+  assessment: null,
+  survey: resultQuest,
+  msicDetails: resultMSIC,
+  ELSA: [],
+  TOTAL_FINAL_SCORE: null,
+  ASSESSMENT_YEAR: year,
+});
+
+/**
+ * Get individual prediction value for a pair
+ * @param {Object} resultPredict Prediction data
+ * @param {string} fields field to check
+ * @param {string} factor ELSA factor
+ * @returns {number} value found from prediction data
+ */
 const getPrediction = (resultPredict, fields, factor) => {
   // prepare key
   const keySearchPre = fields.reduce((fullT, t) => `${fullT}${t}`, '');
@@ -23,6 +58,13 @@ const getPrediction = (resultPredict, fields, factor) => {
   return keyData;
 };
 
+/**
+ * Generate ELSA score based on prediction
+ * @param {Object} resultPredict Prediction data
+ * @param {Object} resultQuest Survey data
+ * @param {string} process name of the process calling the function
+ * @returns {Object} contains ELSA Score based on prediction
+ */
 const generatePredictionData = (resultPredict, resultQuest, process) => {
   logger.debug(`${process} --> public detected, using prediction data...`);
   const IG_INDUSTRY_POTENTIAL = getPrediction(
@@ -451,15 +493,7 @@ module.exports = {
 
       // no company, return null
       if (!resCompany) {
-        return [{
-          company: null,
-          assessment: null,
-          survey: null,
-          msicDetails: null,
-          ELSA: null,
-          TOTAL_FINAL_SCORE: null,
-          ASSESSMENT_YEAR: null,
-        }];
+        return [emptyElsaData];
       }
 
       const resultCompany = {
@@ -534,10 +568,6 @@ module.exports = {
           resultQuest = resultQuestPre.length !== 0 ? resultQuestPre[0] : null;
 
           if (resultQuest) {
-            if (resultQuest.SME_CLASS === 'LARGE ENTERPRISE') {
-              logger.error('oneAll --> Large Enterprise not supported');
-              throw new LargeEnterpriseError();
-            }
             // process result
             const processedResult = processSurveyResult(resultQuest);
 
@@ -546,6 +576,11 @@ module.exports = {
               ...processedResult,
             };
             logger.debug(`oneAll --> Survey found: ${JSON.stringify(resultQuest)}`);
+
+            if (resultQuest.SME_CLASS === 'LARGE ENTERPRISE') {
+              logger.debug('oneAll --> Large Enterprise detected');
+              return largeEnterpriseData(resultCompany, resultQuest, resultMSIC, yr);
+            }
 
             // assessment
             const resultScorePre = resScore
@@ -557,14 +592,27 @@ module.exports = {
             resultScore = resultScorePre.length !== 0 ? resultScorePre[0] : null;
             logger.debug(`oneAll --> Assessment found: ${JSON.stringify(resultScore)}`);
 
+            if (resultQuest.SME_CLASS === 'LARGE ENTERPRISE') {
+              logger.debug('oneAll --> Large Enterprise detected');
+
+              const result = {
+                company: resultCompany,
+                assessment: resultScore,
+                survey: resultQuest,
+                msicDetails: resultMSIC,
+                ELSA: [],
+                TOTAL_FINAL_SCORE: null,
+                ASSESSMENT_YEAR: yr,
+              };
+              return result;
+            }
+
             // intercept public here
             if (input.PUBLIC) {
               resultScore = generatePredictionData(resultPredict, resultQuest, 'oneAll');
             }
 
-            if (resultScore
-              && resultQuest.SME_CLASS !== 'LARGE ENTERPRISE'
-              && resultQuest.SME_CLASS !== 'N/A') {
+            if (resultScore && resultQuest.SME_CLASS !== 'N/A') {
               // calculate score
               logger.debug('oneAll --> calculating scores...');
 
@@ -622,15 +670,7 @@ module.exports = {
           [resultQuest] = resQuest.filter((x) => x.ASSESSMENT_YEAR === yr);
           if (!resultQuest) {
             logger.debug('oneAll --> no survey found. returning null...');
-            return {
-              company: null,
-              assessment: null,
-              survey: null,
-              msicDetails: null,
-              ELSA: null,
-              TOTAL_FINAL_SCORE: null,
-              ASSESSMENT_YEAR: null,
-            };
+            return emptyElsaData;
           }
           // process result
           const processedResult = processSurveyResult(resultQuest);
@@ -638,6 +678,11 @@ module.exports = {
             ...resultQuest,
             ...processedResult,
           };
+
+          if (resultQuest.SME_CLASS === 'LARGE ENTERPRISE') {
+            logger.debug('oneAll --> Large Enterprise detected');
+            return largeEnterpriseData(resultCompany, resultQuest, resultMSIC, yr);
+          }
 
           // assessment
           [resultScore] = resScore
@@ -773,32 +818,36 @@ module.exports = {
         logger.debug(`createElsa --> created assessment: ${JSON.stringify(resultCreateAssess)}`);
       }
 
-      // scorecard
-      const searchOptsElsa = {
-        where: {
-          COMPANY_ID: input.COMPANY_ID,
-          ASSESSMENT_YEAR: 1000,
-          PREDICTION: input.PUBLIC ? 'YES' : 'NO',
-        },
-      };
-      const resElsa = await MysqlSlvELSAScorecard.findAll(searchOptsElsa);
-      logger.debug(`createElsa --> ELSA scorecard found: ${JSON.stringify(resElsa)}`);
+      if (surveyInput.SME_CLASS !== 'LARGE ENTERPRISE') {
+        logger.debug('createElsa --> not a LARGE ENTERPRISE. processing ELSA');
 
-      const elsaInput = resElsa.map((b) => {
-        const preB = b.dataValues;
-        const history = generateHistory(mail, 'CREATE');
-        const newB = {
-          ...preB,
-          ...history,
-          ID: generateId(),
-          ASSESSMENT_YEAR: input.ASSESSMENT_YEAR,
-          COMPANY_ID: input.COMPANY_ID,
-          MODULE: surveyInput.MODULE,
+        // scorecard
+        const searchOptsElsa = {
+          where: {
+            COMPANY_ID: input.COMPANY_ID,
+            ASSESSMENT_YEAR: 1000,
+            PREDICTION: input.PUBLIC ? 'YES' : 'NO',
+          },
         };
-        return newB;
-      });
-      const resultCreateElsa = await MysqlSlvELSAScorecard.bulkCreate(elsaInput);
-      logger.debug(`createElsa --> ELSA scorecard created: ${JSON.stringify(resultCreateElsa)}`);
+        const resElsa = await MysqlSlvELSAScorecard.findAll(searchOptsElsa);
+        logger.debug(`createElsa --> ELSA scorecard found: ${JSON.stringify(resElsa)}`);
+
+        const elsaInput = resElsa.map((b) => {
+          const preB = b.dataValues;
+          const history = generateHistory(mail, 'CREATE');
+          const newB = {
+            ...preB,
+            ...history,
+            ID: generateId(),
+            ASSESSMENT_YEAR: input.ASSESSMENT_YEAR,
+            COMPANY_ID: input.COMPANY_ID,
+            MODULE: surveyInput.MODULE,
+          };
+          return newB;
+        });
+        const resultCreateElsa = await MysqlSlvELSAScorecard.bulkCreate(elsaInput);
+        logger.debug(`createElsa --> ELSA scorecard created: ${JSON.stringify(resultCreateElsa)}`);
+      }
 
       logger.debug(`createElsa --> output: ${JSON.stringify(input)}`);
       logger.info(`createElsa --> by ${mail} completed`);
