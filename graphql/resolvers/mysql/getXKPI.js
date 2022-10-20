@@ -515,6 +515,11 @@ module.exports = {
 
       let result = [];
       let newResult = [];
+      let resultScore = null;
+      let resultQuest = null;
+      let resultElsa = [];
+      let totalFinalScore = 0;
+
       const searchOpts = { where: { COMPANY_ID } };
 
       // KPI
@@ -561,37 +566,42 @@ module.exports = {
           let resAttachment3 = {};
 
           // survey
-          const resQuest2 = resQuest
+          [resultQuest] = resQuest
             .map((q1) => q1.dataValues)
             .filter((q2) => q2.COMPANY_ID === result2.COMPANY_ID
               && q2.ASSESSMENT_YEAR === result2.ASSESSMENT_YEAR);
-          logger.debug(`allGetXKPI --> filtered Survey found: ${JSON.stringify(resQuest2)}`);
+          logger.debug(`allGetXKPI --> filtered Survey found: ${JSON.stringify(resultQuest)}`);
 
           // assessment
-          const resScore2 = resScore
-            .map((s1) => ({
-              ...s1.dataValues,
-              MODULE: JSON.parse(s1.dataValues.MODULE),
-            }))
-            .filter((s2) => s2.COMPANY_ID === result2.COMPANY_ID
-              && s2.ASSESSMENT_YEAR === result2.ASSESSMENT_YEAR);
-          logger.debug(`allGetXKPI --> filtered Assessment found: ${JSON.stringify(resScore2)}`);
+          if (resultQuest.SME_CLASS !== 'LARGE ENTERPRISE') {
+            [resultScore] = resScore
+              .map((s1) => ({
+                ...s1.dataValues,
+                MODULE: JSON.parse(s1.dataValues.MODULE),
+              }))
+              .filter((s2) => s2.COMPANY_ID === result2.COMPANY_ID
+                && s2.ASSESSMENT_YEAR === result2.ASSESSMENT_YEAR);
+            logger.debug(`allGetXKPI --> filtered Assessment found: ${JSON.stringify(resultScore)}`);
 
-          // elsa
-          const resElsaPre1 = resElsa
-            .map((e1) => ({
-              ...e1.dataValues,
-              MODULE: JSON.parse(e1.dataValues.MODULE),
-            }))
-            .filter((e2) => e2.COMPANY_ID === result2.COMPANY_ID
+            // elsa
+            const resElsaPre1 = resElsa
+              .map((e1) => ({
+                ...e1.dataValues,
+                MODULE: JSON.parse(e1.dataValues.MODULE),
+              }))
+              .filter((e2) => e2.COMPANY_ID === result2.COMPANY_ID
               && e2.ASSESSMENT_YEAR === result2.ASSESSMENT_YEAR);
 
-          const elsaPrediction = resElsaPre1.filter((e3) => e3.PREDICTION === 'YES');
-          const elsaActual = resElsaPre1.filter((e3) => e3.PREDICTION === 'NO');
-          const resElsa2 = elsaActual.length !== 0 ? elsaActual : elsaPrediction;
-          logger.debug(`allGetXKPI --> filtered ELSA found: ${JSON.stringify(resElsa2)}`);
+            const elsaPrediction = resElsaPre1.filter((e3) => e3.PREDICTION === 'YES');
+            const elsaActual = resElsaPre1.filter((e3) => e3.PREDICTION === 'NO');
+            resultElsa = elsaActual.length !== 0 ? elsaActual : elsaPrediction;
+            logger.debug(`allGetXKPI --> filtered ELSA found: ${JSON.stringify(resultElsa)}`);
 
-          // sign
+            // calculate ELSA total score
+            totalFinalScore = getTotalScore(resultElsa);
+          }
+
+          // sign initial
           const resSignKPI = resSign
             .map((k1) => k1.dataValues)
             .filter((k2) => k2.GETX_ID === result2.ID
@@ -599,6 +609,7 @@ module.exports = {
             .filter((k3) => k3.GETX_TYPE === 'KPI');
           logger.debug(`allGetXKPI --> filtered KPI signature found: ${JSON.stringify(resSignKPI)}`);
 
+          // sign actual
           const resSignActual = resSign
             .map((a1) => a1.dataValues)
             .filter((a2) => a2.GETX_ID === result2.ID
@@ -624,7 +635,8 @@ module.exports = {
               SIGN_KPI_ID: ID,
             };
           }
-          // achievement
+
+          // sign actual
           if (resSignActual.length !== 0) {
             logger.debug(`allGetXKPI --> total Achievement Signature found: ${resSignActual.length}`);
 
@@ -662,9 +674,6 @@ module.exports = {
             };
           }
 
-          // calculate ELSA total score
-          const totalFinalScore = getTotalScore(resElsa2);
-
           newResult = {
             KPI: {
               ...resSignKPI2,
@@ -673,64 +682,62 @@ module.exports = {
               ...result2,
               MODULE: JSON.parse(result2.MODULE),
             },
-            ELSA: resElsa2,
-            assessment: resScore2[0],
+            ELSA: resultElsa,
+            assessment: resultScore,
             TOTAL_FINAL_SCORE: totalFinalScore,
             ASSESSMENT_YEAR: result2.ASSESSMENT_YEAR,
-            SME_CLASS: resQuest2[0].SME_CLASS,
+            SME_CLASS: resultQuest.SME_CLASS,
           };
 
           return newResult;
         });
       } else {
-        // elsa
-
-        let resElsa4 = [];
-
-        if (resElsa.length !== 0) {
-          const resElsaPre2 = resElsa
-            .map((e1) => ({
-              ...e1.dataValues,
-              MODULE: JSON.parse(e1.dataValues.MODULE),
-            }))
-            .filter((e2) => e2.COMPANY_ID === COMPANY_ID
-            && e2.ASSESSMENT_YEAR === 1000);
-
-          const elsaPrediction2 = resElsaPre2.filter((e3) => e3.PREDICTION === 'YES');
-          const elsaActual2 = resElsaPre2.filter((e3) => e3.PREDICTION === 'NO');
-
-          resElsa4 = elsaActual2.length !== 0 ? elsaActual2 : elsaPrediction2;
-        }
-
-        // calculate total score
-        const totalFinalScore2 = resElsa4.length === 0 ? 0 : getTotalScore(resElsa4);
-
-        // assessment
-        const resScore4 = resScore.length === 0
-          ? [{}]
-          : resScore
-            .map((s1) => ({
-              ...s1.dataValues,
-              MODULE: JSON.parse(s1.dataValues.MODULE),
-            }))
-            .filter((s2) => s2.COMPANY_ID === COMPANY_ID
-              && s2.ASSESSMENT_YEAR === 1000);
-
         // survey
-        const resQuest4 = resQuest.length === 0
-          ? [{}]
-          : resQuest
+        if (resQuest.length === 0) {
+          [resultQuest] = resQuest
             .map((q1) => q1.dataValues)
             .filter((q2) => q2.COMPANY_ID === COMPANY_ID
-              && q2.ASSESSMENT_YEAR === 1000);
+                && q2.ASSESSMENT_YEAR === 1000);
+        }
+
+        if (resultQuest && resultQuest.SME_CLASS !== 'LARGE ENTERPRISE') {
+          // assessment
+          if (resScore.length !== 0) {
+            [resultScore] = resScore
+              .map((s1) => ({
+                ...s1.dataValues,
+                MODULE: JSON.parse(s1.dataValues.MODULE),
+              }))
+              .filter((s2) => s2.COMPANY_ID === COMPANY_ID
+                  && s2.ASSESSMENT_YEAR === 1000);
+          }
+
+          // elsa
+          if (resElsa.length !== 0) {
+            const resElsaPre1 = resElsa
+              .map((e1) => ({
+                ...e1.dataValues,
+                MODULE: JSON.parse(e1.dataValues.MODULE),
+              }))
+              .filter((e2) => e2.COMPANY_ID === COMPANY_ID
+              && e2.ASSESSMENT_YEAR === 1000);
+
+            const elsaPrediction2 = resElsaPre1.filter((e3) => e3.PREDICTION === 'YES');
+            const elsaActual2 = resElsaPre1.filter((e3) => e3.PREDICTION === 'NO');
+            resultElsa = elsaActual2.length !== 0 ? elsaActual2 : elsaPrediction2;
+          }
+
+          // calculate total score
+          if (resultElsa.length !== 0) totalFinalScore = getTotalScore(resultElsa);
+        }
 
         newResult = {
-          KPI: { MODULE: JSON.parse(resQuest4[0].MODULE) },
-          ELSA: resElsa4,
-          assessment: resScore4[0],
-          TOTAL_FINAL_SCORE: totalFinalScore2,
-          ASSESSMENT_YEAR: resScore4[0].ASSESSMENT_YEAR,
-          SME_CLASS: resQuest4[0].SME_CLASS,
+          KPI: { MODULE: JSON.parse(resultQuest.MODULE) },
+          ELSA: resultElsa,
+          assessment: resultScore,
+          TOTAL_FINAL_SCORE: totalFinalScore,
+          ASSESSMENT_YEAR: resultQuest.ASSESSMENT_YEAR,
+          SME_CLASS: resultQuest.SME_CLASS,
         };
         // console.log(newResult);
 
