@@ -10,6 +10,16 @@ const {
 } = require('../../permissions/rule');
 const { ELSANotFinalizedError } = require('../../permissions/errors');
 
+/**
+ * Return a value if actual sign is null
+ * @param {string} key name key
+ * @param {string} value name data
+ * @param {Object[]} resSignKPI alternative data for name
+ * @returns {string} name value
+ */
+const getName = (key, value, resSignKPI) => (
+  !value && resSignKPI.length !== 0 ? resSignKPI[0][key] : value);
+
 const processGetxData = (input, mail, create = true) => {
   const parsedInput = JSON.parse(input.data);
 
@@ -629,7 +639,8 @@ module.exports = {
           if (resSignKPI.length !== 0) {
             logger.debug(`allGetXKPI --> total KPI Signature found: ${resSignKPI.length}`);
 
-            const { ID, ...others } = resSignKPI[0];
+            const [{ ID, ...others }] = resSignKPI;
+
             resSignKPI2 = {
               ...others,
               SIGN_KPI_ID: ID,
@@ -640,26 +651,37 @@ module.exports = {
           if (resSignActual.length !== 0) {
             logger.debug(`allGetXKPI --> total Achievement Signature found: ${resSignActual.length}`);
 
-            const { ID, ...others } = resSignActual[0];
+            const [{
+              ID, BUS_OWNER_NAME, BUS_COACH_NAME, CHECKER_NAME, ...others
+            }] = resSignActual;
+
             resSignActual2 = {
               SIGN_ACTUAL_ID: ID,
-              BUS_OWNER_ACTUAL_NAME: others.BUS_OWNER_NAME,
+              BUS_OWNER_ACTUAL_NAME: getName('BUS_OWNER_NAME', BUS_OWNER_NAME, resSignKPI),
               BUS_OWNER_ACTUAL_DATE: others.BUS_OWNER_DATE,
               BUS_OWNER_ACTUAL: others.BUS_OWNER,
-              BUS_COACH_ACTUAL_NAME: others.BUS_COACH_NAME,
+              BUS_COACH_ACTUAL_NAME: getName('BUS_COACH_NAME', BUS_COACH_NAME, resSignKPI),
               BUS_COACH_ACTUAL_DATE: others.BUS_COACH_DATE,
               BUS_COACH_ACTUAL: others.BUS_COACH,
-              CHECKER_ACTUAL_NAME: others.CHECKER_NAME,
+              CHECKER_ACTUAL_NAME: getName('CHECKER_NAME', CHECKER_NAME, resSignKPI),
               CHECKER_ACTUAL_DATE: others.CHECKER_DATE,
               CHECKER_ACTUAL: others.CHECKER,
             };
           }
 
+          // if (resSignKPI.length !== 0) {
+          //   resSignActual2 = {
+          //     BUS_OWNER_ACTUAL_NAME: resSignKPI[0].BUS_OWNER_NAME,
+          //     BUS_COACH_ACTUAL_NAME: resSignKPI[0].BUS_COACH_NAME,
+          //     CHECKER_ACTUAL_NAME: resSignKPI[0].CHECKER_NAME,
+          //   };
+          // }
+
           // attachment
           if (resAttachment2.length !== 0) {
             logger.debug(`allGetXKPI --> total KPI Attachment found: ${resAttachment2.length}`);
 
-            const { ID, ...others } = resAttachment2[0];
+            const [{ ID, ...others }] = resAttachment2;
             resAttachment3 = {
               ATTACHMENT_ID: ID,
               TURNOVER_ATTACHMENT: JSON.parse(others.TURNOVER_ATTACHMENT),
