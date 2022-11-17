@@ -416,7 +416,7 @@ module.exports = {
       // prediction
       const resPredict = await MysqlSlvPrediction.findAll(searchOptsAll);
       const resultPredict = resPredict.map((a) => a.dataValues);
-      logger.debug(`oneAll --> ELSA prediction found: ${JSON.stringify(resultPredict)}`);
+      logger.debug(`oneElsa --> ELSA prediction found: ${JSON.stringify(resultPredict)}`);
 
       // survey
       const resQuest = await MysqlSlvSurvey.findAll(searchOpts);
@@ -436,7 +436,7 @@ module.exports = {
       logger.debug(`oneElsa --> total assessment found: ${resultScore.length}`);
 
       if (resultScore.length === 0) {
-        resultScore = generatePredictionData(resultPredict, resultQuest, 'oneAll');
+        resultScore = generatePredictionData(resultPredict, resultQuest, 'oneElsa');
       }
 
       const resElsa = await MysqlSlvELSAScorecard.findAll(searchOpts);
@@ -551,8 +551,8 @@ module.exports = {
       const yearOnly = resElsaPre.length !== 0
         ? resElsaPre.map((e) => e.dataValues.ASSESSMENT_YEAR)
         : [input.ASSESSMENT_YEAR];
-      const uniqueYear = yearOnly.filter((item, index) => yearOnly.indexOf(item) === index);
-      const yearList = uniqueYear.includes(1000) ? uniqueYear : [...uniqueYear, 1000];
+      const uniqueYear = [...new Set(yearOnly)];
+      const yearList = uniqueYear.includes(1000) ? uniqueYear : [1000, ...uniqueYear];
       logger.debug(`oneAll --> Year list: ${JSON.stringify(yearList)}`);
 
       const finalResult = yearList.map((yr) => {

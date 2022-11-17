@@ -8,6 +8,7 @@ const bcrypt = require('bcrypt');
 const { profileGroup, tieredInterventionGroup, smeSizeChoice } = require('./parameter');
 const logger = require('../../packages/logger');
 const { ForbiddenError } = require('../permissions/errors');
+const { publicByPass } = require('../../config');
 
 const SECRET = readFileSync(path.join(__dirname, process.env.SECRET));
 const SECRET_PUB = readFileSync(path.join(__dirname, process.env.SECRET_PUB));
@@ -252,8 +253,6 @@ const processUserRolesOutput = (data) => {
  * @param {boolean} [moreValidation=false] flag to determine has extra validation or not.
  */
 const checkPermission = (permission, userRoleList, userType, process, moreValidation = false) => {
-  const publicByPass = ['MODULE-READ', 'ASSESSMENT-READ', 'ASSESSMENT-CREATE', 'GETX-READ'];
-
   // check if user has permission to all in array
   const allPermission = userRoleList.STATUS !== 'ACTIVE'
     ? [false]

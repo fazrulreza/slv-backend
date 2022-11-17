@@ -1,3 +1,6 @@
+/**
+ * MySQL Connection details
+ */
 const mysqlConnection = {
   host: process.env.MYSQL_HOST,
   username: process.env.MYSQL_USER,
@@ -5,6 +8,9 @@ const mysqlConnection = {
   database: process.env.MYSQL_DATABASE,
 };
 
+/**
+ * Firebase Connection details
+ */
 const firebaseConfig = {
   apiKey: process.env.API_KEY,
   authDomain: process.env.AUTH_DOMAIN,
@@ -15,6 +21,9 @@ const firebaseConfig = {
   MEASUREMENT_ID: process.env.MYSQL_HOST,
 };
 
+/**
+ * MySQL Table name
+ */
 const COMPANY_PROFILE = 'company_profile';
 const SURVEY = 'survey';
 const MSIC = 'msic';
@@ -34,14 +43,23 @@ const GETX_SIGN = 'getx_sign';
 const GETX_ATTACHMENT = 'getx_attachment';
 const GETX_COACH_LOG = 'getx_coach_log';
 
-const ADMIN = 'ADMIN';
-const BC = 'BC';
-const PUBLIC = 'PUBLIC';
-
+/**
+ * Whitelisted operation for token verification
+ */
 const whiteListOperation = [
   'registerUserPublic',
   'login',
   'checkUserPublic',
+];
+
+/**
+ * Roles to be bypassed for public user role checking
+ */
+const publicByPass = [
+  'MODULE-READ',
+  'ASSESSMENT-READ',
+  'ASSESSMENT-CREATE',
+  'GETX-READ',
 ];
 
 module.exports = {
@@ -64,8 +82,6 @@ module.exports = {
   GETX_SIGN,
   GETX_ATTACHMENT,
   GETX_COACH_LOG,
-  ADMIN,
-  BC,
-  PUBLIC,
   whiteListOperation,
+  publicByPass,
 };

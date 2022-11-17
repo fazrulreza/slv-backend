@@ -266,7 +266,7 @@ module.exports = {
       logger.info(`updateUserPublic --> by ${mail} input for ${email}`);
       checkPermission(updateUserPublicRule, userRoleList, userType, 'updateUserPublic', true);
 
-      if (userRoleList.NAME === 'PUBLIC' && email !== mail) {
+      if (userType === 10 && email !== mail) {
         logger.error('updateUserPublic --> Permission check failed');
         throw new ForbiddenError();
       }
@@ -317,7 +317,7 @@ module.exports = {
       logger.info(`deleteUserPublic --> by ${mail} input: ${email}`);
       checkPermission(deleteUserPublicRule, userRoleList, userType, 'deleteUserPublic', true);
 
-      if (userRoleList.NAME === 'PUBLIC' && email !== mail) {
+      if (userType === 10 && email !== mail) {
         logger.error('deleteUserPublic --> Permission check failed');
         throw new ForbiddenError();
       }
