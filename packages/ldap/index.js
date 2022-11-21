@@ -51,13 +51,14 @@ const Login = (input) => {
     attributes: ['cn', 'mail', 'thumbnailPhoto', 'telephoneNumber', 'mobile', 'department'],
   };
   // const client = LDAP.createClient({ url: ldapcfg.url });
-  const client = LDAP.createClient({ url: process.env.SSO_URL });
+  const url = process.env.SSO_URL.split(' ');
+  const client = LDAP.createClient({ url });
 
   return new Promise((resolve, reject) => {
     client
       .on('error', (ex) => {
         // console.error('ex:', ex);
-        reject(ex);
+        reject(ex.code);
       });
 
     // 1) Connect to the LDAP server
