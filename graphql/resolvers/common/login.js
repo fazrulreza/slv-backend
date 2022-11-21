@@ -60,7 +60,11 @@ module.exports = {
         case !userData.public: {
           logger.debug('ldapLogin --> Not Public, checking in AD');
           // find from AD
-          const userInfo = await Login(userData);
+          const { data: userInfo, error: ldapError } = await wrapper(Login(userData));
+          if (ldapError) {
+            logger.error(`ldapLogin --> ldapError --> error: ${ldapError}`);
+            throw new NetworkError({ message: ldapError });
+          }
           logger.debug(`ldapLogin --> User Info from AD: ${JSON.stringify(userInfo)}`);
 
           const {
