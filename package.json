@@ -7,7 +7,8 @@
   "scripts": {
     "test": "node -r dotenv/config test.js",
     "start": "nodemon -r dotenv/config -e graphql,js,json index.js",
-    "generateToken": "node -r dotenv/config generateToken.js"
+    "generateToken": "node -r dotenv/config generateToken.js",
+    "btc": "node -r dotenv/config blacklistTokenCleanup.js"
   },
   "dependencies": {
     "@graphql-tools/load-files": "^6.5.3",
