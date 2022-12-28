@@ -715,7 +715,7 @@ module.exports = {
         });
       } else {
         // survey
-        if (resQuest.length === 0) {
+        if (resQuest.length !== 0) {
           [resultQuest] = resQuest
             .map((q1) => q1.dataValues)
             .filter((q2) => q2.COMPANY_ID === COMPANY_ID
