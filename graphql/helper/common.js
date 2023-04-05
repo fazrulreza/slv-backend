@@ -7,6 +7,8 @@ const path = require('path');
 const bcrypt = require('bcrypt');
 const { profileGroup, tieredInterventionGroup, smeSizeChoice } = require('./parameter');
 const logger = require('../../packages/logger');
+const { ForbiddenError } = require('../permissions/errors');
+const { publicByPass } = require('../../config');
 
 const SECRET = readFileSync(path.join(__dirname, process.env.SECRET));
 const SECRET_PUB = readFileSync(path.join(__dirname, process.env.SECRET_PUB));
@@ -91,11 +93,14 @@ const processSurveyResult = (result) => {
     ? JSON.parse(result.CUSTOMER_PAYMENT_METHODS)
     : [];
 
+  const MODULE = JSON.parse(result.MODULE);
+
   const FULLTIME = result.FULLTIME_EMPLOYEE_COUNT || 0;
   const PARTTIME = result.PARTTIME_EMPLOYEE_COUNT || 0;
   const OWNER_MANAGED_100 = result.OWNER_MANAGED_100 || 0;
 
   return {
+    MODULE,
     AVAILABLE_SYSTEM,
     MARKETING_TYPE,
     ONLINE_MARKETING_TYPE,
@@ -234,21 +239,43 @@ const processUserRolesOutput = (data) => {
     ROLES_MODULE: JSON.parse(preOutput.ROLES_MODULE),
     GETX_MODULE: JSON.parse(preOutput.GETX_MODULE),
     ELSA_MODULE: JSON.parse(preOutput.ELSA_MODULE),
+    MODULE_MODULE: JSON.parse(preOutput.MODULE_MODULE),
   };
   return processedOutput;
 };
 
 /**
- * Check user access
- * @param {string} permission Permission requested
+ * Check user access, compare permission with user role
+ * @param {string[]} permission Permission requested
  * @param {Object} userRoleList Contains list of all available access right
- * @returns {Boolean} has access or vice versa
+ * @param {number} userType User Type
+ * @param {string} process Process name
+ * @param {boolean} [moreValidation=false] flag to determine has extra validation or not.
  */
-const checkPermission = (permission, userRoleList) => {
-  const [subModule, auth] = permission.split('-');
+const checkPermission = (permission, userRoleList, userType, process, moreValidation = false) => {
+  // check if user has permission to all in array
+  const allPermission = userRoleList.STATUS !== 'ACTIVE'
+    ? [false]
+    : permission.map((p) => {
+      const [subModule, auth] = p.split('-');
 
-  if (userRoleList.STATUS !== 'ACTIVE') return false;
-  return userRoleList[`${subModule}_MODULE`].includes(auth);
+      // bypass checking for certain scenario
+      if (userType === 10 && publicByPass.includes(p)) return true;
+
+      return userRoleList[`${subModule}_MODULE`].includes(auth);
+    });
+  // logger.debug(allPermission);
+
+  const noPermission = allPermission.includes(false);
+
+  if (noPermission) {
+    logger.error(`${process} --> Permission check failed`);
+    throw new ForbiddenError();
+  }
+  if (!moreValidation) logger.debug(`${process} --> Permission check passed`);
+
+  // if (userRoleList.STATUS !== 'ACTIVE') return false;
+  // return userRoleList[`${subModule}_MODULE`].includes(auth);
 };
 
 /**

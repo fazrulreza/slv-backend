@@ -1,0 +1,167 @@
+
+"""
+    - input format for getx API
+"""
+input GetXCoachLogInput {
+    COMPANY_ID: String!
+    # data follows GetXCoachLog type format and gone through JSON.stringify process
+    data: String!
+}
+
+type ActionPlansType {
+  ACTIONS: String
+  TARGET_DATE: String
+  PIC: String
+  REMARKS: String
+}
+
+"""
+    - available getx fields that can be queried. 
+    - Name reflects columns in DB
+"""
+type GetXCoachLog {
+    ID: String
+    GETX_ID: String
+    BUS_COACH: String
+    BUS_COACH_DATE: String
+    BUS_COACH_NAME: String
+    BUS_OWNER: String
+    BUS_OWNER_DATE: String
+    BUS_OWNER_NAME: String
+    CHECKER: String
+    CHECKER_DATE: String
+    CHECKER_NAME: String
+    CLIENT_EXPECTATION: String
+    CLIENT_ISSUES: String
+    DIVERSIFY_Q1: String
+    DIVERSIFY_Q2: String
+    DIVERSIFY_Q3: String
+    DIVERSIFY_Q4: String
+    DIVERSIFY_A1: String
+    DIVERSIFY_A2: String
+    DIVERSIFY_A3: String
+    DIVERSIFY_A4: String
+    DIVERSIFY_TARGET: String
+    DIVERSIFY_GAP: String
+    END_COACH: String
+    ENTITY_NAME: String
+    EXPORT_REVENUE_Q1: Float
+    EXPORT_REVENUE_Q2: Float
+    EXPORT_REVENUE_Q3: Float
+    EXPORT_REVENUE_Q4: Float
+    EXPORT_REVENUE_A1: Float
+    EXPORT_REVENUE_A2: Float
+    EXPORT_REVENUE_A3: Float
+    EXPORT_REVENUE_A4: Float
+    EXPORT_REVENUE_TARGET: Float
+    EXPORT_REVENUE_GAP: Float
+    FURTHER_NOTES_COACHING: String
+    PROFITABILITY_Q1: Float
+    PROFITABILITY_Q2: Float
+    PROFITABILITY_Q3: Float
+    PROFITABILITY_Q4: Float
+    PROFITABILITY_A1: Float
+    PROFITABILITY_A2: Float
+    PROFITABILITY_A3: Float
+    PROFITABILITY_A4: Float
+    PROFITABILITY_TARGET: Float
+    PROFITABILITY_GAP: Float
+    SKILLED_Q1: Int
+    SKILLED_Q2: Int
+    SKILLED_Q3: Int
+    SKILLED_Q4: Int
+    SKILLED_A1: Int
+    SKILLED_A2: Int
+    SKILLED_A3: Int
+    SKILLED_A4: Int
+    SKILLED_TARGET: Int
+    SKILLED_GAP: Int
+    START_COACH: String
+    TECHNOLOGY_Q1: String
+    TECHNOLOGY_Q2: String
+    TECHNOLOGY_Q3: String
+    TECHNOLOGY_Q4: String
+    TECHNOLOGY_A1: String
+    TECHNOLOGY_A2: String
+    TECHNOLOGY_A3: String
+    TECHNOLOGY_A4: String
+    TECHNOLOGY_TARGET: String
+    TECHNOLOGY_GAP: String
+    TURNOVER_Q1: Int
+    TURNOVER_Q2: Int
+    TURNOVER_Q3: Int
+    TURNOVER_Q4: Int
+    TURNOVER_A1: Int
+    TURNOVER_A2: Int
+    TURNOVER_A3: Int
+    TURNOVER_A4: Int
+    TURNOVER_TARGET: Int
+    TURNOVER_GAP: Int
+    UNSKILLED_Q1: Int
+    UNSKILLED_Q2: Int
+    UNSKILLED_Q3: Int
+    UNSKILLED_Q4: Int
+    UNSKILLED_A1: Int
+    UNSKILLED_A2: Int
+    UNSKILLED_A3: Int
+    UNSKILLED_A4: Int
+    UNSKILLED_TARGET: Int
+    UNSKILLED_GAP: Int
+    NG_TARGET: String
+    NG_GAP: String
+    NG_Q1: String
+    NG_Q2: String
+    NG_Q3: String
+    NG_Q4: String
+    NG_A1: String
+    NG_A2: String
+    NG_A3: String
+    NG_A4: String
+    VENUE: String
+    ACTION_PLANS: [ActionPlansType]
+    COACHING_SESSION: Int
+    QUARTER: Int
+  # Refers to ID generated in CompanyProfile
+    COMPANY_ID: String
+  # Indicates current record belongs to which module
+    MODULE: [String]
+  # Indicates current record belongs to which assessment year. Current year value is 1000
+    ASSESSMENT_YEAR: Int
+  # Created timestamp. Auto generated in database. Not needed for create / update mutation
+    CREATED_AT: String
+  # Creator. Auto generated in database. Not needed for create / update mutation
+    CREATED_BY: String
+  # Updated timestamp. Auto generated in database. Not needed for create / update mutation
+    UPDATED_AT: String
+  # Updater. Auto generated in database. Not needed for create / update mutation
+    UPDATED_BY: String
+    SIGN_ID: String
+    ATTACHMENT_ID: String,
+    FILE_ATTACHMENT: [FileType],
+}
+
+"""
+    - GetXCoachLog output structure
+"""
+type GetXCoachLogOutput {
+    ASSESSMENT_YEAR: Int
+    COACH: GetXCoachLog
+}
+
+type Query {
+"""
+    - retrieve all getx coach log data for a company
+"""
+  allGetXCoachLog (COMPANY_ID: String!, QUARTER: Int!): [GetXCoachLogOutput]
+}
+
+type Mutation {
+"""
+    - create getx data for a company
+"""
+  createGetXCoachLog(input: GetXCoachLogInput!): GetXCoachLog!
+"""
+    - update getx data for a company
+"""
+  updateGetXCoachLog(input: GetXCoachLogInput!): UpdateResp
+}

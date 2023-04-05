@@ -4,11 +4,12 @@ const {
   getRoleWhere, getCurrentData, getFilteredData,
 } = require('../../helper/common');
 const { isAuthenticatedResolver } = require('../../permissions/acl');
-const {
-  ForbiddenError, DataNotAnArrayError, InvalidDataError, SurveyExistsError,
-} = require('../../permissions/errors');
+const { DataNotAnArrayError, InvalidDataError, SurveyExistsError } = require('../../permissions/errors');
 const logger = require('../../../packages/logger');
 const { surveyFlagFields, yesNoObj, commonSurveyFields } = require('../../helper/parameter');
+const {
+  allSurveyRule, smeScatterRule, surveyFieldRule, createSurveyRule, updateSurveyRule,
+} = require('../../permissions/rule');
 
 /**
  * Check if survey for current assessment year already exist in DB
@@ -131,6 +132,7 @@ const processInput = (input) => {
     FULLTIME_EMPLOYEE_COUNT: parsedInput.EMPLOYEE_COUNT_DETAIL.FULLTIME,
     PARTTIME_EMPLOYEE_COUNT: parsedInput.EMPLOYEE_COUNT_DETAIL.PARTTIME,
     OWNER_MANAGED_100: ownerManaged100Flag,
+    MODULE: JSON.stringify(parsedInput.MODULE),
   };
 
   // handle missing class
@@ -159,20 +161,19 @@ module.exports = {
          */
     allSurvey: isAuthenticatedResolver.createResolver(async (parent, { COMPANY_ID }, {
       connectors: { MysqlSlvSurvey, MysqlSlvCompanyProfile },
-      user: { mail, userRoleList },
+      user: { mail, userRoleList, userType },
     }) => {
       logger.info(`allSurvey --> by ${mail} input: ${COMPANY_ID}`);
+      checkPermission(allSurveyRule, userRoleList, userType, 'allSurvey');
 
-      if (!checkPermission('SURVEY-READ', userRoleList)) {
-        logger.error('allSurvey --> Permission check failed');
-        throw new ForbiddenError();
-      }
-      logger.debug('allSurvey --> Permission check passed');
-
-      let result = [];
       // company
       const resCompany = await MysqlSlvCompanyProfile.findById(COMPANY_ID);
       logger.debug(`allSurvey --> company found: ${JSON.stringify(resCompany)}`);
+
+      let result = [{
+        SECTOR: resCompany.dataValues.SECTOR,
+        MODULE: JSON.parse(resCompany.dataValues.MODULE),
+      }];
 
       // survey
       const searchOpts = { where: { COMPANY_ID } };
@@ -190,6 +191,7 @@ module.exports = {
             ...result2,
             ...processedResult,
             SECTOR: resCompany.dataValues.SECTOR,
+            MODULE: JSON.parse(resCompany.dataValues.MODULE),
           };
 
           return newResult;
@@ -211,16 +213,11 @@ module.exports = {
       { filter },
       {
         connectors: { MysqlSlvSurvey, MysqlSlvCompanyProfile, MysqlSlvAssessment },
-        user: { mail, userRoleList },
+        user: { mail, userRoleList, userType },
       },
     ) => {
       logger.info(`smeScatter --> by ${mail} called with filter ${JSON.stringify(filter)}`);
-
-      if (!checkPermission('SURVEY-READ', userRoleList)) {
-        logger.error('smeScatter --> Permission check failed');
-        throw new ForbiddenError();
-      }
-      logger.debug('smeScatter --> Permission check passed');
+      checkPermission(smeScatterRule, userRoleList, userType, 'smeScatter');
 
       let resultCompany = [];
 
@@ -287,16 +284,11 @@ module.exports = {
         connectors: {
           MysqlSlvSurvey, MysqlSlvCompanyProfile, MysqlSlvAssessment, MysqlSlvMSIC,
         },
-        user: { mail, userRoleList },
+        user: { mail, userRoleList, userType },
       },
     ) => {
       logger.info(`surveyField --> by ${mail} called with input ${COLUMN} and filter ${filter}`);
-
-      if (!checkPermission('SURVEY-READ', userRoleList)) {
-        logger.error('surveyField --> Permission check failed');
-        throw new ForbiddenError();
-      }
-      logger.debug('surveyField --> Permission check passed');
+      checkPermission(surveyFieldRule, userRoleList, userType, 'surveyField');
 
       let resultCompany = [];
       let resultMSIC = [];
@@ -379,12 +371,7 @@ module.exports = {
       user: { mail, userType, userRoleList },
     }) => {
       logger.info(`createSurvey --> by ${mail} input: ${JSON.stringify(input)}`);
-
-      if (!checkPermission('SURVEY-CREATE', userRoleList)) {
-        logger.error('createSurvey --> Permission check failed');
-        throw new ForbiddenError();
-      }
-      logger.debug('createSurvey --> Permission check passed');
+      checkPermission(createSurveyRule, userRoleList, userType, 'createSurvey');
 
       await checkSurveyExist(input.COMPANY_ID, MysqlSlvSurvey);
 
@@ -397,7 +384,6 @@ module.exports = {
         ID: generateId(),
         ...history,
         COMPANY_ID: input.COMPANY_ID,
-        MODULE: userRoleList.MODULE === 'ALL' ? 'SME' : userRoleList.MODULE,
         ASSESSMENT_YEAR: 1000,
       };
       const resSurvey = await MysqlSlvSurvey.create(newInput);
@@ -435,15 +421,10 @@ module.exports = {
     }),
     updateSurvey: isAuthenticatedResolver.createResolver(async (parent, { input }, {
       connectors: { MysqlSlvSurvey },
-      user: { mail, userRoleList },
+      user: { mail, userRoleList, userType },
     }) => {
       logger.info(`updateSurvey --> by ${mail} input: ${JSON.stringify(input)}`);
-
-      if (!checkPermission('SURVEY-UPDATE', userRoleList)) {
-        logger.error('updateSurvey --> Permission check failed');
-        throw new ForbiddenError();
-      }
-      logger.debug('updateSurvey --> Permission check passed');
+      checkPermission(updateSurveyRule, userRoleList, userType, 'updateSurvey');
 
       // process input
       const postInput = processInput(input);

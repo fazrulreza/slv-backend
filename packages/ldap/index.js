@@ -91,9 +91,7 @@ const Login = (input) => {
                 userDN,
                 attribute,
                 password,
-                (err, matched) =>
-                  // console.log('password OK', err);
-                  (matched === true ? resolve() : reject({ code: 49 })),
+                (err, matched) => (matched === true ? resolve() : reject({ code: 49 })),
               );
             } else {
               resolve();

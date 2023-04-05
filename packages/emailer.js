@@ -7,6 +7,9 @@ const emailer = nodemailer.createTransport({
   tls: {
     rejectUnauthorized: false,
   },
+  // logger: process.env.LOG_LEVEL || false,
+  // transactionLog: process.env.LOG_LEVEL || false,
+  // debug: true,
 });
 
 module.exports = emailer;

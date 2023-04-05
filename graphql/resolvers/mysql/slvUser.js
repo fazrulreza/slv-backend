@@ -1,27 +1,24 @@
 const { generateHistory } = require('../../../packages/mysql-model');
 const { checkPermission } = require('../../helper/common');
 const { isAuthenticatedResolver } = require('../../permissions/acl');
-const { ForbiddenError } = require('../../permissions/errors');
 const logger = require('../../../packages/logger');
+const {
+  allUserRule, createUserRule, updateUserRule, deleteUserRule,
+} = require('../../permissions/rule');
 
 module.exports = {
   Query: {
     /**
-         * Retrieve all
-         * @param {Object} param0 main input object
-         * @param {String} param0.id id
-         */
+     * Retrieve all
+     * @param {Object} param0 main input object
+     * @param {String} param0.id id
+     */
     allUser: isAuthenticatedResolver.createResolver(async (parent, param, {
       connectors: { MysqlSlvUser, MysqlSlvUserRole },
-      user: { mail, userRoleList },
+      user: { mail, userRoleList, userType },
     }) => {
       logger.info(`allUser --> by ${mail} called with no input`);
-
-      if (!checkPermission('USER-READ', userRoleList)) {
-        logger.error('allUser --> Permission check failed');
-        throw new ForbiddenError();
-      }
-      logger.debug('allUser --> Permission check passed');
+      checkPermission(allUserRule, userRoleList, userType, 'allUser');
 
       // user
       const searchOpts = {
@@ -49,7 +46,7 @@ module.exports = {
         });
       logger.debug(`allUser --> user with user roles found: ${JSON.stringify(resultPreUser)}`);
 
-      const resultUser = userRoleList.MODULE === 'ALL'
+      const resultUser = userRoleList.MODULE === 'SME' && userType === 1
         ? resultPreUser
         : resultPreUser.filter((w) => w.MODULE === userRoleList.MODULE);
 
@@ -63,15 +60,10 @@ module.exports = {
     createUser: isAuthenticatedResolver.createResolver(async (
       parent,
       { input },
-      { connectors: { MysqlSlvUser }, user: { mail, userRoleList } },
+      { connectors: { MysqlSlvUser }, user: { mail, userRoleList, userType } },
     ) => {
       logger.info(`createUser --> by ${mail} input: ${JSON.stringify(input)}`);
-
-      if (!checkPermission('USER-CREATE', userRoleList)) {
-        logger.error('createUser --> Permission check failed');
-        throw new ForbiddenError();
-      }
-      logger.debug('createUser --> Permission check passed');
+      checkPermission(createUserRule, userRoleList, userType, 'createUser');
 
       // process input
       const parsedInput = JSON.parse(input.data);
@@ -91,15 +83,10 @@ module.exports = {
     }),
     updateUser: isAuthenticatedResolver.createResolver(async (parent, { USER, input }, {
       connectors: { MysqlSlvUser },
-      user: { mail, userRoleList },
+      user: { mail, userRoleList, userType },
     }) => {
       logger.info(`updateUser --> by ${mail} input for ${USER}: ${JSON.stringify(input)}`);
-
-      if (!checkPermission('USER-UPDATE', userRoleList)) {
-        logger.error('updateUser --> Permission check failed');
-        throw new ForbiddenError();
-      }
-      logger.debug('updateUser --> Permission check passed');
+      checkPermission(updateUserRule, userRoleList, userType, 'updateUser');
 
       const parsedInput = JSON.parse(input.data);
 
@@ -125,15 +112,10 @@ module.exports = {
     }),
     deleteUser: isAuthenticatedResolver.createResolver(async (parent, { USER }, {
       connectors: { MysqlSlvUser },
-      user: { mail, userRoleList },
+      user: { mail, userRoleList, userType },
     }) => {
       logger.info(`deleteUser --> by ${mail} input: ${USER}`);
-
-      if (!checkPermission('USER-DELETE', userRoleList)) {
-        logger.error('deleteUser --> Permission check failed');
-        throw new ForbiddenError();
-      }
-      logger.debug('deleteUser --> Permission check passed');
+      checkPermission(deleteUserRule, userRoleList, userType, 'deleteUser');
 
       // remove user
       const searchOpts = {

@@ -6,6 +6,10 @@ const { isAuthenticatedResolver } = require('../../permissions/acl');
 const { ForbiddenError, UserExistsError, InvalidDataError } = require('../../permissions/errors');
 const logger = require('../../../packages/logger');
 const { requiredUserFields } = require('../../helper/parameter');
+const {
+  allUserPublicRule, oneUserPublicRule, createUserPublicRule,
+  updateUserPublicRule, deleteUserPublicRule,
+} = require('../../permissions/rule');
 // const emailer = require('../../../packages/emailer');
 
 const getRoleWhereUser = (userRoleList, mail) => {
@@ -61,15 +65,10 @@ module.exports = {
          */
     allUserPublic: isAuthenticatedResolver.createResolver(async (parent, param, {
       connectors: { MysqlSlvUserPublic, MysqlSlvUserRole },
-      user: { mail, userRoleList },
+      user: { mail, userRoleList, userType },
     }) => {
       logger.info(`allUserPublic --> by ${mail} called with no input`);
-
-      if (!checkPermission('USER-READ', userRoleList)) {
-        logger.error('allUserPublic --> Permission check failed');
-        throw new ForbiddenError();
-      }
-      logger.debug('allUserPublic --> Permission check passed');
+      checkPermission(allUserPublicRule, userRoleList, userType, 'allUserPublic');
 
       const where = getRoleWhereUser(userRoleList, mail);
       logger.debug(`allUserPublic --> search criteria: ${JSON.stringify(where)}`);
@@ -100,7 +99,7 @@ module.exports = {
         });
       logger.debug(`allUserPublic --> user with user roles found: ${JSON.stringify(resultPreUser)}`);
 
-      const resultUser = userRoleList.MODULE === 'ALL'
+      const resultUser = userRoleList.MODULE === 'SME' && userType === 1
         ? resultPreUser
         : resultPreUser.filter((w) => w.MODULE === userRoleList.MODULE);
 
@@ -116,15 +115,10 @@ module.exports = {
          */
     oneUserPublic: isAuthenticatedResolver.createResolver(async (parent, { email }, {
       connectors: { MysqlSlvUserPublic, MysqlSlvUserRole },
-      user: { mail, userRoleList },
+      user: { mail, userRoleList, userType },
     }) => {
       logger.info(`oneUserPublic --> by ${mail} input: ${email}`);
-
-      if (!checkPermission('USER-READ', userRoleList)) {
-        logger.error('oneUserPublic --> Permission check failed');
-        throw new ForbiddenError();
-      }
-      logger.debug('oneUserPublic --> Permission check passed');
+      checkPermission(oneUserPublicRule, userRoleList, userType, 'oneUserPublic');
 
       // user
       const searchOpts = { where: { EMAIL: email } };
@@ -173,16 +167,11 @@ module.exports = {
     createUserPublic: isAuthenticatedResolver.createResolver(async (
       parent,
       { input },
-      { connectors: { MysqlSlvUserPublic }, user: { mail, userRoleList } },
+      { connectors: { MysqlSlvUserPublic }, user: { mail, userRoleList, userType } },
     ) => {
       // logger.info(`createUserPublic --> by ${mail} input: ${JSON.stringify(input)}`);
       logger.info(`createUserPublic --> by ${mail}`);
-
-      if (!checkPermission('USER-CREATE', userRoleList)) {
-        logger.error('createUserPublic --> Permission check failed');
-        throw new ForbiddenError();
-      }
-      logger.debug('createUserPublic --> Permission check passed');
+      checkPermission(createUserPublicRule, userRoleList, userType, 'createUserPublic');
 
       // process input
       const parsedInput = verifyToken(input);
@@ -207,6 +196,12 @@ module.exports = {
 
       return result;
     }),
+
+    /**
+     * Create user public without login needed
+     * @param {Object} param0 main input object
+     * @param {String} param0.input input
+     */
     registerUserPublic: async (parent, { input }, { connectors: { MysqlSlvUserPublic } }) => {
       logger.info('registerUserPublic --> for public');
       logger.debug(`registerUserPublic --> for public with input: ${input}`);
@@ -259,14 +254,21 @@ module.exports = {
 
       return result;
     },
+
+    /**
+     * Update user public
+     * @param {Object} param0 main input object
+     * @param {String} param0.email email to be updated
+     * @param {String} param0.input input
+     */
     updateUserPublic: isAuthenticatedResolver.createResolver(async (parent, { email, input }, {
       connectors: { MysqlSlvUserPublic },
-      user: { mail, userRoleList },
+      user: { mail, userRoleList, userType },
     }) => {
       logger.info(`updateUserPublic --> by ${mail} input for ${email}`);
+      checkPermission(updateUserPublicRule, userRoleList, userType, 'updateUserPublic', true);
 
-      if (!checkPermission('USER-UPDATE', userRoleList)
-      || (userRoleList.NAME === 'PUBLIC' && email !== mail)) {
+      if (userType === 10 && email !== mail) {
         logger.error('updateUserPublic --> Permission check failed');
         throw new ForbiddenError();
       }
@@ -305,14 +307,20 @@ module.exports = {
 
       return result2;
     }),
+
+    /**
+     * Delete user public
+     * @param {Object} param0 main input object
+     * @param {String} param0.email email to be updated
+     */
     deleteUserPublic: isAuthenticatedResolver.createResolver(async (parent, { email }, {
       connectors: { MysqlSlvUserPublic },
-      user: { mail, userRoleList },
+      user: { mail, userRoleList, userType },
     }) => {
       logger.info(`deleteUserPublic --> by ${mail} input: ${email}`);
+      checkPermission(deleteUserPublicRule, userRoleList, userType, 'deleteUserPublic', true);
 
-      if (!checkPermission('USER-DELETE', userRoleList)
-      || (userRoleList.NAME === 'PUBLIC' && email !== mail)) {
+      if (userType === 10 && email !== mail) {
         logger.error('deleteUserPublic --> Permission check failed');
         throw new ForbiddenError();
       }

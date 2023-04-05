@@ -26,7 +26,7 @@ type CompanyProfile {
   # Flag for eligibility for GETX program
   GETX_FLAG: String
   # Indicates current record belongs to which module
-  MODULE: String
+  MODULE: [String]
   ENTITY_STATUS: String
   ENTITY_TYPE: String
   ADDRESS_LINE_1: String
@@ -65,11 +65,21 @@ type CompanyProfile {
 }
 
 """
+    - combine modules with MSIC.
+    - used during company create
+"""
+type ModulesWithMSIC {
+  allMSIC: [MSICResult!]!,
+  allModuls: [Modul!]!,
+}
+
+"""
     - combine company profile with MSIC.
     - used during company view / update
 """
 type CompanyProfileWithMSIC {
   allMSIC: [MSICResult!]!,
+  allModuls: [Modul!]!,
   company: CompanyProfile!
 }
 

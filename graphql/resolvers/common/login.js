@@ -9,8 +9,8 @@ const {
 } = require('../../helper/common');
 const { isAuthenticatedResolver } = require('../../permissions/acl');
 const {
-  SessionExpiredError, JsonWebTokenError, NotFoundError, WrongPasswordError,
-  UnknownError, NetworkError,
+  SessionExpiredError, JsonWebTokenError, NotFoundError,
+  WrongPasswordError, UnknownError, NetworkError,
 } = require('../../permissions/errors');
 const logger = require('../../../packages/logger');
 const wrapper = require('../../../packages/wrapper');
@@ -105,7 +105,9 @@ module.exports = {
 
           break;
         }
-        case (userData.source === 'GOOGLE' || userData.source === 'FACEBOOK' || userData.source === 'FIREBASE'): {
+        case (userData.source === 'GOOGLE'
+        || userData.source === 'FACEBOOK'
+        || userData.source === 'FIREBASE'): {
           logger.debug('ldapLogin --> Login from public using GOOGLE / FACEBOOK / FIREBASE');
 
           let EMAIL = userData.email ? userData.email : userData.username;
@@ -114,7 +116,7 @@ module.exports = {
 
           if (userData.source === 'GOOGLE') {
             const ticket = await client.verifyIdToken({
-              idToken: userData.username,
+              idToken: NAME,
               audience: process.env.CLIENT_ID,
             });
             const { name, email, picture } = ticket.getPayload();
@@ -132,7 +134,7 @@ module.exports = {
             logger.debug('ldapLogin --> No data found in DB. Creating...');
             const history = generateHistory(EMAIL, 'CREATE');
             const newInput = {
-              SOURCE: 'APP',
+              SOURCE: userData.source,
               EMAIL,
               NAME,
               AVATAR,

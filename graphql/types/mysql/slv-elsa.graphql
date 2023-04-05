@@ -35,9 +35,11 @@ type ELSAGroup {
   # Refers to ID generated in CompanyProfile
   COMPANY_ID: String
   # Indicates current record belongs to which module
-  MODULE: String
+  MODULE: [String]
   # Indicates current record belongs to which assessment year. Current year value is 1000
   ASSESSMENT_YEAR: Int
+  # Indicates score is based on prediction data or not
+  PREDICTION: String
   # Created timestamp. Auto generated in database. Not needed for create / update mutation
   CREATED_AT: String
   # Creator. Auto generated in database. Not needed for create / update mutation

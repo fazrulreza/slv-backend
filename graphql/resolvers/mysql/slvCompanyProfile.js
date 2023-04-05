@@ -1,14 +1,58 @@
 const moment = require('moment');
+const { Op } = require('sequelize');
 const { generateId, generateHistory } = require('../../../packages/mysql-model');
 const {
   checkPermission, getRoleWhere, getCurrentData, getFilteredData,
 } = require('../../helper/common');
 const { stateList, requiredCompanyFields } = require('../../helper/parameter');
 const { isAuthenticatedResolver } = require('../../permissions/acl');
-const {
-  ForbiddenError, InvalidDataError, CompanyExistsError, DataTooLongError,
-} = require('../../permissions/errors');
+const { InvalidDataError, CompanyExistsError, DataTooLongError } = require('../../permissions/errors');
 const logger = require('../../../packages/logger');
+const {
+  oneCompanyRule, allCompaniesRule, userReportsRule, stateReportsRule,
+  checkCompanyRule, createCompanyRule, deleteCompanyRule, updateCompanyRule, unlistCompanyRule,
+} = require('../../permissions/rule');
+
+/**
+ * Helper function for simple update in DB
+ * @param {string} ID ID
+ * @param {Object} updateTable Sequelize object for table to be updated
+ * @param {string} module module of the company
+ * @param {string} mail mail for update
+ * @returns {string} update status
+ */
+const updateModuleinDB = async (ID, updateTable, module, mail) => {
+  const searchOpts2 = {
+    where: {
+      ASSESSMENT_YEAR: 1000,
+      COMPANY_ID: ID,
+    },
+  };
+
+  const resUpdate = await updateTable.findAll(searchOpts2);
+  if (!resUpdate) return 'does not exist';
+
+  const resultUpdate = resUpdate[0].dataValues;
+
+  if (resultUpdate.MODULE !== module) {
+    const history = generateHistory(mail, 'UPDATE', resultUpdate.CREATED_AT);
+    const searchOpts = {
+      object: {
+        MODULE: module,
+        ...history,
+      },
+      where: {
+        ASSESSMENT_YEAR: 1000,
+        COMPANY_ID: ID,
+      },
+    };
+
+    await updateTable.update(searchOpts);
+    return 'update complete';
+  }
+
+  return 'no update required';
+};
 
 /**
  * Check if date is valid or not
@@ -176,25 +220,13 @@ module.exports = {
      * @param {String} param0.id company id
      */
     oneCompany: isAuthenticatedResolver.createResolver(async (parent, { ID }, {
-      connectors: { MysqlSlvCompanyProfile, MysqlSlvMSIC },
-      user: { mail, userRoleList },
+      connectors: { MysqlSlvCompanyProfile, MysqlSlvModule, MysqlSlvMSIC },
+      user: { mail, userRoleList, userType },
     }) => {
       logger.info(`oneCompany --> by ${mail} input: ${ID}`);
+      checkPermission(oneCompanyRule, userRoleList, userType, 'oneCompany');
 
-      if (!checkPermission('COMPANY-READ', userRoleList)) {
-        logger.error('oneCompany --> Permission check failed');
-        throw new ForbiddenError();
-      }
-      logger.debug('oneCompany --> Permission check passed');
-
-      const searchOpts = {
-        where: null,
-        order: [['MSIC']],
-      };
-      const result = await MysqlSlvMSIC.findAll(searchOpts);
-      const result2 = result.map((x) => x.dataValues);
-      logger.debug('oneCompany --> MSIC data found');
-
+      // get company (if any)
       const res = await MysqlSlvCompanyProfile.findById(ID);
       if (!res) {
         logger.error(`oneCompany --> No record found for ${ID}`);
@@ -203,13 +235,31 @@ module.exports = {
       const newCompany = {
         ...res.dataValues,
         LOGO: JSON.parse(res.dataValues.LOGO),
+        MODULE: JSON.parse(res.dataValues.MODULE),
       };
       logger.debug(`oneCompany --> Company data found: ${JSON.stringify(newCompany)}`);
 
+      // get MSIC list
+      const searchOptsMsic = {
+        where: null,
+        order: [['MSIC']],
+      };
+      const resMSIC = await MysqlSlvMSIC.findAll(searchOptsMsic);
+      const resultMSIC = resMSIC.map((x) => x.dataValues);
+      logger.debug('oneCompany --> MSIC data found');
+
+      // get Modules list
+      const searchOptsModules = { where: null };
+      const resModules = await MysqlSlvModule.findAll(searchOptsModules);
+      const resultModules = resModules.map((x) => x.dataValues);
+      logger.debug('oneCompany --> Module data found');
+
       const finalResult = {
-        allMSIC: result2,
+        allMSIC: resultMSIC,
+        allModuls: resultModules,
         company: newCompany,
       };
+
       logger.debug(`oneCompany --> output: ${JSON.stringify(finalResult)}`);
       logger.info(`oneCompany --> by ${mail} completed`);
       return finalResult;
@@ -223,15 +273,10 @@ module.exports = {
       connectors: {
         MysqlSlvCompanyProfile, MysqlSlvSurvey, MysqlSlvAssessment, MysqlGetxKPI,
       },
-      user: { mail, userRoleList },
+      user: { mail, userRoleList, userType },
     }) => {
       logger.info(`allCompanies --> by ${mail} called with no input`);
-
-      if (!checkPermission('COMPANY-READ', userRoleList)) {
-        logger.error('allCompanies --> Permission check failed');
-        throw new ForbiddenError();
-      }
-      logger.debug('allCompanies --> Permission check passed');
+      checkPermission(allCompaniesRule, userRoleList, userType, 'allCompanies');
 
       let resultCompany = [];
 
@@ -264,6 +309,7 @@ module.exports = {
         const resC1 = {
           ...resC,
           LOGO: JSON.parse(resC.LOGO),
+          MODULE: JSON.parse(resC.MODULE),
         };
         const resQ = resultQuest.filter((y) => y.COMPANY_ID === x.ID);
         const resS = resultScore.filter((z) => z.COMPANY_ID === x.ID);
@@ -313,31 +359,28 @@ module.exports = {
         MysqlSlvCompanyProfile, MysqlSlvSurvey, MysqlSlvAssessment,
         MysqlSlvUser, MysqlSlvUserRole,
       },
-      user: { mail, userRoleList },
+      user: { mail, userRoleList, userType },
     }) => {
       logger.info(`userReports --> by ${mail} called with no input`);
-      if (!checkPermission('COMPANY-READ', userRoleList)) {
-        logger.error('userReports --> Permission check failed');
-        throw new ForbiddenError();
-      }
-      logger.debug('userReports --> Permission check passed');
+      checkPermission(userReportsRule, userRoleList, userType, 'userReports');
 
       const where = getRoleWhere(userRoleList, mail);
       logger.debug(`userReports --> search criteria: ${JSON.stringify(where)}`);
       const searchOpts = { where };
 
+      // user role
+      const resultUserRole = await MysqlSlvUserRole.findAll(searchOpts);
+      const roleIds = resultUserRole.map((x) => x.dataValues.ID);
+      logger.debug(`userReports --> total user roles found: ${resultUserRole.length}`);
+
       // user
       const searchOptsUser = {
-        where,
+        where: { ROLE: { [Op.in]: roleIds } },
         order: [['USER']],
       };
       const resUser = await MysqlSlvUser.findAll(searchOptsUser);
       const resultUser = resUser.map((x) => x.dataValues);
       logger.debug(`userReports --> total user: ${resultUser.length}`);
-
-      // user role
-      const resultUserRole = await MysqlSlvUserRole.findAll(searchOpts);
-      logger.debug(`userReports --> total user roles found: ${resultUserRole.length}`);
 
       // company
       const resultCompany = await MysqlSlvCompanyProfile.findAll(searchOpts);
@@ -389,15 +432,10 @@ module.exports = {
      */
     stateReports: isAuthenticatedResolver.createResolver(async (parent, { filter }, {
       connectors: { MysqlSlvCompanyProfile, MysqlSlvSurvey, MysqlSlvAssessment },
-      user: { mail, userRoleList },
+      user: { mail, userRoleList, userType },
     }) => {
       logger.info(`stateReports --> by ${mail} called with filter ${JSON.stringify(filter)}`);
-
-      if (!checkPermission('COMPANY-READ', userRoleList)) {
-        logger.error('stateReports --> Permission check failed');
-        throw new ForbiddenError();
-      }
-      logger.debug('stateReports --> Permission check passed');
+      checkPermission(stateReportsRule, userRoleList, userType, 'stateReports');
 
       let resultCompany = [];
 
@@ -475,15 +513,10 @@ module.exports = {
     checkCompany: isAuthenticatedResolver.createResolver(async (
       parent,
       { NAME },
-      { connectors: { MysqlSlvCompanyProfile }, user: { mail, userRoleList } },
+      { connectors: { MysqlSlvCompanyProfile }, user: { mail, userRoleList, userType } },
     ) => {
       logger.info(`checkCompany --> by ${mail} input: ${NAME}`);
-
-      if (!checkPermission('COMPANY-READ', userRoleList)) {
-        logger.error('checkCompany --> Permission check failed');
-        throw new ForbiddenError();
-      }
-      logger.debug('checkCompany --> Permission check passed');
+      checkPermission(checkCompanyRule, userRoleList, userType, 'checkCompany');
 
       const result = await checkCompanyExist(NAME, MysqlSlvCompanyProfile, 'checkCompany');
 
@@ -497,12 +530,7 @@ module.exports = {
       user: { mail, userRoleList, userType },
     }) => {
       logger.info(`createCompany --> by ${mail} input: ${JSON.stringify(input)}`);
-
-      if (!checkPermission('COMPANY-CREATE', userRoleList)) {
-        logger.error('createCompany --> Permission check failed');
-        throw new ForbiddenError();
-      }
-      logger.debug('createCompany --> Permission check passed');
+      checkPermission(createCompanyRule, userRoleList, userType, 'createCompany');
 
       const parsedInput = JSON.parse(input.data);
       checkCompanyDetails(parsedInput);
@@ -517,8 +545,8 @@ module.exports = {
       const newInput = {
         ...parsedInput,
         LOGO: JSON.stringify(parsedInput.LOGO),
+        MODULE: JSON.stringify(parsedInput.MODULE),
         ID: generateId(),
-        MODULE: userRoleList.MODULE === 'ALL' ? 'SME' : userRoleList.MODULE,
         OWNER: mail,
         ENTRY_DATE: moment().format('YYYY-MM-DD'),
         ...MSICObject,
@@ -562,15 +590,10 @@ module.exports = {
         MysqlSlvCompanyProfile, MysqlSlvSurvey, MysqlSlvAssessment, MysqlSlvELSAScorecard,
         MysqlGetxKPI, MysqlGetxSign, MysqlGetxAttachment,
       },
-      user: { mail, userRoleList },
+      user: { mail, userRoleList, userType },
     }) => {
       logger.info(`deleteCompany --> by ${mail} input: ${ID}`);
-
-      if (!checkPermission('COMPANY-DELETE', userRoleList)) {
-        logger.error('deleteCompany --> Permission check failed');
-        throw new ForbiddenError();
-      }
-      logger.debug('deleteCompany --> Permission check passed');
+      checkPermission(deleteCompanyRule, userRoleList, userType, 'deleteCompany');
 
       // remove company from other tables
       const searchOpts2 = {
@@ -613,16 +636,15 @@ module.exports = {
       return result2;
     }),
     updateCompany: isAuthenticatedResolver.createResolver(async (parent, { ID, input }, {
-      connectors: { MysqlSlvCompanyProfile, MysqlSlvMSIC },
-      user: { mail, userRoleList },
+      connectors: {
+        MysqlSlvCompanyProfile, MysqlSlvMSIC, MysqlSlvSurvey, MysqlSlvAssessment,
+        MysqlSlvELSAScorecard, MysqlGetxKPI, MysqlGetxSign, MysqlGetxAttachment,
+        MysqlGetxAchievement,
+      },
+      user: { mail, userRoleList, userType },
     }) => {
       logger.info(`updateCompany --> by ${mail} input ${ID}: ${JSON.stringify(input)}`);
-
-      if (!checkPermission('COMPANY-UPDATE', userRoleList)) {
-        logger.error('updateCompany --> Permission check failed');
-        throw new ForbiddenError();
-      }
-      logger.debug('updateCompany --> Permission check passed');
+      checkPermission(updateCompanyRule, userRoleList, userType, 'updateCompany');
 
       const parsedInput = JSON.parse(input.data);
       checkCompanyDetails(parsedInput);
@@ -633,17 +655,42 @@ module.exports = {
       // check for MSIC
       const MSICObject = await checkValidSection(parsedInput.SECTION, MysqlSlvMSIC, 'createCompany');
 
+      const MODULE = JSON.stringify(parsedInput.MODULE);
+
       const history = generateHistory(mail, 'UPDATE', parsedInput.CREATED_AT);
       const searchOpts = {
         object: {
           ...parsedInput,
           LOGO: JSON.stringify(parsedInput.LOGO),
+          MODULE,
           ...MSICObject,
           ...history,
         },
         where: { ID },
       };
       const result = await MysqlSlvCompanyProfile.update(searchOpts);
+
+      const updateSurvey = await updateModuleinDB(ID, MysqlSlvSurvey, MODULE, mail);
+      logger.debug(`updateCompany --> Survey ${updateSurvey}`);
+
+      const updateAssessment = await updateModuleinDB(ID, MysqlSlvAssessment, MODULE, mail);
+      logger.debug(`updateCompany --> Assessment ${updateAssessment}`);
+
+      const updateElsa = await updateModuleinDB(ID, MysqlSlvELSAScorecard, MODULE, mail);
+      logger.debug(`updateCompany --> ELSA Scorecard ${updateElsa}`);
+
+      const updateKPI = await updateModuleinDB(ID, MysqlGetxKPI, MODULE, mail);
+      logger.debug(`updateCompany --> GETX KPI ${updateKPI}`);
+
+      const updateKPIAchievement = await updateModuleinDB(ID, MysqlGetxAchievement, MODULE, mail);
+      logger.debug(`updateCompany --> GETX KPI Achievement ${updateKPIAchievement}`);
+
+      const updateSign = await updateModuleinDB(ID, MysqlGetxSign, MODULE, mail);
+      logger.debug(`updateCompany --> GETX Sign ${updateSign}`);
+
+      const updateAttach = await updateModuleinDB(ID, MysqlGetxAttachment, MODULE, mail);
+      logger.debug(`updateCompany --> GETX Attachment ${updateAttach}`);
+
       const result2 = {
         ID,
         updated: result[0],
@@ -656,15 +703,10 @@ module.exports = {
     }),
     unlistCompany: isAuthenticatedResolver.createResolver(async (parent, { ID }, {
       connectors: { MysqlSlvCompanyProfile },
-      user: { mail, userRoleList },
+      user: { mail, userRoleList, userType },
     }) => {
       logger.info(`unlistCompany --> by ${mail} input: ${ID}`);
-
-      if (!checkPermission('GETX-DELETE', userRoleList)) {
-        logger.error('unlistCompany --> Permission check failed');
-        throw new ForbiddenError();
-      }
-      logger.debug('unlistCompany --> Permission check passed');
+      checkPermission(unlistCompanyRule, userRoleList, userType, 'userReports');
 
       // search company
       const res = await MysqlSlvCompanyProfile.findById(ID);
