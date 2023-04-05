@@ -132,5 +132,6 @@ module.exports = {
   NoSurveyError,
   NoAssessmentError,
   NetworkError,
-  ELSANotFinalizedError,
+  ELSANotFinalizedError
+
 };

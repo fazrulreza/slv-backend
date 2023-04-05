@@ -609,6 +609,7 @@ module.exports = {
 
             // intercept public here
             if (input.PUBLIC) {
+
               resultScore = generatePredictionData(resultPredict, resultQuest, 'oneAll');
             }
 

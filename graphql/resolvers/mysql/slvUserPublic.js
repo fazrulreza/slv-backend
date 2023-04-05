@@ -196,6 +196,7 @@ module.exports = {
 
       return result;
     }),
+
     /**
      * Create user public without login needed
      * @param {Object} param0 main input object
@@ -253,6 +254,7 @@ module.exports = {
 
       return result;
     },
+
     /**
      * Update user public
      * @param {Object} param0 main input object
@@ -305,6 +307,7 @@ module.exports = {
 
       return result2;
     }),
+
     /**
      * Delete user public
      * @param {Object} param0 main input object
