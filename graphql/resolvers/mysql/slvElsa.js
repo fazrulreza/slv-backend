@@ -330,7 +330,7 @@ module.exports = {
       const searchOptsAll = { where: null };
 
       // ELSA
-      resultELSA = await getCurrentData(MysqlSlvELSAScorecard, searchOptsAll, 'elsaPriority', 'ELSA Scorecard');
+      resultELSA = await getCurrentData(MysqlSlvELSAScorecard, searchOptsAll, 'elsaPriority', 'ELSA Scorecard');      
 
       // Assessment
       const resultScore = await getCurrentData(MysqlSlvAssessment, searchOptsAll, 'elsaPriority', 'assessment');
@@ -368,17 +368,19 @@ module.exports = {
 
       resultELSA = resultELSA
         .filter((e) => companyList.includes(e.COMPANY_ID))
+        .filter((val) => val.PRIORITY_ACTION_TAKEN != 'N/A') // zuna fixed bug:count not tally 2023-05-31
         .map((el) => ({
           FACTOR: el.FACTOR,
           PRIORITY_ACTION_TAKEN: el.PRIORITY_ACTION_TAKEN,
         }));
 
-      // console.log(uniqueColumn);
+      // console.log(resultELSA); // Use to show values in Terminal (debug)
       const data = factorOrder.map((f) => {
-        const res = resultELSA.filter((re) => re.FACTOR === f && re.PRIORITY_ACTION_TAKEN);
+        const res = resultELSA.filter((re) => re.FACTOR === f && re.PRIORITY_ACTION_TAKEN);  
         return {
           KEY: f,
           VALUE: res.length,
+          // VALUE: 9,
         };
       });
 
